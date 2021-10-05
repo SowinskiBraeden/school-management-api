@@ -1,6 +1,10 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Course struct {
 	ID          primitive.ObjectID `bson:"_id"`
@@ -8,4 +12,6 @@ type Course struct {
 	Description string             `json:"description"`
 	Grade_level int                `json:"grade_level" validate:"required"`
 	Credits     int                `json:"credits" validate:"required"`
+	Created_at  time.Time          `json:"created_at"`
+	Updated_at  time.Time          `json:"updated_at"`
 }

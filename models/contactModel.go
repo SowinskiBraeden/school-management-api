@@ -1,6 +1,10 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Contact struct {
 	ID             primitive.ObjectID `bson:"_id"`
@@ -13,4 +17,6 @@ type Contact struct {
 	Email          string             `json:"email" validate:"required"`
 	Relation       string             `json:"relation" validate:"required"`
 	PrimaryContact bool               `json:"primaraycontact" validate:"required"`
+	Created_at     time.Time          `json:"created_at"`
+	Updated_at     time.Time          `json:"updated_at"`
 }

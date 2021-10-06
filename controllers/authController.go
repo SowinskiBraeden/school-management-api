@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -106,7 +107,34 @@ func RegisterTeacher(c *fiber.Ctx) error {
 }
 
 func UpdateStudentName(c *fiber.Ctx) error {
-	return c.JSON("status:ok")
+	var data map[string]string
+
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	// Check id and names are included
+	if data["_id"] == "" || data["firstname"] == "" || data["middlename"] == "" || data["lastname"] == "" {
+		return c.Status(400).JSON(ErrorStruct{Error: "missing required fields"})
+	}
+	// Incoming json should include first, middle and last name.
+	// if no change is made to a name, it's old value will be put in
+
+	studentObjectId := data["_id"]
+	update := bson.M{"$set": bson.M{
+		"firtsname":  data["firstname"],
+		"middlename": data["middlename"],
+		"lastname":   data["lastname"]}}
+
+	result, err := studentCollection.UpdateOne(
+		c.Context(),
+		bson.M{"_id": studentObjectId},
+		update)
+	if err != nil {
+		return c.Status(500).JSON(ErrorStruct{Error: "Unable to Update student"})
+	}
+
+	return c.Status(200).JSON(result)
 }
 
 func UpdateStudentGradeLevel(c *fiber.Ctx) error {

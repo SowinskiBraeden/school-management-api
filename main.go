@@ -9,8 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var client *mongo.Client = database.DBinstance()
-var studentCollection *mongo.Collection = database.OpenCollection(client, "students")
+var studentCollection *mongo.Collection = database.OpenCollection(database.Client, "students")
 
 func main() {
 	app := fiber.New()

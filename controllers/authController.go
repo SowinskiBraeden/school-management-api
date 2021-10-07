@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"school-management/database"
 	"school-management/models"
 	"time"
@@ -13,23 +14,30 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type ErrorStruct struct {
-	Error string
-}
-
 var teacherCollection *mongo.Collection = database.OpenCollection(database.Client, "teachers")
 var studentCollection *mongo.Collection = database.OpenCollection(database.Client, "students")
 
 func Enroll(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
 	var data map[string]string
 
 	if err := c.BodyParser(&data); err != nil {
-		return err
+		cancel()
+		return c.Status(400).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
 	}
 
 	// Check minimum enroll field requirements are met
 	if data["firstname"] == "" || data["lastname"] == "" || data["age"] == "" || data["gradelevel"] == "" || data["dob"] == "" || data["email"] == "" {
-		return c.Status(400).JSON(ErrorStruct{Error: "missing required fields"})
+		cancel()
+		return c.Status(400).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
 	}
 
 	// Get age and grade level and convert to int
@@ -62,24 +70,41 @@ func Enroll(c *fiber.Ctx) error {
 	student.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	student.ID = primitive.NewObjectID()
 
-	result, insertErr := studentCollection.InsertOne(c.Context(), student)
+	result, insertErr := studentCollection.InsertOne(ctx, student)
 	if insertErr != nil {
-		return c.Status(500).JSON(ErrorStruct{Error: "the student could not be inserted"})
+		cancel()
+		return c.Status(400).JSON(fiber.Map{
+			"success": false,
+			"message": "the student could not be inserted",
+			"error":   insertErr,
+		})
 	}
+	defer cancel()
 
 	return c.Status(201).JSON(result)
 }
 
 func RegisterTeacher(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
 	var data map[string]string
 
 	if err := c.BodyParser(&data); err != nil {
-		return err
+		cancel()
+		return c.Status(400).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
 	}
 
 	// Check minimum register teacher field requirements are met
 	if data["firstname"] == "" || data["lastname"] == "" || data["dob"] == "" || data["email"] == "" {
-		return c.Status(400).JSON(ErrorStruct{Error: "missing required fields"})
+		cancel()
+		return c.Status(400).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
 	}
 
 	teacher := models.Teacher{}
@@ -98,41 +123,73 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	teacher.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	teacher.ID = primitive.NewObjectID()
 
-	result, insertErr := teacherCollection.InsertOne(c.Context(), teacher)
+	result, insertErr := teacherCollection.InsertOne(ctx, teacher)
 	if insertErr != nil {
-		return c.Status(500).JSON(ErrorStruct{Error: "the teacher could not be inserted"})
+		cancel()
+		return c.Status(400).JSON(fiber.Map{
+			"success": false,
+			"message": "the teacher could not be inserted",
+			"error":   insertErr,
+		})
 	}
+	defer cancel()
 
 	return c.Status(201).JSON(result)
 }
 
 func UpdateStudentName(c *fiber.Ctx) error {
 	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
 	if err := c.BodyParser(&data); err != nil {
-		return err
+		cancel()
+		return c.Status(400).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
 	}
 
 	// Check id and names are included
 	if data["_id"] == "" || data["firstname"] == "" || data["middlename"] == "" || data["lastname"] == "" {
-		return c.Status(400).JSON(ErrorStruct{Error: "missing required fields"})
+		cancel()
+		return c.Status(400).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
 	}
-	// Incoming json should include first, middle and last name.
-	// if no change is made to a name, it's old value will be put in
 
-	studentObjectId := data["_id"]
-	update := bson.M{"$set": bson.M{
-		"firtsname":  data["firstname"],
-		"middlename": data["middlename"],
-		"lastname":   data["lastname"]}}
-
-	result, err := studentCollection.UpdateOne(
-		c.Context(),
-		bson.M{"_id": studentObjectId},
-		update)
+	studentObjectId, err := primitive.ObjectIDFromHex(data["_id"])
 	if err != nil {
-		return c.Status(500).JSON(ErrorStruct{Error: "Unable to Update student"})
+		cancel()
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"success": false,
+			"message": "Catchphrase not found",
+			"error":   err,
+		})
 	}
+	update := bson.M{
+		"$set": bson.M{
+			"firstname":  data["firstname"],
+			"middlename": data["middlename"],
+			"lastname":   data["lastname"],
+		},
+	}
+
+	result, updateErr := studentCollection.UpdateOne(
+		ctx,
+		bson.M{"_id": studentObjectId},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(400).JSON(fiber.Map{
+			"success": false,
+			"message": "the student could not be updated",
+			"error":   updateErr,
+		})
+	}
+	defer cancel()
 
 	return c.Status(200).JSON(result)
 }
@@ -194,5 +251,58 @@ func UpdateTeacherEmail(c *fiber.Ctx) error {
 }
 
 func UpdateTeacherName(c *fiber.Ctx) error {
-	return c.JSON("status:ok")
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(400).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	// Check id and names are included
+	if data["_id"] == "" || data["firstname"] == "" || data["middlename"] == "" || data["lastname"] == "" {
+		cancel()
+		return c.Status(400).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	teacherObjectId, err := primitive.ObjectIDFromHex(data["_id"])
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"success": false,
+			"message": "Catchphrase not found",
+			"error":   err,
+		})
+	}
+	update := bson.M{
+		"$set": bson.M{
+			"firstname":  data["firstname"],
+			"middlename": data["middlename"],
+			"lastname":   data["lastname"],
+		},
+	}
+
+	result, updateErr := teacherCollection.UpdateOne(
+		ctx,
+		bson.M{"_id": teacherObjectId},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(400).JSON(fiber.Map{
+			"success": false,
+			"message": "the student could not be updated",
+			"error":   updateErr,
+		})
+	}
+	defer cancel()
+
+	return c.Status(200).JSON(result)
 }

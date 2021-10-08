@@ -1,18 +1,18 @@
 package main
 
 import (
-	"school-management/database"
-
 	"school-management/routes"
 
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
-
-var studentCollection *mongo.Collection = database.OpenCollection(database.Client, "students")
 
 func main() {
 	app := fiber.New()
+
+	app.Use(cors.New(cors.Config{
+		AllowCredentials: true,
+	}))
 
 	routes.Setup(app)
 

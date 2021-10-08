@@ -20,7 +20,7 @@ type Student struct {
 	GradeLevel   int                `json:"gradelevel" validate:"required"`
 	Email        string             `json:"email" validate:"required"`
 	SchoolEmail  string             `json:"schoolemail"`
-	Password     string             `json:"password" validate:"min=10,max=32"`
+	Password     string             `json:"-" validate:"min=10,max=32"`
 	TempPassword bool               `json:"temppassword"`
 	SID          string             `json:"sid"` // Student ID
 	PEN          string             `json:"ped"` // Personal Education Number

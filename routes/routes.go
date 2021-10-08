@@ -13,7 +13,13 @@ type Person struct {
 
 func Setup(app *fiber.App) {
 	// API Handling
+
+	// Login + Register handling
+	app.Get("/api/student", controllers.Student)
 	app.Post("/api/student/enroll", controllers.Enroll)
+	app.Post("/api/student/login", controllers.StudentLogin)
+
+	// Updating handling
 	app.Post("/api/student/updateName", controllers.UpdateStudentName)
 	app.Post("/api/student/updateGradeLevel", controllers.UpdateStudentGradeLevel)
 	app.Post("/api/student/updateHomeroom", controllers.UpdateStudentHomeroom)
@@ -25,7 +31,12 @@ func Setup(app *fiber.App) {
 	app.Post("/api/student/updatePhoto", controllers.UpdateStudentPhoto)
 	app.Post("/api/student/updateEmail", controllers.UpdateStudentEmail)
 
+	// Login + Register handling
+	app.Get("/api/teacher", controllers.Teacher)
 	app.Post("/api/teacher/register", controllers.RegisterTeacher)
+	app.Post("/api/teacher/login", controllers.TeacherLogin)
+
+	// Updating handling
 	app.Post("/api/teacher/updatePassword", controllers.UpdateTeacherPassword)
 	app.Post("/api/teacher/updateAddress", controllers.UpdateTeacherAddress)
 	app.Post("/api/teacher/updatePhoto", controllers.UpdateTeacherPhoto)

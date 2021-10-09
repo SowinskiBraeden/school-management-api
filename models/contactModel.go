@@ -11,7 +11,10 @@ type Contact struct {
 	FirstName  string             `json:"firstname" validate:"required"`
 	MiddleName string             `json:"middlename"`
 	LastName   string             `json:"lastname" validate:"required"`
+	Province   string             `json:"province"`
+	City       string             `json:"city"`
 	Address    string             `json:"address" validate:"required"`
+	Postal     string             `json:"postal"`
 	HomePhone  string             `json:"homephone" validate:"required"`
 	WorkPhone  string             `json:"workphone"`
 	Email      string             `json:"email" validate:"required"`

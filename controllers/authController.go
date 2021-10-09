@@ -17,6 +17,7 @@ import (
 
 var teacherCollection *mongo.Collection = database.OpenCollection(database.Client, "teachers")
 var studentCollection *mongo.Collection = database.OpenCollection(database.Client, "students")
+var contactCollection *mongo.Collection = database.OpenCollection(database.Client, "contacts")
 
 const SecretKey = "secret"
 
@@ -43,16 +44,12 @@ func Enroll(c *fiber.Ctx) error {
 		})
 	}
 
-	// Get age and grade level and convert to int
-	intAge, _ := strconv.Atoi(data["age"])
-	intGradeLevel, _ := strconv.Atoi(data["gradelevel"])
-
-	student := models.Student{}
+	var student models.Student
 	student.FirstName = data["firstname"]
 	student.MiddleName = data["middlename"]
 	student.LastName = data["lastname"]
-	student.Age = intAge
-	student.GradeLevel = intGradeLevel
+	student.Age, _ = strconv.Atoi(data["age"])
+	student.GradeLevel, _ = strconv.Atoi(data["gradelevel"])
 	student.DOB = data["dob"]
 	student.Email = data["email"]
 	student.Province = data["province"]
@@ -73,7 +70,7 @@ func Enroll(c *fiber.Ctx) error {
 	student.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	student.ID = primitive.NewObjectID()
 
-	result, insertErr := studentCollection.InsertOne(ctx, student)
+	_, insertErr := studentCollection.InsertOne(ctx, student)
 	if insertErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -87,7 +84,6 @@ func Enroll(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully inserted student",
-		"result":  result,
 	})
 }
 
@@ -114,7 +110,7 @@ func RegisterTeacher(c *fiber.Ctx) error {
 		})
 	}
 
-	teacher := models.Teacher{}
+	var teacher models.Teacher
 	teacher.FirstName = data["firstname"]
 	teacher.LastName = data["lastname"]
 	teacher.Email = data["email"]
@@ -130,7 +126,7 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	teacher.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	teacher.ID = primitive.NewObjectID()
 
-	result, insertErr := teacherCollection.InsertOne(ctx, teacher)
+	_, insertErr := teacherCollection.InsertOne(ctx, teacher)
 	if insertErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -144,7 +140,6 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully inserted teacher",
-		"result":  result,
 	})
 }
 
@@ -381,11 +376,13 @@ func UpdateStudentName(c *fiber.Ctx) error {
 			"error":   err,
 		})
 	}
+	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
 			"firstname":  data["firstname"],
 			"middlename": data["middlename"],
 			"lastname":   data["lastname"],
+			"updated_at": update_time,
 		},
 	}
 
@@ -442,9 +439,11 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 			"error":   err,
 		})
 	}
+	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
 			"gradelevel": data["gradelevel"],
+			"updated_at": update_time,
 		},
 	}
 
@@ -471,55 +470,94 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 }
 
 func UpdateStudentHomeroom(c *fiber.Ctx) error {
-	return c.JSON("status:ok")
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
 }
 
 func UpdateStudentPassword(c *fiber.Ctx) error {
-	return c.JSON("status:ok")
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
 }
 
 func UpdateStudentLocker(c *fiber.Ctx) error {
-	return c.JSON("status:ok")
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
 }
 
 func UpdateStudentAddress(c *fiber.Ctx) error {
-	return c.JSON("status:ok")
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
 }
 
 func UpdateStudentYOG(c *fiber.Ctx) error {
-	return c.JSON("status:ok")
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
 }
 
 func UpdateStudentContacts(c *fiber.Ctx) error {
-	return c.JSON("status:ok")
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
 }
 
 func UpdateStudentPhoto(c *fiber.Ctx) error {
-	return c.JSON("status:ok")
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
 }
 
 func UpdateStudentEmail(c *fiber.Ctx) error {
-	return c.JSON("status:ok")
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
 }
 
 func UpdateTeacherHomeroom(c *fiber.Ctx) error {
-	return c.JSON("status:ok")
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
 }
 
 func UpdateTeacherPassword(c *fiber.Ctx) error {
-	return c.JSON("status:ok")
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
 }
 
 func UpdateTeacherAddress(c *fiber.Ctx) error {
-	return c.JSON("status:ok")
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
 }
 
 func UpdateTeacherPhoto(c *fiber.Ctx) error {
-	return c.JSON("status:ok")
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
 }
 
 func UpdateTeacherEmail(c *fiber.Ctx) error {
-	return c.JSON("status:ok")
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
 }
 
 func UpdateTeacherName(c *fiber.Ctx) error {
@@ -553,11 +591,13 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 			"error":   err,
 		})
 	}
+	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
 			"firstname":  data["firstname"],
 			"middlename": data["middlename"],
 			"lastname":   data["lastname"],
+			"updated_at": update_time,
 		},
 	}
 
@@ -580,5 +620,69 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 		"success": true,
 		"message": "successfully updated teacher",
 		"result":  result,
+	})
+}
+
+func CreateContact(c *fiber.Ctx) error {
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	// Check required fields are included
+	if data["firstname"] == "" || data["lastname"] == "" || data["homephone"] == "" || data["email"] == "" || data["priority"] == "" || data["relation"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	var contact models.Contact
+	contact.FirstName = data["firstname"]
+	contact.MiddleName = data["middlename"]
+	contact.LastName = data["lastname"]
+	contact.HomePhone = data["homephone"]
+	contact.WorkPhone = data["workphone"]
+	contact.Email = data["email"]
+	contact.Province = data["province"]
+	contact.City = data["city"]
+	contact.Address = data["address"]
+	contact.Postal = data["postal"]
+	contact.Relation = data["relation"]
+	contact.Priotrity, _ = strconv.Atoi(data["priority"])
+
+	contact.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	contact.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	contact.ID = primitive.NewObjectID()
+
+	_, insertErr := contactCollection.InsertOne(ctx, contact)
+	if insertErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the contact could not be inserted",
+			"error":   insertErr,
+		})
+	}
+	defer cancel()
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully inserted contact",
+	})
+}
+
+func UpdateContact(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
 	})
 }

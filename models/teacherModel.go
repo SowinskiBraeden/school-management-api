@@ -25,7 +25,7 @@ type Teacher struct {
 	LastName     string             `json:"lastname" validate:"required"`
 	Email        string             `json:"email" validate:"required"`
 	SchoolEmail  string             `json:"schoolemail"`
-	Password     string             `json:"password" validate:"min=10,max=32"`
+	Password     string             `json:"-" validate:"min=10,max=32"`
 	TempPassword bool               `json:"temppassword"`
 	TID          string             `json:"tid"` // Teacher ID
 	Homeroom     string             `json:"homeroom"`

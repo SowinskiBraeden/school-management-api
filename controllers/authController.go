@@ -212,14 +212,80 @@ func StudentLogin(c *fiber.Ctx) error {
 	}
 	c.Cookie(&cookie)
 
-	return c.Status(200).JSON(fiber.Map{
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "correct password",
 	})
 }
 
 func TeacherLogin(c *fiber.Ctx) error {
-	return c.JSON("status:ok")
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	// Check required fields are included
+	if data["tid"] == "" || data["password"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	var teacher models.Teacher
+	err := studentCollection.FindOne(ctx, bson.M{"tid": data["tid"]}).Decode(&teacher)
+	defer cancel()
+
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "student not found",
+			"error":   err,
+		})
+	}
+	defer cancel()
+
+	var verified bool = teacher.ComparePasswords(data["password"])
+	if verified == false {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "incorrect password",
+		})
+	}
+
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		Issuer:    teacher.TID,
+		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), // 1 Day
+	})
+	token, err := claims.SignedString([]byte(SecretKey))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "could not log in",
+		})
+	}
+
+	cookie := fiber.Cookie{
+		Name:     "jwt",
+		Value:    token,
+		Expires:  time.Now().Add(time.Hour * 24),
+		HTTPOnly: true,
+	}
+	c.Cookie(&cookie)
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "correct password",
+	})
 }
 
 func Student(c *fiber.Ctx) error {
@@ -231,7 +297,7 @@ func Student(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
-			"message": "student not found",
+			"message": "not authorized",
 		})
 	}
 
@@ -246,11 +312,42 @@ func Student(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(student)
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully logged into student",
+		"result":  student,
+	})
 }
 
 func Teacher(c *fiber.Ctx) error {
-	return c.JSON("status:ok")
+	cookie := c.Cookies("jwt")
+
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(SecretKey), nil
+	})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "not authorized",
+		})
+	}
+
+	claims := token.Claims.(*jwt.StandardClaims)
+
+	var teacher models.Teacher
+	findErr := teacherCollection.FindOne(context.TODO(), bson.M{"tid": claims.Issuer}).Decode(&teacher)
+	if findErr != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "teacher not found",
+		})
+	}
+
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully logged into teacher",
+		"result":  teacher,
+	})
 }
 
 func UpdateStudentName(c *fiber.Ctx) error {

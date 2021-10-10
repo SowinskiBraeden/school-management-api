@@ -33,7 +33,7 @@ type Student struct {
 	Postal       string             `json:"pc"` // Postal Code
 	DOB          string             `json:"dob" validate:"required"`
 	Photo        string             `json:"photo"`
-	Contacts     []Contact          `json:"contacts"`
+	Contacts     []string           `json:"contacts"` // List of contact ID's rather than contact object
 	Created_at   time.Time          `json:"created_at"`
 	Updated_at   time.Time          `json:"updated_at"`
 }

@@ -56,6 +56,7 @@ func Enroll(c *fiber.Ctx) error {
 	student.City = data["city"]
 	student.Address = data["address"]
 	student.Postal = data["postal"]
+	student.Contacts = []string{}
 
 	student.YOG = ((12 - student.GradeLevel) + time.Now().Year()) + 1
 
@@ -342,6 +343,22 @@ func Teacher(c *fiber.Ctx) error {
 		"success": true,
 		"message": "successfully logged into teacher",
 		"result":  teacher,
+	})
+}
+
+// Should work for both teacher and student ends
+func Logout(c *fiber.Ctx) error {
+	cookie := fiber.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour),
+		HTTPOnly: true,
+	}
+	c.Cookie(&cookie)
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully logged out",
 	})
 }
 
@@ -637,7 +654,7 @@ func CreateContact(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["firstname"] == "" || data["lastname"] == "" || data["homephone"] == "" || data["email"] == "" || data["priority"] == "" || data["relation"] == "" {
+	if data["sid"] == "" || data["firstname"] == "" || data["lastname"] == "" || data["homephone"] == "" || data["email"] == "" || data["priority"] == "" || data["relation"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -668,19 +685,123 @@ func CreateContact(c *fiber.Ctx) error {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
-			"message": "the contact could not be inserted",
+			"message": "could not insert contact",
 			"error":   insertErr,
+		})
+	}
+
+	update := bson.M{
+		"$push": bson.M{
+			"contacts": contact.ID,
+		},
+	}
+	_, updateErr := studentCollection.UpdateOne(
+		ctx,
+		bson.M{"sid": data["sid"]},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the student could not be updated",
+			"error":   updateErr,
 		})
 	}
 	defer cancel()
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
-		"message": "successfully inserted contact",
+		"message": "successfully inserted contact to student",
 	})
 }
 
-func UpdateContact(c *fiber.Ctx) error {
+func RemoveContact(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
+}
+
+func UpdateContactName(c *fiber.Ctx) error {
+	var data map[string]string
+
+	if err := c.BodyParser(&data); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
+}
+
+func UpdateContactAddress(c *fiber.Ctx) error {
+	var data map[string]string
+
+	if err := c.BodyParser(&data); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
+}
+
+func UpdateContactPhone(c *fiber.Ctx) error {
+	var data map[string]string
+
+	if err := c.BodyParser(&data); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
+}
+
+func UpdateContactEmail(c *fiber.Ctx) error {
+	var data map[string]string
+
+	if err := c.BodyParser(&data); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
+}
+
+func UpdateContactPriority(c *fiber.Ctx) error {
+	var data map[string]string
+
+	if err := c.BodyParser(&data); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
 	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
 		"success": nil,
 		"message": "not implimented",

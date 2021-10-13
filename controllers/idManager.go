@@ -19,13 +19,14 @@ var table = [...]byte{'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'}
 
 func ValidateID(id string) bool { // true: valid id, false: id already in use
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	err := idCollection.FindOne(ctx, bson.M{"cid": id})
+	var foundID models.Id
+	err := idCollection.FindOne(ctx, bson.M{"cid": id}).Decode(&foundID)
 	cancel()
-	if err != nil && err.Err() == mongo.ErrNoDocuments {
+	if err != nil {
 		var newID models.Id
 		newID.CID = id
 		newID.ID = primitive.NewObjectID()
-		_, insertErr := idCollection.InsertOne(ctx, newID)
+		_, insertErr := idCollection.InsertOne(context.Background(), newID)
 		if insertErr != nil {
 			return false
 		}

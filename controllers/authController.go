@@ -172,7 +172,8 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	var tid string
 	for {
 		tid = GenerateID()
-		if ValidateID(tid) == true {
+		isValid := ValidateID(tid)
+		if isValid == true {
 			break
 		}
 	}

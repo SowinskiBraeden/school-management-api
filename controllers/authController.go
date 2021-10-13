@@ -18,13 +18,13 @@ import (
 var teacherCollection *mongo.Collection = database.OpenCollection(database.Client, "teachers")
 var studentCollection *mongo.Collection = database.OpenCollection(database.Client, "students")
 var contactCollection *mongo.Collection = database.OpenCollection(database.Client, "contacts")
+var adminCollection *mongo.Collection = database.OpenCollection(database.Client, "admins")
 
 const SecretKey = "secret"
 
 func Enroll(c *fiber.Ctx) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-
 	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
 	if err := c.BodyParser(&data); err != nil {
 		cancel()
@@ -32,6 +32,25 @@ func Enroll(c *fiber.Ctx) error {
 			"success": false,
 			"message": "Failed to parse body",
 			"error":   err,
+		})
+	}
+
+	// Check if admin sent request
+	if data["aid"] == "" {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "admin id required",
+		})
+	}
+
+	var admin models.Admin
+	err := adminCollection.FindOne(ctx, bson.M{"aid": data["aid"]}).Decode(&admin)
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "invalid admin id",
 		})
 	}
 
@@ -67,6 +86,15 @@ func Enroll(c *fiber.Ctx) error {
 	student.TempPassword = true
 	// Send student personal email temp password
 
+	var sid string
+	for {
+		sid = GenerateID()
+		if ValidateID(sid) == true {
+			break
+		}
+	}
+	student.SID = sid
+
 	student.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	student.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	student.ID = primitive.NewObjectID()
@@ -89,9 +117,8 @@ func Enroll(c *fiber.Ctx) error {
 }
 
 func RegisterTeacher(c *fiber.Ctx) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-
 	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
 	if err := c.BodyParser(&data); err != nil {
 		cancel()
@@ -99,6 +126,25 @@ func RegisterTeacher(c *fiber.Ctx) error {
 			"success": false,
 			"message": "Failed to parse body",
 			"error":   err,
+		})
+	}
+
+	// Check if admin sent request
+	if data["aid"] == "" {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "admin id required",
+		})
+	}
+
+	var admin models.Admin
+	err := adminCollection.FindOne(ctx, bson.M{"aid": data["aid"]}).Decode(&admin)
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "invalid admin id",
 		})
 	}
 
@@ -123,6 +169,15 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	teacher.TempPassword = true
 	// Send teacher personal email temp password
 
+	var tid string
+	for {
+		tid = GenerateID()
+		if ValidateID(tid) == true {
+			break
+		}
+	}
+	teacher.TID = tid
+
 	teacher.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	teacher.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	teacher.ID = primitive.NewObjectID()
@@ -141,6 +196,87 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully inserted teacher",
+	})
+}
+
+func CreateAdmin(c *fiber.Ctx) error {
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	// Check if admin sent request
+	if data["aid"] == "" {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "admin id required",
+		})
+	}
+
+	var checkadmin models.Admin
+	err := adminCollection.FindOne(ctx, bson.M{"aid": data["aid"]}).Decode(&checkadmin)
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "invalid admin id",
+		})
+	}
+
+	// Check minimum register teacher field requirements are met
+	if data["firstname"] == "" || data["lastname"] == "" || data["dob"] == "" || data["email"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	var admin models.Admin
+	admin.FirstName = data["firstname"]
+	admin.LastName = data["lastname"]
+	admin.Email = data["email"]
+
+	tempPass := admin.GeneratePassword(12, 1, 1, 1)
+	admin.Password = admin.HashPassword(tempPass)
+	admin.TempPassword = true
+	// Send teacher personal email temp password
+
+	var aid string
+	for {
+		aid = GenerateID()
+		if ValidateID(aid) == true {
+			break
+		}
+	}
+	admin.AID = aid
+
+	admin.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	admin.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	admin.ID = primitive.NewObjectID()
+
+	_, insertErr := adminCollection.InsertOne(ctx, admin)
+	if insertErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the admin could not be inserted",
+			"error":   insertErr,
+		})
+	}
+	defer cancel()
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully inserted admin",
 	})
 }
 
@@ -237,7 +373,7 @@ func TeacherLogin(c *fiber.Ctx) error {
 	}
 
 	var teacher models.Teacher
-	err := studentCollection.FindOne(ctx, bson.M{"tid": data["tid"]}).Decode(&teacher)
+	err := teacherCollection.FindOne(ctx, bson.M{"tid": data["tid"]}).Decode(&teacher)
 	defer cancel()
 
 	if err != nil {
@@ -260,6 +396,76 @@ func TeacherLogin(c *fiber.Ctx) error {
 
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Issuer:    teacher.TID,
+		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), // 1 Day
+	})
+	token, err := claims.SignedString([]byte(SecretKey))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "could not log in",
+		})
+	}
+
+	cookie := fiber.Cookie{
+		Name:     "jwt",
+		Value:    token,
+		Expires:  time.Now().Add(time.Hour * 24),
+		HTTPOnly: true,
+	}
+	c.Cookie(&cookie)
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "correct password",
+	})
+}
+
+func AdminLogin(c *fiber.Ctx) error {
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	// Check required fields are included
+	if data["aid"] == "" || data["password"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	var admin models.Admin
+	err := adminCollection.FindOne(ctx, bson.M{"aid": data["aid"]}).Decode(&admin)
+	defer cancel()
+
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "admin not found",
+			"error":   err,
+		})
+	}
+	defer cancel()
+
+	var verified bool = admin.ComparePasswords(data["password"])
+	if verified == false {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "incorrect password",
+		})
+	}
+
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		Issuer:    admin.AID,
 		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), // 1 Day
 	})
 	token, err := claims.SignedString([]byte(SecretKey))
@@ -346,6 +552,37 @@ func Teacher(c *fiber.Ctx) error {
 	})
 }
 
+func Admin(c *fiber.Ctx) error {
+	cookie := c.Cookies("jwt")
+
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(SecretKey), nil
+	})
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "not authorized",
+		})
+	}
+
+	claims := token.Claims.(*jwt.StandardClaims)
+
+	var admin models.Admin
+	findErr := adminCollection.FindOne(context.TODO(), bson.M{"aid": claims.Issuer}).Decode(&admin)
+	if findErr != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "admin not found",
+		})
+	}
+
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully logged into admin",
+		"result":  admin,
+	})
+}
+
 // Should work for both teacher and student ends
 func Logout(c *fiber.Ctx) error {
 	cookie := fiber.Cookie{
@@ -375,8 +612,27 @@ func UpdateStudentName(c *fiber.Ctx) error {
 		})
 	}
 
+	// Check if admin sent request
+	if data["aid"] == "" {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "admin id required",
+		})
+	}
+
+	var admin models.Admin
+	err := adminCollection.FindOne(ctx, bson.M{"aid": data["aid"]}).Decode(&admin)
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "invalid admin id",
+		})
+	}
+
 	// Check id and names are included
-	if data["_id"] == "" || data["firstname"] == "" || data["middlename"] == "" || data["lastname"] == "" {
+	if data["sid"] == "" || data["firstname"] == "" || data["middlename"] == "" || data["lastname"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -384,15 +640,6 @@ func UpdateStudentName(c *fiber.Ctx) error {
 		})
 	}
 
-	studentObjectId, err := primitive.ObjectIDFromHex(data["_id"])
-	if err != nil {
-		cancel()
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"success": false,
-			"message": "student not found",
-			"error":   err,
-		})
-	}
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
@@ -405,7 +652,7 @@ func UpdateStudentName(c *fiber.Ctx) error {
 
 	result, updateErr := studentCollection.UpdateOne(
 		ctx,
-		bson.M{"_id": studentObjectId},
+		bson.M{"sid": data["sid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -438,8 +685,27 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 		})
 	}
 
+	// Check if admin sent request
+	if data["aid"] == "" {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "admin id required",
+		})
+	}
+
+	var admin models.Admin
+	err := adminCollection.FindOne(ctx, bson.M{"aid": data["aid"]}).Decode(&admin)
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "invalid admin id",
+		})
+	}
+
 	// Check required fields are included
-	if data["_id"] == "" || data["gradelevel"] == "" {
+	if data["sid"] == "" || data["gradelevel"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -447,15 +713,6 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 		})
 	}
 
-	studentObjectId, err := primitive.ObjectIDFromHex(data["_id"])
-	if err != nil {
-		cancel()
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"success": false,
-			"message": "student not found",
-			"error":   err,
-		})
-	}
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
@@ -466,7 +723,7 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 
 	result, updateErr := studentCollection.UpdateOne(
 		ctx,
-		bson.M{"_id": studentObjectId},
+		bson.M{"sid": data["sid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -590,6 +847,25 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 		})
 	}
 
+	// Check if admin sent request
+	if data["aid"] == "" {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "admin id required",
+		})
+	}
+
+	var admin models.Admin
+	err := adminCollection.FindOne(ctx, bson.M{"aid": data["aid"]}).Decode(&admin)
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "invalid admin id",
+		})
+	}
+
 	// Check id and names are included
 	if data["_id"] == "" || data["firstname"] == "" || data["middlename"] == "" || data["lastname"] == "" {
 		cancel()
@@ -599,13 +875,13 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 		})
 	}
 
-	teacherObjectId, err := primitive.ObjectIDFromHex(data["_id"])
-	if err != nil {
+	teacherObjectId, idErr := primitive.ObjectIDFromHex(data["_id"])
+	if idErr != nil {
 		cancel()
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"success": false,
 			"message": "teacher not found",
-			"error":   err,
+			"error":   idErr,
 		})
 	}
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
@@ -650,6 +926,25 @@ func CreateContact(c *fiber.Ctx) error {
 			"success": false,
 			"message": "Failed to parse body",
 			"error":   err,
+		})
+	}
+
+	// Check if admin sent request
+	if data["aid"] == "" {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "admin id required",
+		})
+	}
+
+	var admin models.Admin
+	err := adminCollection.FindOne(ctx, bson.M{"aid": data["aid"]}).Decode(&admin)
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "invalid admin id",
 		})
 	}
 
@@ -724,16 +1019,6 @@ func RemoveContact(c *fiber.Ctx) error {
 }
 
 func UpdateContactName(c *fiber.Ctx) error {
-	var data map[string]string
-
-	if err := c.BodyParser(&data); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "Failed to parse body",
-			"error":   err,
-		})
-	}
-
 	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
 		"success": nil,
 		"message": "not implimented",
@@ -741,16 +1026,6 @@ func UpdateContactName(c *fiber.Ctx) error {
 }
 
 func UpdateContactAddress(c *fiber.Ctx) error {
-	var data map[string]string
-
-	if err := c.BodyParser(&data); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "Failed to parse body",
-			"error":   err,
-		})
-	}
-
 	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
 		"success": nil,
 		"message": "not implimented",
@@ -758,16 +1033,6 @@ func UpdateContactAddress(c *fiber.Ctx) error {
 }
 
 func UpdateContactPhone(c *fiber.Ctx) error {
-	var data map[string]string
-
-	if err := c.BodyParser(&data); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "Failed to parse body",
-			"error":   err,
-		})
-	}
-
 	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
 		"success": nil,
 		"message": "not implimented",
@@ -775,16 +1040,6 @@ func UpdateContactPhone(c *fiber.Ctx) error {
 }
 
 func UpdateContactEmail(c *fiber.Ctx) error {
-	var data map[string]string
-
-	if err := c.BodyParser(&data); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "Failed to parse body",
-			"error":   err,
-		})
-	}
-
 	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
 		"success": nil,
 		"message": "not implimented",
@@ -792,16 +1047,6 @@ func UpdateContactEmail(c *fiber.Ctx) error {
 }
 
 func UpdateContactPriority(c *fiber.Ctx) error {
-	var data map[string]string
-
-	if err := c.BodyParser(&data); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "Failed to parse body",
-			"error":   err,
-		})
-	}
-
 	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
 		"success": nil,
 		"message": "not implimented",

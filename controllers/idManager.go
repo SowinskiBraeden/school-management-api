@@ -22,7 +22,7 @@ func ValidateID(id string) bool { // true: valid id, false: id already in use
 	var foundID models.Id
 	err := idCollection.FindOne(ctx, bson.M{"cid": id}).Decode(&foundID)
 	cancel()
-	if err != nil {
+	if err != nil { // If there is no id found create new ID object to be stored and return true (unless insert error then try again)
 		var newID models.Id
 		newID.CID = id
 		newID.ID = primitive.NewObjectID()

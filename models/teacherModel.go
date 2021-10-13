@@ -32,7 +32,7 @@ type Teacher struct {
 	Address      string             `json:"address"`
 	City         string             `json:"city"`
 	Province     string             `json:"province"`
-	Postal       string             `json:"pc"` // Postal Code
+	Postal       string             `json:"postal"`
 	DOB          string             `json:"dob" validate:"required"`
 	Photo        string             `json:"string"`
 	Created_at   time.Time          `json:"created_at"`

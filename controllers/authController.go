@@ -170,6 +170,7 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	// Send teacher personal email temp password
 
 	var tid string
+	// For the unlikely event that an ID is already in use this will simply try again till it gets a id not in use
 	for {
 		tid = GenerateID()
 		isValid := ValidateID(tid)

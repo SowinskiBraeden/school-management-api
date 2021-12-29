@@ -2,10 +2,12 @@ package controllers
 
 import (
 	"context"
+	"os"
 	"school-management/database"
 	"school-management/models"
 	"time"
 
+	"net/smtp"
 	"strconv"
 
 	"github.com/dgrijalva/jwt-go"
@@ -21,6 +23,9 @@ var contactCollection *mongo.Collection = database.OpenCollection(database.Clien
 var adminCollection *mongo.Collection = database.OpenCollection(database.Client, "admins")
 
 const SecretKey = "secret"
+
+var systemEmail string = os.Getenv("SYSTEM_EMAIL")
+var systemPassword string = os.Getenv("SYSTEM_PASSWORD")
 
 func Enroll(c *fiber.Ctx) error {
 	var data map[string]string
@@ -85,6 +90,23 @@ func Enroll(c *fiber.Ctx) error {
 	student.Password = student.HashPassword(tempPass)
 	student.TempPassword = true
 	// Send student personal email temp password
+
+	smtpHost := "smpt.gmail.com"
+	smtpPort := "587"
+
+	message := []byte("Your temporary password is: " + tempPass)
+
+	auth := smtp.PlainAuth("", systemEmail, systemPassword, smtpHost)
+
+	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, systemEmail, []string{student.Email}, message)
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Could not send password to students email",
+			"error":   err,
+		})
+	}
 
 	var sid string
 	for {
@@ -169,6 +191,23 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	teacher.TempPassword = true
 	// Send teacher personal email temp password
 
+	smtpHost := "smpt.gmail.com"
+	smtpPort := "587"
+
+	message := []byte("Your temporary password is: " + tempPass)
+
+	auth := smtp.PlainAuth("", systemEmail, systemPassword, smtpHost)
+
+	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, systemEmail, []string{teacher.Email}, message)
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Could not send password to teacners email",
+			"error":   err,
+		})
+	}
+
 	var tid string
 	// For the unlikely event that an ID is already in use this will simply try again till it gets a id not in use
 	for {
@@ -250,7 +289,24 @@ func CreateAdmin(c *fiber.Ctx) error {
 	tempPass := admin.GeneratePassword(12, 1, 1, 1)
 	admin.Password = admin.HashPassword(tempPass)
 	admin.TempPassword = true
-	// Send teacher personal email temp password
+	// Send admin personal email temp password
+
+	smtpHost := "smpt.gmail.com"
+	smtpPort := "587"
+
+	message := []byte("Your temporary password is: " + tempPass)
+
+	auth := smtp.PlainAuth("", systemEmail, systemPassword, smtpHost)
+
+	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, systemEmail, []string{admin.Email}, message)
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Could not send password to admins email",
+			"error":   err,
+		})
+	}
 
 	var aid string
 	for {
@@ -634,7 +690,8 @@ func UpdateStudentName(c *fiber.Ctx) error {
 	}
 
 	// Check id and names are included
-	if data["sid"] == "" || data["firstname"] == "" || data["middlename"] == "" || data["lastname"] == "" {
+	// Middle name is optional
+	if data["sid"] == "" || data["firstname"] == "" || data["lastname"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -746,9 +803,64 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 }
 
 func UpdateStudentHomeroom(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
-		"success": nil,
-		"message": "not implimented",
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	var admin models.Admin
+	err := adminCollection.FindOne(ctx, bson.M{"aid": data["aid"]}).Decode(&admin)
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "invalid admin id",
+		})
+	}
+
+	// Check required fields are included
+	if data["sid"] == "" || data["homeroom"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	update := bson.M{
+		"$set": bson.M{
+			"homeroom":   data["homeroom"],
+			"updated_at": update_time,
+		},
+	}
+
+	result, updateErr := studentCollection.UpdateOne(
+		ctx,
+		bson.M{"sid": data["sid"]},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the student could not be updated",
+			"error":   updateErr,
+		})
+	}
+	defer cancel()
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully updated student",
+		"result":  result,
 	})
 }
 

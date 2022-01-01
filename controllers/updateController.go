@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"school-management/models"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -23,22 +22,12 @@ func UpdateStudentName(c *fiber.Ctx) error {
 		})
 	}
 
-	// Check if admin sent request
-	if data["aid"] == "" {
+	// Ensure Authenticated admin sent request
+	if !AuthAdmin(c) {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
-			"message": "admin id required",
-		})
-	}
-
-	var admin models.Admin
-	err := adminCollection.FindOne(ctx, bson.M{"aid": data["aid"]}).Decode(&admin)
-	if err != nil {
-		cancel()
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"success": false,
-			"message": "invalid admin id",
+			"message": "Unauthorized: only an admin can perform this action",
 		})
 	}
 
@@ -97,22 +86,12 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 		})
 	}
 
-	// Check if admin sent request
-	if data["aid"] == "" {
+	// Ensure Authorized admin sent request
+	if !AuthAdmin(c) {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
-			"message": "admin id required",
-		})
-	}
-
-	var admin models.Admin
-	err := adminCollection.FindOne(ctx, bson.M{"aid": data["aid"]}).Decode(&admin)
-	if err != nil {
-		cancel()
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"success": false,
-			"message": "invalid admin id",
+			"message": "Unauthorized: only an admin can perform this action",
 		})
 	}
 
@@ -168,13 +147,12 @@ func UpdateStudentHomeroom(c *fiber.Ctx) error {
 		})
 	}
 
-	var admin models.Admin
-	err := adminCollection.FindOne(ctx, bson.M{"aid": data["aid"]}).Decode(&admin)
-	if err != nil {
+	// Ensure Authenticated admin sent request
+	if !AuthAdmin(c) {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
-			"message": "invalid admin id",
+			"message": "Unauthorized: only an admin can perform this action",
 		})
 	}
 
@@ -314,22 +292,12 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 		})
 	}
 
-	// Check if admin sent request
-	if data["aid"] == "" {
+	// Ensure Authenticated admin sent request
+	if !AuthAdmin(c) {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
-			"message": "admin id required",
-		})
-	}
-
-	var admin models.Admin
-	err := adminCollection.FindOne(ctx, bson.M{"aid": data["aid"]}).Decode(&admin)
-	if err != nil {
-		cancel()
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"success": false,
-			"message": "invalid admin id",
+			"message": "Unauthorized: only an admin can perform this action",
 		})
 	}
 

@@ -59,17 +59,17 @@ func (s *Student) ComparePasswords(password string) bool {
 
 func (s *Student) CheckPasswordStrength(password string) bool {
 
-	var hasUpper bool = true
+	var hasUpper bool = false
 	for _, r := range password {
-		if !unicode.IsUpper(r) && unicode.IsLetter(r) {
-			hasUpper = false
+		if unicode.IsUpper(r) && unicode.IsLetter(r) {
+			hasUpper = true
 		}
 	}
 
-	var hasLower bool = true
+	var hasLower bool = false
 	for _, r := range password {
-		if !unicode.IsLower(r) && unicode.IsLetter(r) {
-			hasLower = false
+		if unicode.IsLower(r) && unicode.IsLetter(r) {
+			hasLower = true
 		}
 	}
 

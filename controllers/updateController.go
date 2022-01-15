@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"net/smtp"
 	"school-management/models"
 	"time"
 
@@ -292,9 +293,92 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 }
 
 func ResetStudentPassword(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
-		"succes":  nil,
-		"message": "not implimented",
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	// Check required fields are included
+	if data["sid"] == "" || data["email"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	var student models.Student
+	findErr := studentCollection.FindOne(context.TODO(), bson.M{"sid": data["sid"]}).Decode(&student)
+	if findErr != nil {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "student not found",
+		})
+	}
+
+	if student.PersonalData.Email == data["email"] {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "Your personal email is incorrect",
+		})
+	}
+
+	tempPass := student.GeneratePassword(12, 1, 1, 1)
+	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	update := bson.M{
+		"$set": bson.M{
+			"password":     student.HashPassword(tempPass),
+			"temppassword": true,
+			"updated_at":   update_time,
+		},
+	}
+
+	result, updateErr := studentCollection.UpdateOne(
+		ctx,
+		bson.M{"sid": data["sid"]},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the student password could not be updated",
+			"error":   updateErr,
+		})
+	}
+	defer cancel()
+
+	// Send student personal email temp password
+	smtpHost := "smpt.gmail.com"
+	smtpPort := "587"
+
+	message := []byte("Your temporary password is: " + tempPass)
+
+	auth := smtp.PlainAuth("", systemEmail, systemPassword, smtpHost)
+
+	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, systemEmail, []string{student.PersonalData.Email}, message)
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Could not send password to students email",
+			"error":   err,
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully updated student password",
+		"result":  result,
 	})
 }
 

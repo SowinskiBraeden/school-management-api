@@ -11,13 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type Locker struct {
-	ID             primitive.ObjectID `bson:"_id"`
-	LockerNumber   string             `json:"lockernumber"`
-	LockerPasscode string             `json:"lockerpasscode"`
-	LockerType     string             `json:"lockertype"` // Upper / Lower locker
-}
-
 type Student struct {
 	ID           primitive.ObjectID `bson:"_id"`
 	PersonalData struct {
@@ -66,8 +59,8 @@ func (s *Student) GenerateSchoolEmail() string {
 }
 
 func (s *Student) ComparePasswords(password string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(s.SchoolData.Password), []byte(password))
-	if err != nil {
+	valid := bcrypt.CompareHashAndPassword([]byte(s.SchoolData.Password), []byte(password))
+	if valid != nil {
 		return false
 	}
 	return true

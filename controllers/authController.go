@@ -363,15 +363,71 @@ func StudentLogin(c *fiber.Ctx) error {
 			"error":   err,
 		})
 	}
-	defer cancel()
+
+	var localAccountDisabled = false
+	if student.Attempts >= 5 {
+		localAccountDisabled = true // Catches newly disbaled account before student obj is updated
+		update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		update := bson.M{
+			"$set": bson.M{
+				"accountdisabled": true,
+				"attempts":        0,
+				"updated_at":      update_time,
+			},
+		}
+
+		_, updateErr := studentCollection.UpdateOne(
+			ctx,
+			bson.M{"sid": data["sid"]},
+			update,
+		)
+		if updateErr != nil {
+			cancel()
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"success": false,
+				"message": "the student could not be updated",
+				"error":   updateErr,
+			})
+		}
+	}
+
+	if localAccountDisabled || student.AccountDisabled {
+		cancel()
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+			"success": false,
+			"message": "Account is Disabled, contact an Admin",
+		})
+	}
 
 	var verified bool = student.ComparePasswords(data["password"])
 	if verified == false {
+		update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		update := bson.M{
+			"$set": bson.M{
+				"attempts":   student.Attempts + 1,
+				"updated_at": update_time,
+			},
+		}
+
+		_, updateErr := studentCollection.UpdateOne(
+			ctx,
+			bson.M{"sid": data["sid"]},
+			update,
+		)
+		cancel()
+		if updateErr != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"success": false,
+				"message": "the student could not be updated",
+				"error":   updateErr,
+			})
+		}
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "incorrect password",
 		})
 	}
+	defer cancel()
 
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Issuer:    student.SID,

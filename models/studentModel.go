@@ -12,30 +12,32 @@ import (
 )
 
 type Student struct {
-	ID           primitive.ObjectID `bson:"_id"`
-	FirstName    string             `json:"firstname" validate:"required"`
-	MiddleName   string             `json:"middlename"`
-	LastName     string             `json:"lastname" validate:"required"`
-	Age          int                `json:"age" validate:"required"`
-	GradeLevel   int                `json:"gradelevel" validate:"required"`
-	Email        string             `json:"email" validate:"required"`
-	SchoolEmail  string             `json:"schoolemail"`
-	Password     string             `json:"-" validate:"min=10,max=32"`
-	TempPassword bool               `json:"temppassword"`
-	SID          string             `json:"sid"` // Student ID
-	PEN          string             `json:"ped"` // Personal Education Number
-	Homeroom     string             `json:"homeroom"`
-	Locker       string             `json:"locker"`
-	YOG          int                `json:"yog"` // Year of Graduation
-	Address      string             `json:"address"`
-	City         string             `json:"city"`
-	Province     string             `json:"province"`
-	Postal       string             `json:"postal"`
-	DOB          string             `json:"dob" validate:"required"`
-	Photo        string             `json:"photo"`
-	Contacts     []string           `json:"contacts"` // List of contact ID's rather than contact object
-	Created_at   time.Time          `json:"created_at"`
-	Updated_at   time.Time          `json:"updated_at"`
+	ID              primitive.ObjectID `bson:"_id"`
+	AccountDisabled bool               `bson:"accountdisabled"`
+	FirstName       string             `json:"firstname" validate:"required"`
+	MiddleName      string             `json:"middlename"`
+	LastName        string             `json:"lastname" validate:"required"`
+	Age             int                `json:"age" validate:"required"`
+	GradeLevel      int                `json:"gradelevel" validate:"required"`
+	Email           string             `json:"email" validate:"required"`
+	SchoolEmail     string             `json:"schoolemail"`
+	Password        string             `json:"-" validate:"min=10,max=32"`
+	TempPassword    bool               `json:"temppassword"`
+	Attempts        int                `json:"attempts"` // login attempts max 5
+	SID             string             `json:"sid"`      // Student ID
+	PEN             string             `json:"ped"`      // Personal Education Number
+	Homeroom        string             `json:"homeroom"`
+	Locker          string             `json:"locker"`
+	YOG             int                `json:"yog"` // Year of Graduation
+	Address         string             `json:"address"`
+	City            string             `json:"city"`
+	Province        string             `json:"province"`
+	Postal          string             `json:"postal"`
+	DOB             string             `json:"dob" validate:"required"`
+	Photo           string             `json:"photo"`
+	Contacts        []string           `json:"contacts"` // List of contact ID's rather than contact object
+	Created_at      time.Time          `json:"created_at"`
+	Updated_at      time.Time          `json:"updated_at"`
 }
 
 func (s *Student) HashPassword(password string) string {

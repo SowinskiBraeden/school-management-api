@@ -80,31 +80,31 @@ func Enroll(c *fiber.Ctx) error {
 	}
 
 	var student models.Student
-	student.FirstName = data["firstname"]
-	student.MiddleName = data["middlename"]
-	student.LastName = data["lastname"]
-	student.Age, _ = strconv.Atoi(data["age"])
-	student.GradeLevel, _ = strconv.Atoi(data["gradelevel"])
-	student.DOB = data["dob"]
-	student.Email = data["email"]
-	student.Province = data["province"]
-	student.City = data["city"]
-	student.Address = data["address"]
-	student.Postal = data["postal"]
-	student.Contacts = []string{}
+	student.PersonalData.FirstName = data["firstname"]
+	student.PersonalData.MiddleName = data["middlename"]
+	student.PersonalData.LastName = data["lastname"]
+	student.PersonalData.Age, _ = strconv.Atoi(data["age"])
+	student.SchoolData.GradeLevel, _ = strconv.Atoi(data["gradelevel"])
+	student.PersonalData.DOB = data["dob"]
+	student.PersonalData.Email = data["email"]
+	student.PersonalData.Province = data["province"]
+	student.PersonalData.City = data["city"]
+	student.PersonalData.Address = data["address"]
+	student.PersonalData.Postal = data["postal"]
+	student.PersonalData.Contacts = []string{}
 
-	student.YOG = ((12 - student.GradeLevel) + time.Now().Year()) + 1
+	student.SchoolData.YOG = ((12 - student.SchoolData.GradeLevel) + time.Now().Year()) + 1
 
-	student.SchoolEmail = student.GenerateSchoolEmail()
+	student.SchoolData.SchoolEmail = student.GenerateSchoolEmail()
 
 	// Disable login block
-	student.AccountDisabled = false
-	student.Attempts = 0
+	student.AccountData.AccountDisabled = false
+	student.AccountData.Attempts = 0
 
 	// Generate temporary password
 	tempPass := student.GeneratePassword(12, 1, 1, 1)
-	student.Password = student.HashPassword(tempPass)
-	student.TempPassword = true
+	student.SchoolData.Password = student.HashPassword(tempPass)
+	student.AccountData.TempPassword = true
 
 	// Send student personal email temp password
 	smtpHost := "smpt.gmail.com"
@@ -114,7 +114,7 @@ func Enroll(c *fiber.Ctx) error {
 
 	auth := smtp.PlainAuth("", systemEmail, systemPassword, smtpHost)
 
-	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, systemEmail, []string{student.Email}, message)
+	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, systemEmail, []string{student.PersonalData.Email}, message)
 	if err != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -131,7 +131,7 @@ func Enroll(c *fiber.Ctx) error {
 			break
 		}
 	}
-	student.SID = sid
+	student.SchoolData.SID = sid
 
 	student.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	student.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
@@ -370,7 +370,7 @@ func StudentLogin(c *fiber.Ctx) error {
 	}
 
 	var localAccountDisabled = false
-	if student.Attempts >= 5 {
+	if student.AccountData.Attempts >= 5 {
 		localAccountDisabled = true // Catches newly disbaled account before student obj is updated
 		update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		update := bson.M{
@@ -396,7 +396,7 @@ func StudentLogin(c *fiber.Ctx) error {
 		}
 	}
 
-	if localAccountDisabled || student.AccountDisabled {
+	if localAccountDisabled || student.AccountData.AccountDisabled {
 		cancel()
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
 			"success": false,
@@ -409,7 +409,7 @@ func StudentLogin(c *fiber.Ctx) error {
 		update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		update := bson.M{
 			"$set": bson.M{
-				"attempts":   student.Attempts + 1,
+				"attempts":   student.AccountData.Attempts + 1,
 				"updated_at": update_time,
 			},
 		}
@@ -435,7 +435,7 @@ func StudentLogin(c *fiber.Ctx) error {
 	defer cancel()
 
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer:    student.SID,
+		Issuer:    student.SchoolData.SID,
 		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), // 1 Day
 	})
 	token, err := claims.SignedString([]byte(SecretKey))

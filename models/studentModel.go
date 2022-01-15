@@ -11,33 +11,47 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type Locker struct {
+	ID             primitive.ObjectID `bson:"_id"`
+	LockerNumber   string             `json:"lockernumber"`
+	LockerPasscode string             `json:"lockerpasscode"`
+	LockerType     string             `json:"lockertype"` // Upper / Lower locker
+}
+
 type Student struct {
-	ID              primitive.ObjectID `bson:"_id"`
-	AccountDisabled bool               `bson:"accountdisabled"`
-	FirstName       string             `json:"firstname" validate:"required"`
-	MiddleName      string             `json:"middlename"`
-	LastName        string             `json:"lastname" validate:"required"`
-	Age             int                `json:"age" validate:"required"`
-	GradeLevel      int                `json:"gradelevel" validate:"required"`
-	Email           string             `json:"email" validate:"required"`
-	SchoolEmail     string             `json:"schoolemail"`
-	Password        string             `json:"-" validate:"min=10,max=32"`
-	TempPassword    bool               `json:"temppassword"`
-	Attempts        int                `json:"attempts"` // login attempts max 5
-	SID             string             `json:"sid"`      // Student ID
-	PEN             string             `json:"ped"`      // Personal Education Number
-	Homeroom        string             `json:"homeroom"`
-	Locker          string             `json:"locker"`
-	YOG             int                `json:"yog"` // Year of Graduation
-	Address         string             `json:"address"`
-	City            string             `json:"city"`
-	Province        string             `json:"province"`
-	Postal          string             `json:"postal"`
-	DOB             string             `json:"dob" validate:"required"`
-	Photo           string             `json:"photo"`
-	Contacts        []string           `json:"contacts"` // List of contact ID's rather than contact object
-	Created_at      time.Time          `json:"created_at"`
-	Updated_at      time.Time          `json:"updated_at"`
+	ID           primitive.ObjectID `bson:"_id"`
+	PersonalData struct {
+		FirstName  string   `json:"firstname" validate:"required"`
+		MiddleName string   `json:"middlename"`
+		LastName   string   `json:"lastname" validate:"required"`
+		Age        int      `json:"age" validate:"required"`
+		Email      string   `json:"email" validate:"required"`
+		Address    string   `json:"address"`
+		City       string   `json:"city"`
+		Province   string   `json:"province"`
+		Postal     string   `json:"postal"`
+		DOB        string   `json:"dob" validate:"required"`
+		Photo      string   `json:"photo"`
+		Contacts   []string `json:"contacts"` // List of contact ID's rather than contact object
+	}
+	SchoolData struct {
+		GradeLevel  int    `json:"gradelevel" validate:"required"`
+		SchoolEmail string `json:"schoolemail"`
+		Password    string `json:"-" validate:"min=10,max=32"`
+		SID         string `json:"sid"` // Student ID
+		PEN         string `json:"ped"` // Personal Education Number
+		Homeroom    string `json:"homeroom"`
+		Locker      Locker `json:"locker"`
+		YOG         int    `json:"yog"` // Year of Graduation
+		Photo       string `json:"photo"`
+	}
+	AccountData struct {
+		AccountDisabled bool `bson:"accountdisabled"`
+		TempPassword    bool `json:"temppassword"`
+		Attempts        int  `json:"attempts"` // login attempts max 5
+	}
+	Created_at time.Time `json:"created_at"`
+	Updated_at time.Time `json:"updated_at"`
 }
 
 func (s *Student) HashPassword(password string) string {
@@ -46,13 +60,13 @@ func (s *Student) HashPassword(password string) string {
 }
 
 func (s *Student) GenerateSchoolEmail() string {
-	var email string = strings.ToLower(string(s.FirstName[0])) + "." + strings.ToLower(s.LastName) + "@surreyschools.ca"
+	var email string = strings.ToLower(string(s.PersonalData.FirstName[0])) + "." + strings.ToLower(s.PersonalData.LastName) + "@surreyschools.ca"
 	// Add check to see if email already exists
 	return email
 }
 
 func (s *Student) ComparePasswords(password string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(s.Password), []byte(password))
+	err := bcrypt.CompareHashAndPassword([]byte(s.SchoolData.Password), []byte(password))
 	if err != nil {
 		return false
 	}

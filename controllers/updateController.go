@@ -291,6 +291,13 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 	})
 }
 
+func ResetStudentPassword(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"succes":  nil,
+		"message": "not implimented",
+	})
+}
+
 func UpdateStudentLocker(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
 		"success": nil,

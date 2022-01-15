@@ -95,7 +95,7 @@ func Enroll(c *fiber.Ctx) error {
 
 	student.SchoolData.YOG = ((12 - student.SchoolData.GradeLevel) + time.Now().Year()) + 1
 
-	student.SchoolData.SchoolEmail = student.GenerateSchoolEmail()
+	student.AccountData.SchoolEmail = student.GenerateSchoolEmail()
 
 	// Disable login block
 	student.AccountData.AccountDisabled = false
@@ -103,7 +103,7 @@ func Enroll(c *fiber.Ctx) error {
 
 	// Generate temporary password
 	tempPass := student.GeneratePassword(12, 1, 1, 1)
-	student.SchoolData.Password = student.HashPassword(tempPass)
+	student.AccountData.Password = student.HashPassword(tempPass)
 	student.AccountData.TempPassword = true
 
 	// Send student personal email temp password

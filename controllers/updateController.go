@@ -51,10 +51,10 @@ func UpdateStudentName(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"firstname":  data["firstname"],
-			"middlename": data["middlename"],
-			"lastname":   data["lastname"],
-			"updated_at": update_time,
+			"PersonalData.FirstName":  data["firstname"],
+			"PersonalData.middlename": data["middlename"],
+			"PersonalData.lastname":   data["lastname"],
+			"updated_at":              update_time,
 		},
 	}
 
@@ -114,8 +114,8 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"gradelevel": data["gradelevel"],
-			"updated_at": update_time,
+			"SchoolData.gradelevel": data["gradelevel"],
+			"updated_at":            update_time,
 		},
 	}
 
@@ -175,8 +175,8 @@ func UpdateStudentHomeroom(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"homeroom":   data["homeroom"],
-			"updated_at": update_time,
+			"SchoolData.homeroom": data["homeroom"],
+			"updated_at":          update_time,
 		},
 	}
 
@@ -268,9 +268,9 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"password":     student.HashPassword(data["newPassword1"]),
-			"temppassword": false, // If it were a temp password, its not now
-			"updated_at":   update_time,
+			"AccountData.password":     student.HashPassword(data["newPassword1"]),
+			"AccountData.temppassword": false, // If it were a temp password, its not now
+			"updated_at":               update_time,
 		},
 	}
 
@@ -340,9 +340,9 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"password":     student.HashPassword(tempPass),
-			"temppassword": true,
-			"updated_at":   update_time,
+			"AccountData.password":     student.HashPassword(tempPass),
+			"AccountData.temppassword": true,
+			"updated_at":               update_time,
 		},
 	}
 
@@ -462,9 +462,9 @@ func RemoveStudentsDisabled(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"accountdisabled": false,
-			"attempts":        0,
-			"updated_at":      update_time,
+			"AccountData.accountdisabled": false,
+			"AccountData.attempts":        0,
+			"updated_at":                  update_time,
 		},
 	}
 

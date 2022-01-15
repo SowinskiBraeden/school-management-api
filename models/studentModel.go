@@ -28,20 +28,20 @@ type Student struct {
 		Contacts   []string `json:"contacts"` // List of contact ID's rather than contact object
 	}
 	SchoolData struct {
-		GradeLevel  int    `json:"gradelevel" validate:"required"`
-		SchoolEmail string `json:"schoolemail"`
-		Password    string `json:"-" validate:"min=10,max=32"`
-		SID         string `json:"sid"` // Student ID
-		PEN         string `json:"ped"` // Personal Education Number
-		Homeroom    string `json:"homeroom"`
-		Locker      Locker `json:"locker"`
-		YOG         int    `json:"yog"` // Year of Graduation
-		Photo       string `json:"photo"`
+		GradeLevel int    `json:"gradelevel" validate:"required"`
+		SID        string `json:"sid"` // Student ID
+		PEN        string `json:"ped"` // Personal Education Number
+		Homeroom   string `json:"homeroom"`
+		Locker     Locker `json:"locker"`
+		YOG        int    `json:"yog"` // Year of Graduation
+		Photo      string `json:"photo"`
 	}
 	AccountData struct {
-		AccountDisabled bool `bson:"accountdisabled"`
-		TempPassword    bool `json:"temppassword"`
-		Attempts        int  `json:"attempts"` // login attempts max 5
+		SchoolEmail     string `json:"schoolemail"`
+		Password        string `json:"-" validate:"min=10,max=32"`
+		AccountDisabled bool   `bson:"accountdisabled"`
+		TempPassword    bool   `json:"temppassword"`
+		Attempts        int    `json:"attempts"` // login attempts max 5
 	}
 	Created_at time.Time `json:"created_at"`
 	Updated_at time.Time `json:"updated_at"`
@@ -59,7 +59,7 @@ func (s *Student) GenerateSchoolEmail() string {
 }
 
 func (s *Student) ComparePasswords(password string) bool {
-	valid := bcrypt.CompareHashAndPassword([]byte(s.SchoolData.Password), []byte(password))
+	valid := bcrypt.CompareHashAndPassword([]byte(s.AccountData.Password), []byte(password))
 	if valid != nil {
 		return false
 	}

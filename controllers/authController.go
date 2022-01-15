@@ -375,9 +375,9 @@ func StudentLogin(c *fiber.Ctx) error {
 		update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		update := bson.M{
 			"$set": bson.M{
-				"accountdisabled": true,
-				"attempts":        0,
-				"updated_at":      update_time,
+				"AccountData.accountdisabled": true,
+				"AccountData.attempts":        0,
+				"updated_at":                  update_time,
 			},
 		}
 
@@ -409,8 +409,8 @@ func StudentLogin(c *fiber.Ctx) error {
 		update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		update := bson.M{
 			"$set": bson.M{
-				"attempts":   student.AccountData.Attempts + 1,
-				"updated_at": update_time,
+				"AccountData.attempts": student.AccountData.Attempts + 1,
+				"updated_at":           update_time,
 			},
 		}
 

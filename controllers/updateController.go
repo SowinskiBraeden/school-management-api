@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"net/smtp"
+	"school-management/database"
 	"school-management/models"
 	"time"
 
@@ -10,7 +11,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
+
+var lockerCollection *mongo.Collection = database.OpenCollection(database.Client, "lockers")
 
 func UpdateStudentName(c *fiber.Ctx) error {
 	var data map[string]string
@@ -625,5 +629,66 @@ func UpdateContactPriority(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
 		"success": nil,
 		"message": "not implimented",
+	})
+}
+
+func UpdateLockerCombo(c *fiber.Ctx) error {
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	// Ensure Authenticated admin sent request
+	if !AuthAdmin(c) {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "Unauthorized: only an admin can perform this action",
+		})
+	}
+
+	// Check locker number is included
+	if data["lockernumber"] == "" || data["newlockercombo"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	update := bson.M{
+		"$set": bson.M{
+			"lockercombo": data["newlockercombo"],
+			"updated_at":  update_time,
+		},
+	}
+
+	result, updateErr := lockerCollection.UpdateOne(
+		ctx,
+		bson.M{"lockernumber": data["lockernumber"]},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the locker could not be updated",
+			"error":   updateErr,
+		})
+	}
+	defer cancel()
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully updated locker",
+		"result":  result,
 	})
 }

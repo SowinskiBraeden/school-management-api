@@ -97,11 +97,16 @@ func Enroll(c *fiber.Ctx) error {
 
 	student.SchoolEmail = student.GenerateSchoolEmail()
 
+	// Disable login block
+	student.AccountDisabled = false
+	student.Attempts = 0
+
+	// Generate temporary password
 	tempPass := student.GeneratePassword(12, 1, 1, 1)
 	student.Password = student.HashPassword(tempPass)
 	student.TempPassword = true
-	// Send student personal email temp password
 
+	// Send student personal email temp password
 	smtpHost := "smpt.gmail.com"
 	smtpPort := "587"
 

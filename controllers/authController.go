@@ -624,10 +624,16 @@ func Student(c *fiber.Ctx) error {
 		})
 	}
 
+	var locker models.Locker
+	if student.SchoolData.Locker != "" {
+		lockerCollection.FindOne(context.TODO(), bson.M{"ID": student.SchoolData.Locker}).Decode(&locker)
+	}
+
 	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully logged into student",
 		"result":  student,
+		"locker":  locker,
 	})
 }
 

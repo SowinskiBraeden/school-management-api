@@ -2,6 +2,7 @@ package models
 
 import (
 	"math/rand"
+	"school-management/database"
 	"strings"
 	"time"
 	"unicode"
@@ -9,7 +10,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
+
+var lockerCollection *mongo.Collection = database.OpenCollection(database.Client, "lockers")
 
 type Student struct {
 	ID           primitive.ObjectID `bson:"_id"`
@@ -32,8 +36,8 @@ type Student struct {
 		SID        string `json:"sid"` // Student ID
 		PEN        string `json:"ped"` // Personal Education Number
 		Homeroom   string `json:"homeroom"`
-		Locker     Locker `json:"locker"`
-		YOG        int    `json:"yog"` // Year of Graduation
+		Locker     string `json:"locker"` // Locker ID
+		YOG        int    `json:"yog"`    // Year of Graduation
 		Photo      string `json:"photo"`
 	}
 	AccountData struct {

@@ -745,6 +745,13 @@ func UpdateTeacherPassword(c *fiber.Ctx) error {
 	})
 }
 
+func ResetTeacherPassword(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"success": nil,
+		"message": "not implimented",
+	})
+}
+
 func UpdateTeacherAddress(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
 		"success": nil,

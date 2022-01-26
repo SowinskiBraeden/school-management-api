@@ -22,6 +22,7 @@ func Setup(app *fiber.App) {
 	app.Post("/api/studnet/updateYOG", controllers.UpdateStudentYOG)
 	app.Post("/api/studnet/updateContacts", controllers.UpdateStudentContacts)
 	app.Post("/api/student/updatePassword", controllers.UpdateStudentPassword)
+	app.Post("/api/student/resetPassword", controllers.ResetStudentPassword)
 	app.Post("/api/student/updateAddress", controllers.UpdateStudentAddress)
 	app.Post("/api/student/updatePhoto", controllers.UpdateStudentPhoto)
 	app.Post("/api/student/updateEmail", controllers.UpdateStudentEmail)
@@ -47,6 +48,7 @@ func Setup(app *fiber.App) {
 	app.Post("/api/teacher/updateName", controllers.UpdateTeacherName)
 	app.Post("/api/teacher/updateHomeroom", controllers.UpdateTeacherHomeroom)
 	app.Post("/api/teacher/updateEmail", controllers.UpdateTeacherEmail)
+	app.Post("/api/teacher/resetPassword", controllers.ResetTeacherPassword)
 
 	// General Routes
 	app.Post("/api/logout", controllers.Logout)
@@ -58,4 +60,5 @@ func Setup(app *fiber.App) {
 
 	// General Command Handling
 	app.Post("/api/admin/updateLockerCombo", controllers.UpdateLockerCombo)
+	app.Post("/api/admin/renableStudent", controllers.RemoveStudentsDisabled)
 }

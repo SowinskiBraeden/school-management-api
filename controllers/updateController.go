@@ -309,7 +309,7 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 		})
 	}
 
-	// Check required fields are included
+	// Check required fields are included (email must be personal email)
 	if data["sid"] == "" || data["email"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{

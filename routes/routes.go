@@ -9,12 +9,12 @@ import (
 func Setup(app *fiber.App) {
 	// API Handling
 
-	// Login + Register handling
+	// Student Authentication Handler
 	app.Get("/api/student", controllers.Student)
 	app.Post("/api/student/enroll", controllers.Enroll)
 	app.Post("/api/student/login", controllers.StudentLogin)
 
-	// Updating handling
+	// Update Student Handler
 	app.Post("/api/student/updateName", controllers.UpdateStudentName)
 	app.Post("/api/student/updateGradeLevel", controllers.UpdateStudentGradeLevel)
 	app.Post("/api/student/updateHomeroom", controllers.UpdateStudentHomeroom)
@@ -26,7 +26,7 @@ func Setup(app *fiber.App) {
 	app.Post("/api/student/updatePhoto", controllers.UpdateStudentPhoto)
 	app.Post("/api/student/updateEmail", controllers.UpdateStudentEmail)
 
-	// Student Contacts
+	// Student Contact Handler
 	app.Post("/api/student/createContact", controllers.CreateContact)
 	app.Post("/api/student/contact/updateName", controllers.UpdateContactName)
 	app.Post("/api/student/contact/updateAddress", controllers.UpdateContactAddress)
@@ -35,12 +35,12 @@ func Setup(app *fiber.App) {
 	app.Post("/api/student/contact/updatePriority", controllers.UpdateContactPriority)
 	app.Post("/api/student/contact/removeContact", controllers.RemoveContact)
 
-	// Login + Register handling
+	// Teacher Login Handling
 	app.Get("/api/teacher", controllers.Teacher)
 	app.Post("/api/teacher/register", controllers.RegisterTeacher)
 	app.Post("/api/teacher/login", controllers.TeacherLogin)
 
-	// Updating handling
+	// Update Teacher Handler
 	app.Post("/api/teacher/updatePassword", controllers.UpdateTeacherPassword)
 	app.Post("/api/teacher/updateAddress", controllers.UpdateTeacherAddress)
 	app.Post("/api/teacher/updatePhoto", controllers.UpdateTeacherPhoto)
@@ -50,4 +50,12 @@ func Setup(app *fiber.App) {
 
 	// General Routes
 	app.Post("/api/logout", controllers.Logout)
+
+	// Admin Login Handling
+	app.Get("/api/admin", controllers.Admin)
+	app.Post("/api/admin/create", controllers.CreateAdmin)
+	app.Post("/api/admin/login", controllers.AdminLogin)
+
+	// General Command Handling
+	app.Post("/api/admin/updateLockerCombo", controllers.UpdateLockerCombo)
 }

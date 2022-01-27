@@ -51,16 +51,16 @@ func UpdateStudentName(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"PersonalData.FirstName":  data["firstname"],
-			"PersonalData.middlename": data["middlename"],
-			"PersonalData.lastname":   data["lastname"],
+			"personaldata.firstname":  data["firstname"],
+			"personaldata.middlename": data["middlename"],
+			"personaldata.lastname":   data["lastname"],
 			"updated_at":              update_time,
 		},
 	}
 
 	result, updateErr := studentCollection.UpdateOne(
 		ctx,
-		bson.M{"sid": data["sid"]},
+		bson.M{"schooldata.sid": data["sid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -114,14 +114,14 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"SchoolData.gradelevel": data["gradelevel"],
+			"schooldata.gradelevel": data["gradelevel"],
 			"updated_at":            update_time,
 		},
 	}
 
 	result, updateErr := studentCollection.UpdateOne(
 		ctx,
-		bson.M{"sid": data["sid"]},
+		bson.M{"schooldata.sid": data["sid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -175,14 +175,14 @@ func UpdateStudentHomeroom(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"SchoolData.homeroom": data["homeroom"],
+			"schooldata.homeroom": data["homeroom"],
 			"updated_at":          update_time,
 		},
 	}
 
 	result, updateErr := studentCollection.UpdateOne(
 		ctx,
-		bson.M{"sid": data["sid"]},
+		bson.M{"schooldata.sid": data["sid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -231,7 +231,7 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 	claims := token.Claims.(*jwt.StandardClaims)
 
 	var student models.Student
-	findErr := studentCollection.FindOne(context.TODO(), bson.M{"sid": claims.Issuer}).Decode(&student)
+	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": claims.Issuer}).Decode(&student)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -268,15 +268,15 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"AccountData.password":     student.HashPassword(data["newPassword1"]),
-			"AccountData.temppassword": false, // If it were a temp password, its not now
+			"accountdata.password":     student.HashPassword(data["newPassword1"]),
+			"accountdata.temppassword": false, // If it were a temp password, its not now
 			"updated_at":               update_time,
 		},
 	}
 
 	result, updateErr := studentCollection.UpdateOne(
 		ctx,
-		bson.M{"sid": data["sid"]},
+		bson.M{"schooldata.sid": data["sid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -319,7 +319,7 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 	}
 
 	var student models.Student
-	findErr := studentCollection.FindOne(context.TODO(), bson.M{"sid": data["sid"]}).Decode(&student)
+	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": data["sid"]}).Decode(&student)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -340,15 +340,15 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"AccountData.password":     student.HashPassword(tempPass),
-			"AccountData.temppassword": true,
+			"accountdata.password":     student.HashPassword(tempPass),
+			"accountdata.temppassword": true,
 			"updated_at":               update_time,
 		},
 	}
 
 	result, updateErr := studentCollection.UpdateOne(
 		ctx,
-		bson.M{"sid": data["sid"]},
+		bson.M{"schooldata.sid": data["sid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -418,7 +418,7 @@ func UpdateStudentLocker(c *fiber.Ctx) error {
 	}
 
 	var locker models.Locker
-	err := lockerCollection.FindOne(ctx, bson.M{"sid": data["sid"]}).Decode(&locker)
+	err := lockerCollection.FindOne(ctx, bson.M{"schooldata.sid": data["sid"]}).Decode(&locker)
 	if err != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -431,14 +431,14 @@ func UpdateStudentLocker(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"School.Data.FirstName": locker.ID,
-			"updated_at":            update_time,
+			"schooldata.locker": locker.ID,
+			"updated_at":        update_time,
 		},
 	}
 
 	result, updateErr := studentCollection.UpdateOne(
 		ctx,
-		bson.M{"sid": data["sid"]},
+		bson.M{"schooldata.sid": data["sid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -492,10 +492,10 @@ func UpdateStudentAddress(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"PersonalData.Address":  data["address"],
-			"PersonalData.City":     data["city"],
-			"PersonalData.Province": data["province"],
-			"PersonalData.Postal":   data["postal"],
+			"personaldata.address":  data["address"],
+			"personaldata.city":     data["city"],
+			"personaldata.province": data["province"],
+			"personaldata.postal":   data["postal"],
 			"updated_at":            update_time,
 		},
 	}
@@ -555,7 +555,7 @@ func UpdateStudentYOG(c *fiber.Ctx) error {
 	}
 
 	var student models.Student
-	findErr := studentCollection.FindOne(context.TODO(), bson.M{"sid": data["sid"]}).Decode(&student)
+	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": data["sid"]}).Decode(&student)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -567,14 +567,14 @@ func UpdateStudentYOG(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"SchoolData.YOG": student.SchoolData.YOG + 1,
+			"schooldata.yog": student.SchoolData.YOG + 1,
 			"updated_at":     update_time,
 		},
 	}
 
 	result, updateErr := studentCollection.UpdateOne(
 		ctx,
-		bson.M{"sid": data["sid"]},
+		bson.M{"schooldata.sid": data["sid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -642,14 +642,14 @@ func UpdateStudentEmail(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"PersonalData.Email": data["email"],
+			"personaldata.email": data["email"],
 			"updated_at":         update_time,
 		},
 	}
 
 	result, updateErr := studentCollection.UpdateOne(
 		ctx,
-		bson.M{"sid": data["sid"]},
+		bson.M{"schooldata.sid": data["sid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -703,15 +703,15 @@ func RemoveStudentsDisabled(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"AccountData.accountdisabled": false,
-			"AccountData.attempts":        0,
+			"accountdata.accountdisabled": false,
+			"accountdata.attempts":        0,
 			"updated_at":                  update_time,
 		},
 	}
 
 	result, updateErr := studentCollection.UpdateOne(
 		ctx,
-		bson.M{"sid": data["sid"]},
+		bson.M{"schooldata.sid": data["sid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -874,9 +874,63 @@ func UpdateContactEmail(c *fiber.Ctx) error {
 }
 
 func UpdateContactPriority(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
-		"success": nil,
-		"message": "not implimented",
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	// Ensure Authenticated admin sent request
+	if !AuthAdmin(c) {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "Unauthorized: only an admin can perform this action",
+		})
+	}
+
+	// Check id of contact and new priority number is included
+	if data["_id"] == "" || data["priority"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	update := bson.M{
+		"$set": bson.M{
+			"priority":   data["priority"],
+			"updated_at": update_time,
+		},
+	}
+
+	result, updateErr := contactCollection.UpdateOne(
+		ctx,
+		bson.M{"_id": data["_id"]},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the locker could not be updated",
+			"error":   updateErr,
+		})
+	}
+	defer cancel()
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully updated locker",
+		"result":  result,
 	})
 }
 

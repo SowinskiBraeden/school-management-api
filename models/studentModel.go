@@ -30,7 +30,7 @@ type Student struct {
 		DOB        string   `json:"dob" validate:"required"`
 		Photo      string   `json:"photo"`
 		Contacts   []string `json:"contacts"` // List of contact ID's rather than contact object
-	}
+	} `json:"personaldata"`
 	SchoolData struct {
 		GradeLevel int    `json:"gradelevel" validate:"required"`
 		SID        string `json:"sid"` // Student ID
@@ -39,14 +39,14 @@ type Student struct {
 		Locker     string `json:"locker"` // Locker ID
 		YOG        int    `json:"yog"`    // Year of Graduation
 		Photo      string `json:"photo"`
-	}
+	} `json:"schooldata"`
 	AccountData struct {
 		SchoolEmail     string `json:"schoolemail"`
 		Password        string `json:"-" validate:"min=10,max=32"`
 		AccountDisabled bool   `bson:"accountdisabled"`
 		TempPassword    bool   `json:"temppassword"`
 		Attempts        int    `json:"attempts"` // login attempts max 5
-	}
+	} `json:"accountdata"`
 	Created_at time.Time `json:"created_at"`
 	Updated_at time.Time `json:"updated_at"`
 }

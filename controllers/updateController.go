@@ -846,9 +846,65 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 }
 
 func UpdateContactName(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
-		"success": nil,
-		"message": "not implimented",
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	// Ensure Authenticated admin sent request
+	if !AuthAdmin(c) {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "Unauthorized: only an admin can perform this action",
+		})
+	}
+
+	// Check required fields are included
+	if data["_id"] == "" || data["firstname"] == "" || data["middlename"] == "" || data["lastname"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	update := bson.M{
+		"$set": bson.M{
+			"firstname":  data["firstname"],
+			"middlename": data["middlename"],
+			"lastname":   data["lastname"],
+			"updated_at": update_time,
+		},
+	}
+
+	result, updateErr := contactCollection.UpdateOne(
+		ctx,
+		bson.M{"_id": data["_id"]},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the contact could not be updated",
+			"error":   updateErr,
+		})
+	}
+	defer cancel()
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully updated contact",
+		"result":  result,
 	})
 }
 

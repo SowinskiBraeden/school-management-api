@@ -753,9 +753,66 @@ func ResetTeacherPassword(c *fiber.Ctx) error {
 }
 
 func UpdateTeacherAddress(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
-		"success": nil,
-		"message": "not implimented",
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	// Ensure Authenticated admin sent request
+	if !AuthAdmin(c) {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "Unauthorized: only an admin can perform this action",
+		})
+	}
+
+	// Check required fields are included
+	if data["tid"] == "" || data["address"] == "" || data["city"] == "" || data["province"] == "" || data["postal"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	update := bson.M{
+		"$set": bson.M{
+			"address":    data["address"],
+			"city":       data["city"],
+			"province":   data["province"],
+			"postal":     data["postal"],
+			"updated_at": update_time,
+		},
+	}
+
+	result, updateErr := teacherCollection.UpdateOne(
+		ctx,
+		bson.M{"tid": data["tid"]},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the teacher could not be updated",
+			"error":   updateErr,
+		})
+	}
+	defer cancel()
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully updated teacher",
+		"result":  result,
 	})
 }
 
@@ -996,11 +1053,11 @@ func UpdateContactAddress(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"address":               data["address"],
-			"city":                  data["city"],
-			"personaldata.province": data["province"],
-			"postal":                data["postal"],
-			"updated_at":            update_time,
+			"address":    data["address"],
+			"city":       data["city"],
+			"province":   data["province"],
+			"postal":     data["postal"],
+			"updated_at": update_time,
 		},
 	}
 

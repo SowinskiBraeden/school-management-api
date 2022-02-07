@@ -39,8 +39,7 @@ func AuthAdmin(c *fiber.Ctx) bool {
 
 	claims := token.Claims.(*jwt.StandardClaims)
 
-	var admin models.Admin
-	findErr := adminCollection.FindOne(context.TODO(), bson.M{"aid": claims.Issuer}).Decode(&admin)
+	findErr := adminCollection.FindOne(context.TODO(), bson.M{"aid": claims.Issuer})
 	if findErr != nil {
 		return false
 	}
@@ -60,8 +59,7 @@ func AuthStudent(c *fiber.Ctx) (verified bool, sid string) {
 
 	claims := token.Claims.(*jwt.StandardClaims)
 
-	var student models.Admin
-	findErr := adminCollection.FindOne(context.TODO(), bson.M{"sid": claims.Issuer}).Decode(&student)
+	findErr := studentCollection.FindOne(context.TODO(), bson.M{"sid": claims.Issuer})
 	if findErr != nil {
 		return false, ""
 	}
@@ -70,7 +68,7 @@ func AuthStudent(c *fiber.Ctx) (verified bool, sid string) {
 }
 
 func Enroll(c *fiber.Ctx) error {
-	var data map[string]string
+	var data map[string]interface{}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
 	if err := c.BodyParser(&data); err != nil {
@@ -92,7 +90,7 @@ func Enroll(c *fiber.Ctx) error {
 	}
 
 	// Check minimum enroll field requirements are met
-	if data["firstname"] == "" || data["lastname"] == "" || data["age"] == "" || data["gradelevel"] == "" || data["dob"] == "" || data["email"] == "" {
+	if data["firstname"] == "" || data["lastname"] == "" || data["age"] == "" || data["gradelevel"] == "" || data["dob"] == "" || data["email"] == "" || data["province"] == "" || data["city"] == "" || data["address"] == "" || data["postal"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -101,22 +99,31 @@ func Enroll(c *fiber.Ctx) error {
 	}
 
 	var student models.Student
-	student.PersonalData.FirstName = data["firstname"]
-	student.PersonalData.MiddleName = data["middlename"]
-	student.PersonalData.LastName = data["lastname"]
-	student.PersonalData.Age, _ = strconv.Atoi(data["age"])
-	student.SchoolData.GradeLevel, _ = strconv.Atoi(data["gradelevel"])
-	student.PersonalData.DOB = data["dob"]
-	student.PersonalData.Email = data["email"]
-	student.PersonalData.Province = data["province"]
-	student.PersonalData.City = data["city"]
-	student.PersonalData.Address = data["address"]
-	student.PersonalData.Postal = data["postal"]
+	student.PersonalData.FirstName = data["firstname"].(string)
+	student.PersonalData.MiddleName = data["middlename"].(string)
+	student.PersonalData.LastName = data["lastname"].(string)
+	student.PersonalData.Age = data["age"].(int)
+	student.SchoolData.GradeLevel = data["gradelevel"].(int)
+	student.PersonalData.DOB = data["dob"].(string)
+	student.PersonalData.Email = data["email"].(string)
+	student.PersonalData.Province = data["province"].(string)
+	student.PersonalData.City = data["city"].(string)
+	student.PersonalData.Address = data["address"].(string)
+	student.PersonalData.Postal = data["postal"].(string)
 	student.PersonalData.Contacts = []string{}
 
 	student.SchoolData.YOG = ((12 - student.SchoolData.GradeLevel) + time.Now().Year()) + 1
 
-	student.AccountData.SchoolEmail = student.GenerateSchoolEmail()
+	var schoolEmail string = ""
+	offset := 0
+	for {
+		schoolEmail = student.GenerateSchoolEmail(offset, schoolEmail)
+		if student.EmailExists(schoolEmail) == true {
+			break
+		}
+		offset++
+	}
+	student.AccountData.SchoolEmail = schoolEmail
 
 	// Disable login block
 	student.AccountData.AccountDisabled = false
@@ -176,7 +183,7 @@ func Enroll(c *fiber.Ctx) error {
 }
 
 func RegisterTeacher(c *fiber.Ctx) error {
-	var data map[string]string
+	var data map[string]interface{}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
 	if err := c.BodyParser(&data); err != nil {
@@ -207,9 +214,14 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	}
 
 	var teacher models.Teacher
-	teacher.FirstName = data["firstname"]
-	teacher.LastName = data["lastname"]
-	teacher.Email = data["email"]
+	teacher.FirstName = data["firstname"].(string)
+	teacher.MiddleName = data["middlename"].(string)
+	teacher.LastName = data["lastname"].(string)
+	teacher.Email = data["email"].(string)
+	teacher.Province = data["province"].(string)
+	teacher.City = data["city"].(string)
+	teacher.Postal = data["postal"].(string)
+	teacher.DOB = data["postal"].(string)
 
 	teacher.SchoolEmail = teacher.GenerateSchoolEmail()
 
@@ -302,6 +314,8 @@ func CreateAdmin(c *fiber.Ctx) error {
 	admin.FirstName = data["firstname"]
 	admin.LastName = data["lastname"]
 	admin.Email = data["email"]
+
+	admin.SchoolEmail = admin.GenerateSchoolEmail()
 
 	tempPass := admin.GeneratePassword(12, 1, 1, 1)
 	admin.Password = admin.HashPassword(tempPass)

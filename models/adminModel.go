@@ -16,11 +16,18 @@ type Admin struct {
 	FirstName    string             `json:"firstname" validate:"required"`
 	LastName     string             `json:"lastname" validate:"required"`
 	Email        string             `json:"email" validate:"required"`
+	SchoolEmail  string             `json:"schoolemail"`
 	Password     string             `json:"-" validate:"min=10,max=32"`
 	TempPassword bool               `json:"temppassword"`
 	AID          string             `json:"aid"`
 	Created_at   time.Time          `json:"created_at"`
 	Updated_at   time.Time          `json:"updated_at"`
+}
+
+func (a *Admin) GenerateSchoolEmail() string {
+	var email string = strings.ToLower(a.LastName) + "_" + strings.ToLower(string(a.FirstName[0])) + "@surreyschools.ca"
+	// Add check to see if email already exists
+	return email
 }
 
 func (s *Admin) HashPassword(password string) string {

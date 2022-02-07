@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"math/rand"
 	"school-management/database"
 	"strings"
@@ -9,11 +10,13 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var lockerCollection *mongo.Collection = database.OpenCollection(database.Client, "lockers")
+var studentCollection *mongo.Collection = database.OpenCollection(database.Client, "students")
 
 type Student struct {
 	ID           primitive.ObjectID `bson:"_id"`
@@ -56,9 +59,19 @@ func (s *Student) HashPassword(password string) string {
 	return string(hash)
 }
 
-func (s *Student) GenerateSchoolEmail() string {
+func (s *Student) EmailExists(email string) bool {
+	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.schoolemail": email})
+	if findErr != nil {
+		return false
+	}
+	return true
+}
+
+func (s *Student) GenerateSchoolEmail(offset int, lastEmail string) string {
 	var email string = strings.ToLower(string(s.PersonalData.FirstName[0])) + "." + strings.ToLower(s.PersonalData.LastName) + "@surreyschools.ca"
-	// Add check to see if email already exists
+	if offset > 0 {
+		email = lastEmail[:offset] + string(s.PersonalData.FirstName[offset]) + lastEmail[offset:]
+	}
 	return email
 }
 

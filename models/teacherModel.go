@@ -45,8 +45,7 @@ func (t *Teacher) HashPassword(password string) string {
 }
 
 func (t *Teacher) GenerateSchoolEmail() string {
-	var email string = strings.ToLower(string(t.FirstName[0])) + "_" + strings.ToLower(t.LastName) + "@surreyschools.ca"
-	// Add check to see if email already exists
+	var email string = strings.ToLower(t.LastName) + "_" + strings.ToLower(string(t.FirstName[0])) + "@surreyschools.ca"
 	return email
 }
 

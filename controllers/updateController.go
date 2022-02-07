@@ -621,8 +621,10 @@ func UpdateStudentEmail(c *fiber.Ctx) error {
 		})
 	}
 
+	verifiedAdmin := AuthAdmin(c)
+	verifiedStudent, sid := AuthStudent(c)
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) && !AuthStudent(c) {
+	if !verifiedAdmin && !verifiedStudent {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -631,7 +633,7 @@ func UpdateStudentEmail(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["sid"] == "" || data["email"] == "" {
+	if data["email"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -649,7 +651,7 @@ func UpdateStudentEmail(c *fiber.Ctx) error {
 
 	result, updateErr := studentCollection.UpdateOne(
 		ctx,
-		bson.M{"schooldata.sid": data["sid"]},
+		bson.M{"schooldata.sid": sid},
 		update,
 	)
 	if updateErr != nil {
@@ -837,7 +839,7 @@ func UpdateTeacherEmail(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) && !AuthStudent(c) {
+	if !AuthAdmin(c) {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,

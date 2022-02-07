@@ -48,14 +48,14 @@ func AuthAdmin(c *fiber.Ctx) bool {
 	return true
 }
 
-func AuthStudent(c *fiber.Ctx) bool {
+func AuthStudent(c *fiber.Ctx) (verified bool, sid string) {
 	cookie := c.Cookies("jwt")
 
 	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(SecretKey), nil
 	})
 	if err != nil {
-		return false
+		return false, ""
 	}
 
 	claims := token.Claims.(*jwt.StandardClaims)
@@ -63,10 +63,10 @@ func AuthStudent(c *fiber.Ctx) bool {
 	var student models.Admin
 	findErr := adminCollection.FindOne(context.TODO(), bson.M{"sid": claims.Issuer}).Decode(&student)
 	if findErr != nil {
-		return false
+		return false, ""
 	}
 
-	return true
+	return true, claims.Issuer
 }
 
 func Enroll(c *fiber.Ctx) error {

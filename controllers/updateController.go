@@ -48,14 +48,31 @@ func UpdateStudentName(c *fiber.Ctx) error {
 		})
 	}
 
+	var updateMiddle bool = false
+	if data["middlename"] != "" {
+		updateMiddle = true
+	}
+
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-	update := bson.M{
-		"$set": bson.M{
-			"personaldata.firstname":  data["firstname"],
-			"personaldata.middlename": data["middlename"],
-			"personaldata.lastname":   data["lastname"],
-			"updated_at":              update_time,
-		},
+	var update bson.M
+	if updateMiddle {
+		update = bson.M{
+			"$set": bson.M{
+				"personaldata.firstname":  data["firstname"],
+				"personaldata.middlename": data["middlename"],
+				"personaldata.lastname":   data["lastname"],
+				"updated_at":              update_time,
+			},
+		}
+	} else {
+		update = bson.M{
+			"$set": bson.M{
+				"personaldata.firstname":  data["firstname"],
+				"personaldata.middlename": data["middlename"],
+				"personaldata.lastname":   data["lastname"],
+				"updated_at":              update_time,
+			},
+		}
 	}
 
 	result, updateErr := studentCollection.UpdateOne(

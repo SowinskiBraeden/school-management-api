@@ -40,7 +40,7 @@ func ValidatePEN(pen string) bool { // true: valid pen, false: pen already in us
 	var foundID models.Id
 	err := studentCollection.FindOne(ctx, bson.M{"schooldata.pen": pen}).Decode(&foundID)
 	cancel()
-	if err != nil { // If there is no id found create new ID object to be stored and return true (unless insert error then try again)
+	if err != nil {
 		return true
 	}
 	return false

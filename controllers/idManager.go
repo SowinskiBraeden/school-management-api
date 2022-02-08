@@ -35,10 +35,21 @@ func ValidateID(id string) bool { // true: valid id, false: id already in use
 	return false
 }
 
-func GenerateID() string {
-	b := make([]byte, 6)
-	n, err := io.ReadAtLeast(rand.Reader, b, 6)
-	if n != 6 {
+func ValidatePEN(pen string) bool { // true: valid pen, false: pen already in use
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	var foundID models.Id
+	err := studentCollection.FindOne(ctx, bson.M{"schooldata.pen": pen}).Decode(&foundID)
+	cancel()
+	if err != nil { // If there is no id found create new ID object to be stored and return true (unless insert error then try again)
+		return true
+	}
+	return false
+}
+
+func GenerateID(length int) string {
+	b := make([]byte, length)
+	n, err := io.ReadAtLeast(rand.Reader, b, length)
+	if n != length {
 		panic(err)
 	}
 	for i := 0; i < len(b); i++ {

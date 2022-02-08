@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/rand"
 	"school-management/database"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -24,7 +25,7 @@ type Student struct {
 		FirstName  string   `json:"firstname" validate:"required"`
 		MiddleName string   `json:"middlename"`
 		LastName   string   `json:"lastname" validate:"required"`
-		Age        int      `json:"age" validate:"required"`
+		Age        float64  `json:"age" validate:"required"`
 		Email      string   `json:"email" validate:"required"`
 		Address    string   `json:"address"`
 		City       string   `json:"city"`
@@ -35,13 +36,13 @@ type Student struct {
 		Contacts   []string `json:"contacts"` // List of contact ID's rather than contact object
 	} `json:"personaldata"`
 	SchoolData struct {
-		GradeLevel int    `json:"gradelevel" validate:"required"`
-		SID        string `json:"sid"` // Student ID
-		PEN        string `json:"ped"` // Personal Education Number
-		Homeroom   string `json:"homeroom"`
-		Locker     string `json:"locker"` // Locker ID
-		YOG        int    `json:"yog"`    // Year of Graduation
-		Photo      string `json:"photo"`
+		GradeLevel float64 `json:"gradelevel" validate:"required"`
+		SID        string  `json:"sid"` // Student ID
+		PEN        string  `json:"ped"` // Personal Education Number
+		Homeroom   string  `json:"homeroom"`
+		Locker     string  `json:"-"`   // Locker ID
+		YOG        int     `json:"yog"` // Year of Graduation
+		Photo      string  `json:"photo"`
 	} `json:"schooldata"`
 	AccountData struct {
 		SchoolEmail     string `json:"schoolemail"`
@@ -60,7 +61,8 @@ func (s *Student) HashPassword(password string) string {
 }
 
 func (s *Student) EmailExists(email string) bool {
-	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.schoolemail": email})
+	var student Student
+	findErr := studentCollection.FindOne(context.TODO(), bson.M{"accountdata.schoolemail": email}).Decode(&student)
 	if findErr != nil {
 		return false
 	}
@@ -69,13 +71,19 @@ func (s *Student) EmailExists(email string) bool {
 
 func (s *Student) GenerateSchoolEmail(offset int, lastEmail string) string {
 	var email string = strings.ToLower(string(s.PersonalData.FirstName[0])) + "." + strings.ToLower(s.PersonalData.LastName) + "@surreyschools.ca"
-	if offset > 0 {
-		email = lastEmail[:offset] + string(s.PersonalData.FirstName[offset]) + lastEmail[offset:]
+	if offset > 0 && offset < len([]rune(s.PersonalData.FirstName))-1 {
+		email = lastEmail[:offset] + strings.ToLower(string(s.PersonalData.FirstName[offset])) + lastEmail[offset:]
+	}
+	if offset == len([]rune(s.PersonalData.FirstName))-1 {
+		email = strings.ToLower(s.PersonalData.FirstName) + "." + strings.ToLower(s.PersonalData.LastName)
+	}
+	if offset > len([]rune(s.PersonalData.FirstName))-1 {
+		email = strings.ToLower(s.PersonalData.FirstName) + "." + strings.ToLower(s.PersonalData.LastName) + strconv.Itoa(offset-len([]rune(s.PersonalData.FirstName)))
 	}
 	return email
 }
 
-func (s *Student) ComparePasswords(password string) bool {
+func (s *Student) ComparePasswords(password string) bool { //True: passwords match, False: no match
 	valid := bcrypt.CompareHashAndPassword([]byte(s.AccountData.Password), []byte(password))
 	if valid != nil {
 		return false

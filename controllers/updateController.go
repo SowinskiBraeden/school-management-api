@@ -252,7 +252,7 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["currentPassword"] == "" || data["newPassword1"] == "" || data["newPassword2"] == "" {
+	if data["currentpassword"] == "" || data["newpassword1"] == "" || data["newpassword2"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -260,7 +260,7 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 		})
 	}
 
-	if student.ComparePasswords(data["currentPassword"]) {
+	if !student.ComparePasswords(data["currentpassword"]) {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -268,7 +268,7 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 		})
 	}
 
-	if data["newPassword1"] != data["newPassword2"] {
+	if data["newpassword1"] != data["newpassword2"] {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -279,7 +279,7 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"accountdata.password":     student.HashPassword(data["newPassword1"]),
+			"accountdata.password":     student.HashPassword(data["newpassword1"]),
 			"accountdata.temppassword": false, // If it were a temp password, its not now
 			"updated_at":               update_time,
 		},
@@ -287,7 +287,7 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 
 	result, updateErr := studentCollection.UpdateOne(
 		ctx,
-		bson.M{"schooldata.sid": data["sid"]},
+		bson.M{"schooldata.sid": claims.Issuer},
 		update,
 	)
 	if updateErr != nil {
@@ -307,6 +307,7 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 	})
 }
 
+// This is for students to reset their password if they are unable to login
 func ResetStudentPassword(c *fiber.Ctx) error {
 	var data map[string]string
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -373,14 +374,10 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 	defer cancel()
 
 	// Send student personal email temp password
-	smtpHost := "smpt.gmail.com"
-	smtpPort := "587"
+	message := []byte("Your temporary password is " + tempPass)
+	auth := smtp.PlainAuth("", systemEmail, systemPassword, "smtp.gmail.com")
 
-	message := []byte("Your temporary password is: " + tempPass)
-
-	auth := smtp.PlainAuth("", systemEmail, systemPassword, smtpHost)
-
-	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, systemEmail, []string{student.PersonalData.Email}, message)
+	err := smtp.SendMail("smtp.gmail.com:587", auth, systemEmail, []string{student.PersonalData.Email}, message)
 	if err != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -442,8 +439,8 @@ func UpdateStudentLocker(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"schooldata.locker": locker.ID,
-			"updated_at":        update_time,
+			"schooldata.studentlocker": locker.ID,
+			"updated_at":               update_time,
 		},
 	}
 

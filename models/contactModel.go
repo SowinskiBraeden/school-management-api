@@ -15,11 +15,11 @@ type Contact struct {
 	City       string             `json:"city"`
 	Address    string             `json:"address" validate:"required"`
 	Postal     string             `json:"postal"`
-	HomePhone  string             `json:"homephone" validate:"required"`
-	WorkPhone  string             `json:"workphone"`
+	HomePhone  float64            `json:"homephone" validate:"required"`
+	WorkPhone  float64            `json:"workphone"`
 	Email      string             `json:"email" validate:"required"`
 	Relation   string             `json:"relation" validate:"required"`
-	Priotrity  int                `json:"priority" validate:"required"`
+	Priotrity  float64            `json:"priority" validate:"required"`
 	Created_at time.Time          `json:"created_at"`
 	Updated_at time.Time          `json:"updated_at"`
 }

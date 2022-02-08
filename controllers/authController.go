@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"net/smtp"
-	"strconv"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
@@ -39,7 +38,9 @@ func AuthAdmin(c *fiber.Ctx) bool {
 
 	claims := token.Claims.(*jwt.StandardClaims)
 
-	findErr := adminCollection.FindOne(context.TODO(), bson.M{"aid": claims.Issuer})
+	// Though admin is not used, it's required to prevent findErr
+	var admin models.Admin
+	findErr := adminCollection.FindOne(context.TODO(), bson.M{"aid": claims.Issuer}).Decode(&admin)
 	if findErr != nil {
 		return false
 	}
@@ -59,7 +60,9 @@ func AuthStudent(c *fiber.Ctx) (verified bool, sid string) {
 
 	claims := token.Claims.(*jwt.StandardClaims)
 
-	findErr := studentCollection.FindOne(context.TODO(), bson.M{"sid": claims.Issuer})
+	// Though student is not used, it's required to prevent findErr
+	var student models.Student
+	findErr := studentCollection.FindOne(context.TODO(), bson.M{"sid": claims.Issuer}).Decode(&student)
 	if findErr != nil {
 		return false, ""
 	}
@@ -90,7 +93,7 @@ func Enroll(c *fiber.Ctx) error {
 	}
 
 	// Check minimum enroll field requirements are met
-	if data["firstname"] == "" || data["lastname"] == "" || data["age"] == "" || data["gradelevel"] == "" || data["dob"] == "" || data["email"] == "" || data["province"] == "" || data["city"] == "" || data["address"] == "" || data["postal"] == "" {
+	if data["firstname"] == nil || data["lastname"] == nil || data["age"] == nil || data["gradelevel"] == nil || data["dob"] == nil || data["email"] == nil || data["province"] == nil || data["city"] == nil || data["address"] == nil || data["postal"] == nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -102,8 +105,8 @@ func Enroll(c *fiber.Ctx) error {
 	student.PersonalData.FirstName = data["firstname"].(string)
 	student.PersonalData.MiddleName = data["middlename"].(string)
 	student.PersonalData.LastName = data["lastname"].(string)
-	student.PersonalData.Age = data["age"].(int)
-	student.SchoolData.GradeLevel = data["gradelevel"].(int)
+	student.PersonalData.Age = data["age"].(float64)
+	student.SchoolData.GradeLevel = data["gradelevel"].(float64)
 	student.PersonalData.DOB = data["dob"].(string)
 	student.PersonalData.Email = data["email"].(string)
 	student.PersonalData.Province = data["province"].(string)
@@ -112,13 +115,13 @@ func Enroll(c *fiber.Ctx) error {
 	student.PersonalData.Postal = data["postal"].(string)
 	student.PersonalData.Contacts = []string{}
 
-	student.SchoolData.YOG = ((12 - student.SchoolData.GradeLevel) + time.Now().Year()) + 1
+	student.SchoolData.YOG = ((12 - int(student.SchoolData.GradeLevel)) + time.Now().Year()) + 1
 
 	var schoolEmail string = ""
 	offset := 0
 	for {
 		schoolEmail = student.GenerateSchoolEmail(offset, schoolEmail)
-		if student.EmailExists(schoolEmail) == true {
+		if !student.EmailExists(schoolEmail) {
 			break
 		}
 		offset++
@@ -130,19 +133,15 @@ func Enroll(c *fiber.Ctx) error {
 	student.AccountData.Attempts = 0
 
 	// Generate temporary password
-	tempPass := student.GeneratePassword(12, 1, 1, 1)
+	var tempPass string = student.GeneratePassword(12, 1, 1, 1)
 	student.AccountData.Password = student.HashPassword(tempPass)
 	student.AccountData.TempPassword = true
 
 	// Send student personal email temp password
-	smtpHost := "smpt.gmail.com"
-	smtpPort := "587"
+	message := []byte("Your temporary password is " + tempPass)
+	auth := smtp.PlainAuth("", systemEmail, systemPassword, "smtp.gmail.com")
 
-	message := []byte("Your temporary password is: " + tempPass)
-
-	auth := smtp.PlainAuth("", systemEmail, systemPassword, smtpHost)
-
-	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, systemEmail, []string{student.PersonalData.Email}, message)
+	err := smtp.SendMail("smtp.gmail.com:587", auth, systemEmail, []string{student.PersonalData.Email}, message)
 	if err != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -154,12 +153,21 @@ func Enroll(c *fiber.Ctx) error {
 
 	var sid string
 	for {
-		sid = GenerateID()
+		sid = GenerateID(6)
 		if ValidateID(sid) == true {
 			break
 		}
 	}
 	student.SchoolData.SID = sid
+
+	var pen string
+	for {
+		pen = GenerateID(9)
+		if ValidatePEN(pen) == true {
+			break
+		}
+	}
+	student.SchoolData.PEN = pen
 
 	student.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	student.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
@@ -205,7 +213,7 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	}
 
 	// Check minimum register teacher field requirements are met
-	if data["firstname"] == "" || data["lastname"] == "" || data["dob"] == "" || data["email"] == "" {
+	if data["firstname"] == nil || data["lastname"] == nil || data["dob"] == nil || data["email"] == nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -225,19 +233,15 @@ func RegisterTeacher(c *fiber.Ctx) error {
 
 	teacher.SchoolEmail = teacher.GenerateSchoolEmail()
 
-	tempPass := teacher.GeneratePassword(12, 1, 1, 1)
+	var tempPass string = teacher.GeneratePassword(12, 1, 1, 1)
 	teacher.Password = teacher.HashPassword(tempPass)
 	teacher.TempPassword = true
+
 	// Send teacher personal email temp password
+	message := []byte("Your temporary password is " + tempPass)
+	auth := smtp.PlainAuth("", systemEmail, systemPassword, "smtp.gmail.com")
 
-	smtpHost := "smpt.gmail.com"
-	smtpPort := "587"
-
-	message := []byte("Your temporary password is: " + tempPass)
-
-	auth := smtp.PlainAuth("", systemEmail, systemPassword, smtpHost)
-
-	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, systemEmail, []string{teacher.Email}, message)
+	err := smtp.SendMail("smtp.gmail.com:587", auth, systemEmail, []string{teacher.Email}, message)
 	if err != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -250,7 +254,7 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	var tid string
 	// For the unlikely event that an ID is already in use this will simply try again till it gets a id not in use
 	for {
-		tid = GenerateID()
+		tid = GenerateID(6)
 		isValid := ValidateID(tid)
 		if isValid == true {
 			break
@@ -280,7 +284,7 @@ func RegisterTeacher(c *fiber.Ctx) error {
 }
 
 func CreateAdmin(c *fiber.Ctx) error {
-	var data map[string]string
+	var data map[string]interface{}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
 	if err := c.BodyParser(&data); err != nil {
@@ -302,7 +306,7 @@ func CreateAdmin(c *fiber.Ctx) error {
 	}
 
 	// Check minimum register teacher field requirements are met
-	if data["firstname"] == "" || data["lastname"] == "" || data["dob"] == "" || data["email"] == "" {
+	if data["firstname"] == nil || data["lastname"] == nil || data["dob"] == nil || data["email"] == nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -311,25 +315,21 @@ func CreateAdmin(c *fiber.Ctx) error {
 	}
 
 	var admin models.Admin
-	admin.FirstName = data["firstname"]
-	admin.LastName = data["lastname"]
-	admin.Email = data["email"]
+	admin.FirstName = data["firstname"].(string)
+	admin.LastName = data["lastname"].(string)
+	admin.Email = data["email"].(string)
 
 	admin.SchoolEmail = admin.GenerateSchoolEmail()
 
 	tempPass := admin.GeneratePassword(12, 1, 1, 1)
 	admin.Password = admin.HashPassword(tempPass)
 	admin.TempPassword = true
+
 	// Send admin personal email temp password
+	message := []byte("Your temporary password is " + tempPass)
+	auth := smtp.PlainAuth("", systemEmail, systemPassword, "smtp.gmail.com")
 
-	smtpHost := "smpt.gmail.com"
-	smtpPort := "587"
-
-	message := []byte("Your temporary password is: " + tempPass)
-
-	auth := smtp.PlainAuth("", systemEmail, systemPassword, smtpHost)
-
-	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, systemEmail, []string{admin.Email}, message)
+	err := smtp.SendMail("smtp.gmail.com:587", auth, systemEmail, []string{admin.Email}, message)
 	if err != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -341,7 +341,7 @@ func CreateAdmin(c *fiber.Ctx) error {
 
 	var aid string
 	for {
-		aid = GenerateID()
+		aid = GenerateID(6)
 		if ValidateID(aid) == true {
 			break
 		}
@@ -392,7 +392,7 @@ func StudentLogin(c *fiber.Ctx) error {
 	}
 
 	var student models.Student
-	err := studentCollection.FindOne(ctx, bson.M{"sid": data["sid"]}).Decode(&student)
+	err := studentCollection.FindOne(ctx, bson.M{"schooldata.sid": data["sid"]}).Decode(&student)
 	defer cancel()
 
 	if err != nil {
@@ -651,7 +651,7 @@ func Student(c *fiber.Ctx) error {
 	claims := token.Claims.(*jwt.StandardClaims)
 
 	var student models.Student
-	findErr := studentCollection.FindOne(context.TODO(), bson.M{"sid": claims.Issuer}).Decode(&student)
+	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": claims.Issuer}).Decode(&student)
 	if findErr != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -660,16 +660,27 @@ func Student(c *fiber.Ctx) error {
 	}
 
 	var locker models.Locker
+	var hasLocker bool = false
 	if student.SchoolData.Locker != "" {
 		lockerCollection.FindOne(context.TODO(), bson.M{"ID": student.SchoolData.Locker}).Decode(&locker)
+		hasLocker = true
 	}
 
-	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
-		"success": true,
-		"message": "successfully logged into student",
-		"result":  student,
-		"locker":  locker,
-	})
+	if hasLocker {
+		return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+			"success": true,
+			"message": "successfully logged into student",
+			"result":  student,
+			"locker":  locker,
+		})
+	} else {
+		return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+			"success": true,
+			"message": "successfully logged into student",
+			"result":  student,
+			"locker":  nil, // Nil locker == no locker provided
+		})
+	}
 }
 
 func Teacher(c *fiber.Ctx) error {
@@ -751,7 +762,7 @@ func Logout(c *fiber.Ctx) error {
 }
 
 func CreateContact(c *fiber.Ctx) error {
-	var data map[string]string
+	var data map[string]interface{}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
 	if err := c.BodyParser(&data); err != nil {
@@ -773,7 +784,7 @@ func CreateContact(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["sid"] == "" || data["firstname"] == "" || data["lastname"] == "" || data["homephone"] == "" || data["email"] == "" || data["priority"] == "" || data["relation"] == "" {
+	if data["sid"] == nil || data["firstname"] == nil || data["lastname"] == nil || data["homephone"] == nil || data["email"] == nil || data["priority"] == nil || data["relation"] == nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -782,18 +793,18 @@ func CreateContact(c *fiber.Ctx) error {
 	}
 
 	var contact models.Contact
-	contact.FirstName = data["firstname"]
-	contact.MiddleName = data["middlename"]
-	contact.LastName = data["lastname"]
-	contact.HomePhone = data["homephone"]
-	contact.WorkPhone = data["workphone"]
-	contact.Email = data["email"]
-	contact.Province = data["province"]
-	contact.City = data["city"]
-	contact.Address = data["address"]
-	contact.Postal = data["postal"]
-	contact.Relation = data["relation"]
-	contact.Priotrity, _ = strconv.Atoi(data["priority"])
+	contact.FirstName = data["firstname"].(string)
+	contact.MiddleName = data["middlename"].(string)
+	contact.LastName = data["lastname"].(string)
+	contact.HomePhone = data["homephone"].(float64)
+	contact.WorkPhone = data["workphone"].(float64)
+	contact.Email = data["email"].(string)
+	contact.Province = data["province"].(string)
+	contact.City = data["city"].(string)
+	contact.Address = data["address"].(string)
+	contact.Postal = data["postal"].(string)
+	contact.Relation = data["relation"].(string)
+	contact.Priotrity, _ = data["priority"].(float64)
 
 	contact.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	contact.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))

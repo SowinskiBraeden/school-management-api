@@ -258,7 +258,7 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 	claims := token.Claims.(*jwt.StandardClaims)
 
 	var student models.Student
-	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": claims.Issuer}).Decode(&student)
+	findErr := studentCollection.FindOne(ctx, bson.M{"schooldata.sid": claims.Issuer}).Decode(&student)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -292,12 +292,23 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 		})
 	}
 
+	if student.UsedPassword(data["newpassword1"]) {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "Your new password cannot be the same as a previous password",
+		})
+	}
+
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
 			"accountdata.password":     student.HashPassword(data["newpassword1"]),
 			"accountdata.temppassword": false, // If it were a temp password, its not now
 			"updated_at":               update_time,
+		},
+		"$push": bson.M{
+			"accountdata.hashhistory": student.HashPassword(data["newpassword1"]),
 		},
 	}
 

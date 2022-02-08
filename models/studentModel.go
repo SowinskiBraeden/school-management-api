@@ -45,14 +45,24 @@ type Student struct {
 		Photo      string  `json:"photo"`
 	} `json:"schooldata"`
 	AccountData struct {
-		SchoolEmail     string `json:"schoolemail"`
-		Password        string `json:"-" validate:"min=10,max=32"`
-		AccountDisabled bool   `bson:"accountdisabled"`
-		TempPassword    bool   `json:"temppassword"`
-		Attempts        int    `json:"attempts"` // login attempts max 5
+		SchoolEmail     string   `json:"schoolemail"`
+		Password        string   `json:"-" validate:"min=10,max=32"`
+		AccountDisabled bool     `bson:"accountdisabled"`
+		TempPassword    bool     `json:"temppassword"`
+		Attempts        int      `json:"attempts"` // login attempts max 5
+		HashHistory     []string `json:"-"`        // List of old hashed passwords (not including auto generated passwords)
 	} `json:"accountdata"`
 	Created_at time.Time `json:"created_at"`
 	Updated_at time.Time `json:"updated_at"`
+}
+
+func (s *Student) UsedPassword(password string) bool {
+	for _, oldHash := range s.AccountData.HashHistory {
+		if oldHash == s.HashPassword(password) {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *Student) HashPassword(password string) string {

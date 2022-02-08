@@ -67,10 +67,9 @@ func UpdateStudentName(c *fiber.Ctx) error {
 	} else {
 		update = bson.M{
 			"$set": bson.M{
-				"personaldata.firstname":  data["firstname"],
-				"personaldata.middlename": data["middlename"],
-				"personaldata.lastname":   data["lastname"],
-				"updated_at":              update_time,
+				"personaldata.firstname": data["firstname"],
+				"personaldata.lastname":  data["lastname"],
+				"updated_at":             update_time,
 			},
 		}
 	}

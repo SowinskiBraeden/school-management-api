@@ -97,7 +97,7 @@ func UpdateStudentName(c *fiber.Ctx) error {
 }
 
 func UpdateStudentGradeLevel(c *fiber.Ctx) error {
-	var data map[string]string
+	var data map[string]interface{}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
 	if err := c.BodyParser(&data); err != nil {
@@ -119,7 +119,7 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["sid"] == "" || data["gradelevel"] == "" {
+	if data["sid"] == nil || data["gradelevel"] == nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -130,14 +130,14 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"schooldata.gradelevel": data["gradelevel"],
+			"schooldata.gradelevel": data["gradelevel"].(float64),
 			"updated_at":            update_time,
 		},
 	}
 
 	result, updateErr := studentCollection.UpdateOne(
 		ctx,
-		bson.M{"schooldata.sid": data["sid"]},
+		bson.M{"schooldata.sid": data["sid"].(string)},
 		update,
 	)
 	if updateErr != nil {

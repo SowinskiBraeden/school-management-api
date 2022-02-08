@@ -340,7 +340,7 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 		})
 	}
 
-	if student.PersonalData.Email == data["email"] {
+	if student.PersonalData.Email != data["email"] {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,

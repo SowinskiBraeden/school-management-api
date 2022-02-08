@@ -417,7 +417,7 @@ func UpdateStudentLocker(c *fiber.Ctx) error {
 	}
 
 	// Check id and locker are included
-	if data["sid"] == "" || data["lockerNumber"] == "" {
+	if data["sid"] == "" || data["lockernumber"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -439,8 +439,8 @@ func UpdateStudentLocker(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"schooldata.studentlocker": locker.ID,
-			"updated_at":               update_time,
+			"schooldata.locker": locker.ID,
+			"updated_at":        update_time,
 		},
 	}
 

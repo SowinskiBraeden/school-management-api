@@ -629,7 +629,7 @@ func UpdateStudentYOG(c *fiber.Ctx) error {
 	})
 }
 
-func UpdateStudentContacts(c *fiber.Ctx) error {
+func RemoveStudentContact(c *fiber.Ctx) error {
 	var data map[string]string
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
@@ -651,7 +651,81 @@ func UpdateStudentContacts(c *fiber.Ctx) error {
 		})
 	}
 
-	// Check id and locker are included
+	// Check id and contact id are included
+	if data["sid"] == "" || data["contactid"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	var contact models.Contact
+	err := contactCollection.FindOne(ctx, bson.M{"_id": data["contactid"]}).Decode(&contact)
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "contact not found",
+			"error":   err,
+		})
+	}
+
+	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	update := bson.M{
+		"$set": bson.M{
+			"updated_at": update_time,
+		},
+		"$pull": bson.M{
+			"personaldata.contacts": contact.ID,
+		},
+	}
+
+	result, updateErr := studentCollection.UpdateOne(
+		ctx,
+		bson.M{"schooldata.sid": data["sid"]},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the contact could not be added",
+			"error":   updateErr,
+		})
+	}
+	defer cancel()
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully added contact",
+		"result":  result,
+	})
+}
+
+func AddStudentContact(c *fiber.Ctx) error {
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	// Ensure Authenticated admin sent request
+	if !AuthAdmin(c) {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "Unauthorized: only an admin can perform this action",
+		})
+	}
+
+	// Check id and contact id are included
 	if data["sid"] == "" || data["contactid"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{

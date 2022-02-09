@@ -675,7 +675,7 @@ func Student(c *fiber.Ctx) error {
 	for i := range student.PersonalData.Contacts {
 		findErr := contactCollection.FindOne(context.TODO(), bson.M{"_id": student.PersonalData.Contacts[i]}).Decode(&contact)
 		if findErr != nil {
-			responceData["error"] = "Error: There was an error loading some contacts"
+			responceData["error"] = "Error! There was an error finding some contacts"
 		}
 		contacts = append(contacts, contact)
 	}

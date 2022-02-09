@@ -846,7 +846,7 @@ func CreateContact(c *fiber.Ctx) error {
 	})
 }
 
-func RemoveContact(c *fiber.Ctx) error {
+func DeleteContact(c *fiber.Ctx) error {
 	var data map[string]string
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 

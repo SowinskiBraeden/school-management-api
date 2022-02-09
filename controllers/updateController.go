@@ -453,7 +453,7 @@ func UpdateStudentLocker(c *fiber.Ctx) error {
 	}
 
 	var locker models.Locker
-	err := lockerCollection.FindOne(ctx, bson.M{"schooldata.sid": data["sid"]}).Decode(&locker)
+	err := lockerCollection.FindOne(ctx, bson.M{"lockernumber": data["lockernumber"]}).Decode(&locker)
 	if err != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

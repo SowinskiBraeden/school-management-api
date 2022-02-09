@@ -650,6 +650,8 @@ func Student(c *fiber.Ctx) error {
 
 	claims := token.Claims.(*jwt.StandardClaims)
 
+	var responceData map[string]interface{}
+
 	var student models.Student
 	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": claims.Issuer}).Decode(&student)
 	if findErr != nil {
@@ -659,28 +661,32 @@ func Student(c *fiber.Ctx) error {
 		})
 	}
 
+	responceData["student"] = student
+
 	var locker models.Locker
-	var hasLocker bool = false
 	if student.SchoolData.Locker != "" {
 		lockerCollection.FindOne(context.TODO(), bson.M{"ID": student.SchoolData.Locker}).Decode(&locker)
-		hasLocker = true
+		responceData["locker"] = locker
 	}
 
-	if hasLocker {
-		return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
-			"success": true,
-			"message": "successfully logged into student",
-			"result":  student,
-			"locker":  locker,
-		})
-	} else {
-		return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
-			"success": true,
-			"message": "successfully logged into student",
-			"result":  student,
-			"locker":  nil, // Nil locker == no locker provided
-		})
+	var contacts []models.Contact
+	var contact models.Contact
+
+	for i := range student.PersonalData.Contacts {
+		findErr := contactCollection.FindOne(context.TODO(), bson.M{"_id": student.PersonalData.Contacts[i]}).Decode(&contact)
+		if findErr != nil {
+			responceData["error"] = "Error: There was an error loading some contacts"
+		}
+		contacts = append(contacts, contact)
 	}
+	if len(contacts) > 0 {
+		responceData["contacts"] = contacts
+	}
+
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"success":  true,
+		"responce": responceData,
+	})
 }
 
 func Teacher(c *fiber.Ctx) error {

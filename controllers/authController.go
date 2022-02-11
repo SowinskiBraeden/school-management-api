@@ -636,24 +636,51 @@ func AdminLogin(c *fiber.Ctx) error {
 }
 
 func Student(c *fiber.Ctx) error {
-	cookie := c.Cookies("jwt")
+	var sid string
+	if AuthAdmin(c) {
+		var data map[string]string
 
-	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(SecretKey), nil
-	})
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"success": false,
-			"message": "not authorized",
+		if err := c.BodyParser(&data); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"success": false,
+				"message": "Failed to parse body",
+				"error":   err,
+			})
+		}
+
+		// Check required fields are included
+		if data["sid"] == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"success": false,
+				"message": "missing required fields",
+			})
+		}
+		sid = data["sid"]
+	} else {
+		cookie := c.Cookies("jwt")
+
+		token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+			return []byte(SecretKey), nil
 		})
+		// This returns not authorized for both admin and student
+		if err != nil {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"success": false,
+				"message": "not authorized",
+			})
+		}
+
+		claims := token.Claims.(*jwt.StandardClaims)
+		sid = claims.Issuer
 	}
 
-	claims := token.Claims.(*jwt.StandardClaims)
-
-	var responceData map[string]interface{}
+	responceData := make(map[string]interface{})
+	responceData["student"] = nil
+	responceData["locker"] = nil
+	responceData["contacts"] = nil
 
 	var student models.Student
-	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": claims.Issuer}).Decode(&student)
+	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": sid}).Decode(&student)
 	if findErr != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,

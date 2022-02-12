@@ -15,6 +15,7 @@ import (
 )
 
 var lockerCollection *mongo.Collection = database.OpenCollection(database.Client, "lockers")
+var imageCollection *mongo.Collection = database.OpenCollection(database.Client, "images")
 
 func UpdateStudentName(c *fiber.Ctx) error {
 	var data map[string]string
@@ -778,9 +779,56 @@ func AddStudentContact(c *fiber.Ctx) error {
 }
 
 func UpdateStudentPhoto(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
-		"success": nil,
-		"message": "not implimented",
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	//Ensure Authenticated admin sent request
+	if !AuthAdmin(c) {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "Unauthorized: only an admin can perform this action",
+		})
+	}
+
+	sid := c.FormValue("sid")
+
+	if sid == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	// get image
+
+	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	update := bson.M{
+		"$set": bson.M{
+			"schooldata.Photo": nil,
+			"updated_at":       update_time,
+		},
+	}
+
+	result, updateErr := studentCollection.UpdateOne(
+		ctx,
+		bson.M{"schooldata.sid": sid},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the student could not be updated",
+			"error":   updateErr,
+		})
+	}
+	defer cancel()
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully uploaded image",
+		"result":  result,
 	})
 }
 

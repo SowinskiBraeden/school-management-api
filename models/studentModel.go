@@ -40,9 +40,9 @@ type Student struct {
 		SID        string  `json:"sid"` // Student ID
 		PEN        string  `json:"ped"` // Personal Education Number
 		Homeroom   string  `json:"homeroom"`
-		Locker     string  `json:"-"`   // Locker ID
-		YOG        int     `json:"yog"` // Year of Graduation
-		Photo      string  `json:"photo"`
+		Locker     string  `json:"-"`     // Locker ID
+		YOG        int     `json:"yog"`   // Year of Graduation
+		PhotoName  string  `json:"photo"` // name of photo in db
 	} `json:"schooldata"`
 	AccountData struct {
 		SchoolEmail     string   `json:"schoolemail"`

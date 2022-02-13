@@ -11,6 +11,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -114,8 +115,18 @@ func Enroll(c *fiber.Ctx) error {
 	student.PersonalData.Address = data["address"].(string)
 	student.PersonalData.Postal = data["postal"].(string)
 	student.PersonalData.Contacts = []string{}
-
 	student.SchoolData.YOG = ((12 - int(student.SchoolData.GradeLevel)) + time.Now().Year()) + 1
+
+	var photo models.Photo
+	photo.Name = uuid.New().String()
+	photo.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	photo.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	photo.ID = primitive.NewObjectID()
+
+	defaultImage, _ := os.ReadFile("./database/defaultImage.txt")
+	photo.Base64 = string(defaultImage)
+
+	student.SchoolData.PhotoName = photo.Name
 
 	var schoolEmail string = ""
 	offset := 0
@@ -179,6 +190,16 @@ func Enroll(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "the student could not be inserted",
+			"error":   insertErr,
+		})
+	}
+
+	_, insertErr = imageCollection.InsertOne(ctx, photo)
+	if insertErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the student default photo could not be inserted",
 			"error":   insertErr,
 		})
 	}
@@ -678,6 +699,7 @@ func Student(c *fiber.Ctx) error {
 	responceData["student"] = nil
 	responceData["locker"] = nil
 	responceData["contacts"] = nil
+	responceData["photo"] = nil
 
 	var student models.Student
 	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": sid}).Decode(&student)
@@ -698,7 +720,6 @@ func Student(c *fiber.Ctx) error {
 
 	var contacts []models.Contact
 	var contact models.Contact
-
 	for i := range student.PersonalData.Contacts {
 		findErr := contactCollection.FindOne(context.TODO(), bson.M{"_id": student.PersonalData.Contacts[i]}).Decode(&contact)
 		if findErr != nil {
@@ -708,6 +729,12 @@ func Student(c *fiber.Ctx) error {
 	}
 	if len(contacts) > 0 {
 		responceData["contacts"] = contacts
+	}
+
+	var photo models.Photo
+	findErr = imageCollection.FindOne(context.TODO(), bson.M{"_id": student.SchoolData.PhotoName}).Decode(&photo)
+	if findErr != nil {
+		responceData["error"] = "Error! There was an error finding the student photo"
 	}
 
 	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{

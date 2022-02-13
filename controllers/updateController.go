@@ -2,19 +2,25 @@ package controllers
 
 import (
 	"context"
+	"fmt"
+	"io/ioutil"
 	"net/smtp"
+	"os"
 	"school-management/database"
 	"school-management/models"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var lockerCollection *mongo.Collection = database.OpenCollection(database.Client, "lockers")
+var imageCollection *mongo.Collection = database.OpenCollection(database.Client, "images")
 
 func UpdateStudentName(c *fiber.Ctx) error {
 	var data map[string]string
@@ -778,9 +784,138 @@ func AddStudentContact(c *fiber.Ctx) error {
 }
 
 func UpdateStudentPhoto(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
-		"success": nil,
-		"message": "not implimented",
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	//Ensure Authenticated admin sent request
+	if !AuthAdmin(c) {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "Unauthorized: only an admin can perform this action",
+		})
+	}
+
+	sid := c.FormValue("sid")
+	if sid == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	// Get student
+	var student models.Student
+	findErr := studentCollection.FindOne(context.TODO(), bson.M{"sid": sid}).Decode(&student)
+	if findErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the student could not be found",
+			"error":   findErr,
+		})
+	}
+
+	// Collect image
+	file, err := c.FormFile("image")
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the image could not be retrieved",
+			"error":   err,
+		})
+	}
+
+	// Get student photo
+	var photo models.Photo
+	findErr = imageCollection.FindOne(context.TODO(), bson.M{"name": student.SchoolData.PhotoName}).Decode(&student)
+	if findErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the student image could not be found",
+			"error":   findErr,
+		})
+	}
+
+	// Save image to local
+	uniqueId := uuid.New()
+	filename := strings.Replace(uniqueId.String(), "-", "", -1)
+	fileExt := strings.Split(file.Filename, ".")[1]
+	image := fmt.Sprintf("%s.%s", filename, fileExt)
+	err = c.SaveFile(file, fmt.Sprintf("./database/images/%s", image))
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the image could not be saved",
+			"error":   err,
+		})
+	}
+
+	// Get local image as base64 data
+	imageData, err := ioutil.ReadFile(fmt.Sprintf("./database/images/%s", image))
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the image could not read",
+			"error":   err,
+		})
+	}
+	// Remove local image
+	os.Remove(fmt.Sprintf("./database/images/%s", image))
+
+	// Update image name and base64 data
+	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	update := bson.M{
+		"$set": bson.M{
+			"name":       filename,
+			"base64":     imageData,
+			"updated_at": update_time,
+		},
+	}
+	result, updateErr := imageCollection.UpdateOne(
+		ctx,
+		bson.M{"_id": photo.ID},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the student could not be updated",
+			"error":   updateErr,
+		})
+	}
+
+	// Update student photo name reference
+	update = bson.M{
+		"$set": bson.M{
+			"SchoolData.PhotoName": filename,
+			"updated_at":           update_time,
+		},
+	}
+	result, updateErr = studentCollection.UpdateOne(
+		ctx,
+		bson.M{"schooldata.sid": sid},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the student could not be updated",
+			"error":   updateErr,
+		})
+	}
+	defer cancel()
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully updated student photo",
+		"result":  result,
 	})
 }
 

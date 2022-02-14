@@ -33,7 +33,6 @@ type Student struct {
 		Province   string   `json:"province"`
 		Postal     string   `json:"postal"`
 		DOB        string   `json:"dob" validate:"required"`
-		Photo      string   `json:"photo"`
 		Contacts   []string `json:"contacts"` // List of contact ID's rather than contact object
 	} `json:"personaldata"`
 	SchoolData struct {

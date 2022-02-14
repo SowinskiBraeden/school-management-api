@@ -1,7 +1,7 @@
 package main
 
 import (
-	"school-management/routes"
+	"github.com/SowinskiBraeden/school-management-api/routes"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"

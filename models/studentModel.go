@@ -3,11 +3,12 @@ package models
 import (
 	"context"
 	"math/rand"
-	"school-management/database"
 	"strconv"
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/SowinskiBraeden/school-management-api/database"
 
 	"golang.org/x/crypto/bcrypt"
 

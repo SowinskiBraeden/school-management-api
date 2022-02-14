@@ -4,9 +4,10 @@ import (
 	"context"
 	"crypto/rand"
 	"io"
-	"school-management/database"
-	"school-management/models"
 	"time"
+
+	"github.com/SowinskiBraeden/school-management-api/database"
+	"github.com/SowinskiBraeden/school-management-api/models"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

@@ -3,9 +3,10 @@ package controllers
 import (
 	"context"
 	"os"
-	"school-management/database"
-	"school-management/models"
 	"time"
+
+	"github.com/SowinskiBraeden/school-management-api/database"
+	"github.com/SowinskiBraeden/school-management-api/models"
 
 	"net/smtp"
 

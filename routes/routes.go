@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"school-management/controllers"
+	"github.com/SowinskiBraeden/school-management-api/controllers"
 
 	"github.com/gofiber/fiber/v2"
 )

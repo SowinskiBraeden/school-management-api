@@ -7,10 +7,11 @@ import (
 	"io/ioutil"
 	"net/smtp"
 	"os"
-	"school-management/database"
-	"school-management/models"
 	"strings"
 	"time"
+
+	"github.com/SowinskiBraeden/school-management-api/database"
+	"github.com/SowinskiBraeden/school-management-api/models"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"

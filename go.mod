@@ -1,4 +1,4 @@
-module school-management-api
+module github.com/SowinskiBraeden/school-management-api
 
 go 1.16
 

@@ -1031,6 +1031,68 @@ func RemoveStudentsDisabled(c *fiber.Ctx) error {
 	})
 }
 
+func RemoveTeachersDisabled(c *fiber.Ctx) error {
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	// Ensure Authorized admin sent request
+	if !AuthAdmin(c) {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "Unauthorized: only an admin can perform this action",
+		})
+	}
+
+	// Check required fields are included
+	if data["tid"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	update := bson.M{
+		"$set": bson.M{
+			"accountdata.accountdisabled": false,
+			"accountdata.attempts":        0,
+			"updated_at":                  update_time,
+		},
+	}
+
+	result, updateErr := teacherCollection.UpdateOne(
+		ctx,
+		bson.M{"schooldata.tid": data["tid"]},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the student account could not be re-enabled",
+			"error":   updateErr,
+		})
+	}
+	defer cancel()
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully re-enabled teacher account",
+		"result":  result,
+	})
+}
+
 /*
 	Far later on this function is going to be completely automated.
 	Instead of an admin sending a request to update the homeroom of

@@ -138,6 +138,7 @@ func Enroll(c *fiber.Ctx) error {
 		offset++
 	}
 	student.AccountData.SchoolEmail = schoolEmail
+	student.AccountData.HashHistory = []string{}
 
 	// Disable login block
 	student.AccountData.AccountDisabled = false
@@ -732,10 +733,11 @@ func Student(c *fiber.Ctx) error {
 	}
 
 	var photo models.Photo
-	findErr = imageCollection.FindOne(context.TODO(), bson.M{"_id": student.SchoolData.PhotoName}).Decode(&photo)
+	findErr = imageCollection.FindOne(context.TODO(), bson.M{"name": student.SchoolData.PhotoName}).Decode(&photo)
 	if findErr != nil {
 		responceData["error"] = "Error! There was an error finding the student photo"
 	}
+	responceData["photo"] = photo
 
 	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
 		"success":  true,

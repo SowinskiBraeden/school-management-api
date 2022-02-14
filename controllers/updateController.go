@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"net/smtp"
@@ -21,6 +22,10 @@ import (
 
 var lockerCollection *mongo.Collection = database.OpenCollection(database.Client, "lockers")
 var imageCollection *mongo.Collection = database.OpenCollection(database.Client, "images")
+
+func toBase64(b []byte) string {
+	return base64.StdEncoding.EncodeToString(b)
+}
 
 func UpdateStudentName(c *fiber.Ctx) error {
 	var data map[string]string
@@ -274,7 +279,7 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["currentpassword"] == "" || data["newpassword1"] == "" || data["newpassword2"] == "" {
+	if data["password"] == "" || data["newpassword1"] == "" || data["newpassword2"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -282,7 +287,7 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 		})
 	}
 
-	if !student.ComparePasswords(data["currentpassword"]) {
+	if !student.ComparePasswords(data["password"]) {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -806,7 +811,7 @@ func UpdateStudentPhoto(c *fiber.Ctx) error {
 
 	// Get student
 	var student models.Student
-	findErr := studentCollection.FindOne(context.TODO(), bson.M{"sid": sid}).Decode(&student)
+	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": sid}).Decode(&student)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -829,7 +834,7 @@ func UpdateStudentPhoto(c *fiber.Ctx) error {
 
 	// Get student photo
 	var photo models.Photo
-	findErr = imageCollection.FindOne(context.TODO(), bson.M{"name": student.SchoolData.PhotoName}).Decode(&student)
+	findErr = imageCollection.FindOne(context.TODO(), bson.M{"name": student.SchoolData.PhotoName}).Decode(&photo)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -854,25 +859,24 @@ func UpdateStudentPhoto(c *fiber.Ctx) error {
 		})
 	}
 
-	// Get local image as base64 data
-	imageData, err := ioutil.ReadFile(fmt.Sprintf("./database/images/%s", image))
+	// Read the entire file into a byte slice
+	bytes, err := ioutil.ReadFile(fmt.Sprintf("./database/images/%s", image))
 	if err != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
-			"message": "the image could not read",
+			"message": "the image could not be read",
 			"error":   err,
 		})
 	}
-	// Remove local image
-	os.Remove(fmt.Sprintf("./database/images/%s", image))
+
+	var base64Encoding string = toBase64(bytes)
 
 	// Update image name and base64 data
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"name":       filename,
-			"base64":     imageData,
+			"base64":     base64Encoding,
 			"updated_at": update_time,
 		},
 	}
@@ -885,32 +889,14 @@ func UpdateStudentPhoto(c *fiber.Ctx) error {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
-			"message": "the student could not be updated",
-			"error":   updateErr,
-		})
-	}
-
-	// Update student photo name reference
-	update = bson.M{
-		"$set": bson.M{
-			"SchoolData.PhotoName": filename,
-			"updated_at":           update_time,
-		},
-	}
-	result, updateErr = studentCollection.UpdateOne(
-		ctx,
-		bson.M{"schooldata.sid": sid},
-		update,
-	)
-	if updateErr != nil {
-		cancel()
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "the student could not be updated",
+			"message": "the image could not be updated",
 			"error":   updateErr,
 		})
 	}
 	defer cancel()
+
+	// Remove local image
+	os.Remove(fmt.Sprintf("./database/images/%s", image))
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,

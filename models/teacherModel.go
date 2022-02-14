@@ -55,6 +55,15 @@ type Teacher struct {
 	Updated_at time.Time `json:"updated_at"`
 }
 
+func (t *Teacher) UsedPassword(password string) bool {
+	for _, oldHash := range t.AccountData.HashHistory {
+		if oldHash == t.HashPassword(password) {
+			return true
+		}
+	}
+	return false
+}
+
 func (t *Teacher) HashPassword(password string) string {
 	hash, _ := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(hash)

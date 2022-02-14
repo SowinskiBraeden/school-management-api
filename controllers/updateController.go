@@ -1104,9 +1104,107 @@ func UpdateTeacherHomeroom(c *fiber.Ctx) error {
 }
 
 func UpdateTeacherPassword(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
-		"success": nil,
-		"message": "not implimented",
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	cookie := c.Cookies("jwt")
+
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(SecretKey), nil
+	})
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "not authorized",
+		})
+	}
+
+	claims := token.Claims.(*jwt.StandardClaims)
+
+	var teacher models.Teacher
+	findErr := studentCollection.FindOne(ctx, bson.M{"schooldata.tid": claims.Issuer}).Decode(&teacher)
+	if findErr != nil {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "teacher not found",
+		})
+	}
+
+	// Check required fields are included
+	if data["password"] == "" || data["newpassword1"] == "" || data["newpassword2"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	if !teacher.ComparePasswords(data["password"]) {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "Your current password is incorrect",
+		})
+	}
+
+	if data["newpassword1"] != data["newpassword2"] {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "Your new password must match",
+		})
+	}
+
+	if teacher.UsedPassword(data["newpassword1"]) {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "Your new password cannot be the same as a previous password",
+		})
+	}
+
+	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	update := bson.M{
+		"$set": bson.M{
+			"accountdata.password":     teacher.HashPassword(data["newpassword1"]),
+			"accountdata.temppassword": false, // If it were a temp password, its not now
+			"updated_at":               update_time,
+		},
+		"$push": bson.M{
+			"accountdata.hashhistory": teacher.HashPassword(data["newpassword1"]),
+		},
+	}
+
+	result, updateErr := teacherCollection.UpdateOne(
+		ctx,
+		bson.M{"schooldata.tid": claims.Issuer},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the teacher password could not be updated",
+			"error":   updateErr,
+		})
+	}
+	defer cancel()
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully updated teacher password",
+		"result":  result,
 	})
 }
 

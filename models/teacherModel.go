@@ -1,12 +1,17 @@
 package models
 
 import (
+	"context"
 	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
 
+	"github.com/SowinskiBraeden/school-management-api/database"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,25 +23,36 @@ var (
 	allCharSet     = lowerCharSet + upperCharSet + specialCharSet + numberSet
 )
 
+var teacherCollection *mongo.Collection = database.OpenCollection(database.Client, "teachers")
+
 type Teacher struct {
 	ID           primitive.ObjectID `bson:"_id"`
-	FirstName    string             `json:"firstname" validate:"required"`
-	MiddleName   string             `json:"middlename"`
-	LastName     string             `json:"lastname" validate:"required"`
-	Email        string             `json:"email" validate:"required"`
-	SchoolEmail  string             `json:"schoolemail"`
-	Password     string             `json:"-" validate:"min=10,max=32"`
-	TempPassword bool               `json:"temppassword"`
-	TID          string             `json:"tid"` // Teacher ID
-	Homeroom     string             `json:"homeroom"`
-	Address      string             `json:"address"`
-	City         string             `json:"city"`
-	Province     string             `json:"province"`
-	Postal       string             `json:"postal"`
-	DOB          string             `json:"dob" validate:"required"`
-	Photo        string             `json:"string"`
-	Created_at   time.Time          `json:"created_at"`
-	Updated_at   time.Time          `json:"updated_at"`
+	PersonalData struct {
+		FirstName  string `json:"firstname" validate:"required"`
+		MiddleName string `json:"middlename"`
+		LastName   string `json:"lastname" validate:"required"`
+		Email      string `json:"email" validate:"required"`
+		Address    string `json:"address"`
+		City       string `json:"city"`
+		Province   string `json:"province"`
+		Postal     string `json:"postal"`
+		DOB        string `json:"dob" validate:"required"`
+	} `json:"personaldata"`
+	SchoolData struct {
+		TID       string `json:"tid"` // Teacher ID
+		Homeroom  string `json:"homeroom"`
+		PhotoName string `json:"photoname"` // name of photo in db
+	} `json:"schooldata"`
+	AccountData struct {
+		SchoolEmail     string   `json:"schoolemail"`
+		Password        string   `json:"-" validate:"min=10,max=32"`
+		AccountDisabled bool     `bson:"accountdisabled"`
+		TempPassword    bool     `json:"temppassword"`
+		Attempts        int      `json:"attempts"` // login attempts max 5
+		HashHistory     []string `json:"-"`        // List of old hashed passwords (not including auto generated passwords)
+	} `json:"accountdata"`
+	Created_at time.Time `json:"created_at"`
+	Updated_at time.Time `json:"updated_at"`
 }
 
 func (t *Teacher) HashPassword(password string) string {
@@ -44,13 +60,31 @@ func (t *Teacher) HashPassword(password string) string {
 	return string(hash)
 }
 
-func (t *Teacher) GenerateSchoolEmail() string {
-	var email string = strings.ToLower(t.LastName) + "_" + strings.ToLower(string(t.FirstName[0])) + "@surreyschools.ca"
+func (t *Teacher) EmailExists(email string) bool {
+	var teacher Teacher
+	findErr := teacherCollection.FindOne(context.TODO(), bson.M{"accountdata.schoolemail": email}).Decode(&teacher)
+	if findErr != nil {
+		return false
+	}
+	return true
+}
+
+func (t *Teacher) GenerateSchoolEmail(offset int, lastEmail string) string {
+	var email string = strings.ToLower(t.PersonalData.LastName) + "_" + strings.ToLower(string(t.PersonalData.FirstName[0])) + "@surreyschools.ca"
+	if offset > 0 && offset < len([]rune(t.PersonalData.FirstName))-1 {
+		email = lastEmail[:strings.Index(lastEmail, "_")+offset+1] + strings.ToLower(string(t.PersonalData.FirstName[offset])) + "@surreyschools.ca"
+	}
+	if offset == len([]rune(t.PersonalData.FirstName))-1 {
+		email = strings.ToLower(t.PersonalData.LastName) + "_" + strings.ToLower(t.PersonalData.FirstName) + "@surreyschools.ca"
+	}
+	if offset > len([]rune(t.PersonalData.FirstName))-1 {
+		email = strings.ToLower(t.PersonalData.LastName) + "_" + strings.ToLower(t.PersonalData.FirstName) + strconv.Itoa(offset-len([]rune(t.PersonalData.FirstName))) + "@surreyschools.ca"
+	}
 	return email
 }
 
 func (t *Teacher) ComparePasswords(password string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(t.Password), []byte(password))
+	err := bcrypt.CompareHashAndPassword([]byte(t.AccountData.Password), []byte(password))
 	if err != nil {
 		return false
 	}

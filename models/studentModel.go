@@ -85,10 +85,10 @@ func (s *Student) GenerateSchoolEmail(offset int, lastEmail string) string {
 		email = lastEmail[:offset] + strings.ToLower(string(s.PersonalData.FirstName[offset])) + lastEmail[offset:]
 	}
 	if offset == len([]rune(s.PersonalData.FirstName))-1 {
-		email = strings.ToLower(s.PersonalData.FirstName) + "." + strings.ToLower(s.PersonalData.LastName)
+		email = strings.ToLower(s.PersonalData.FirstName) + "." + strings.ToLower(s.PersonalData.LastName) + "@surreyschools.ca"
 	}
 	if offset > len([]rune(s.PersonalData.FirstName))-1 {
-		email = strings.ToLower(s.PersonalData.FirstName) + "." + strings.ToLower(s.PersonalData.LastName) + strconv.Itoa(offset-len([]rune(s.PersonalData.FirstName)))
+		email = strings.ToLower(s.PersonalData.FirstName) + "." + strings.ToLower(s.PersonalData.LastName) + strconv.Itoa(offset-len([]rune(s.PersonalData.FirstName))) + "@surreyschools.ca"
 	}
 	return email
 }

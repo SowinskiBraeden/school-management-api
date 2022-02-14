@@ -1083,7 +1083,7 @@ func UpdateTeacherHomeroom(c *fiber.Ctx) error {
 
 	result, updateErr := teacherCollection.UpdateOne(
 		ctx,
-		bson.M{"tid": data["tid"]},
+		bson.M{"schooldata.tid": data["tid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -1111,9 +1111,88 @@ func UpdateTeacherPassword(c *fiber.Ctx) error {
 }
 
 func ResetTeacherPassword(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
-		"success": nil,
-		"message": "not implimented",
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	// Check required fields are included (email must be personal email)
+	if data["tid"] == "" || data["email"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	var teacher models.Teacher
+	findErr := teacherCollection.FindOne(context.TODO(), bson.M{"schooldata.tid": data["tid"]}).Decode(&teacher)
+	if findErr != nil {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "teacher not found",
+		})
+	}
+
+	if teacher.PersonalData.Email != data["email"] {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "Your personal email is incorrect",
+		})
+	}
+
+	tempPass := teacher.GeneratePassword(12, 1, 1, 1)
+	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	update := bson.M{
+		"$set": bson.M{
+			"accountdata.password":     teacher.HashPassword(tempPass),
+			"accountdata.temppassword": true,
+			"updated_at":               update_time,
+		},
+	}
+
+	result, updateErr := studentCollection.UpdateOne(
+		ctx,
+		bson.M{"schooldata.tid": data["tid"]},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the teacher password could not be updated",
+			"error":   updateErr,
+		})
+	}
+	defer cancel()
+
+	// Send student personal email temp password
+	message := []byte("Your temporary password is " + tempPass)
+	auth := smtp.PlainAuth("", systemEmail, systemPassword, "smtp.gmail.com")
+
+	err := smtp.SendMail("smtp.gmail.com:587", auth, systemEmail, []string{teacher.PersonalData.Email}, message)
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Could not send password to teachers email",
+			"error":   err,
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully updated teacher password",
+		"result":  result,
 	})
 }
 
@@ -1151,17 +1230,17 @@ func UpdateTeacherAddress(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"address":    data["address"],
-			"city":       data["city"],
-			"province":   data["province"],
-			"postal":     data["postal"],
-			"updated_at": update_time,
+			"personaldata.address":  data["address"],
+			"personaldata.city":     data["city"],
+			"personaldata.province": data["province"],
+			"personaldata.postal":   data["postal"],
+			"updated_at":            update_time,
 		},
 	}
 
 	result, updateErr := teacherCollection.UpdateOne(
 		ctx,
-		bson.M{"tid": data["tid"]},
+		bson.M{"schooldata.tid": data["tid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -1222,14 +1301,14 @@ func UpdateTeacherEmail(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"email":      data["email"],
-			"updated_at": update_time,
+			"personaldata.email": data["email"],
+			"updated_at":         update_time,
 		},
 	}
 
 	result, updateErr := teacherCollection.UpdateOne(
 		ctx,
-		bson.M{"tid": data["tid"]},
+		bson.M{"schooldata.tid": data["tid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -1292,10 +1371,10 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"firstname":  data["firstname"],
-			"middlename": data["middlename"],
-			"lastname":   data["lastname"],
-			"updated_at": update_time,
+			"personaldata.firstname":  data["firstname"],
+			"personaldata.middlename": data["middlename"],
+			"personaldata.lastname":   data["lastname"],
+			"updated_at":              update_time,
 		},
 	}
 

@@ -245,26 +245,51 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	}
 
 	var teacher models.Teacher
-	teacher.FirstName = data["firstname"].(string)
-	teacher.MiddleName = data["middlename"].(string)
-	teacher.LastName = data["lastname"].(string)
-	teacher.Email = data["email"].(string)
-	teacher.Province = data["province"].(string)
-	teacher.City = data["city"].(string)
-	teacher.Postal = data["postal"].(string)
-	teacher.DOB = data["postal"].(string)
+	teacher.PersonalData.FirstName = data["firstname"].(string)
+	teacher.PersonalData.MiddleName = data["middlename"].(string)
+	teacher.PersonalData.LastName = data["lastname"].(string)
+	teacher.PersonalData.Email = data["email"].(string)
+	teacher.PersonalData.Province = data["province"].(string)
+	teacher.PersonalData.City = data["city"].(string)
+	teacher.PersonalData.Postal = data["postal"].(string)
+	teacher.PersonalData.DOB = data["postal"].(string)
 
-	teacher.SchoolEmail = teacher.GenerateSchoolEmail()
+	var photo models.Photo
+	photo.Name = uuid.New().String()
+	photo.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	photo.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	photo.ID = primitive.NewObjectID()
+
+	defaultImage, _ := os.ReadFile("./database/defaultImage.txt")
+	photo.Base64 = string(defaultImage)
+
+	teacher.SchoolData.PhotoName = photo.Name
+
+	var schoolEmail string = ""
+	offset := 0
+	for {
+		schoolEmail = teacher.GenerateSchoolEmail(offset, schoolEmail)
+		if !teacher.EmailExists(schoolEmail) {
+			break
+		}
+		offset++
+	}
+	teacher.AccountData.SchoolEmail = schoolEmail
+	teacher.AccountData.HashHistory = []string{}
+
+	// Disable login block
+	teacher.AccountData.AccountDisabled = false
+	teacher.AccountData.Attempts = 0
 
 	var tempPass string = teacher.GeneratePassword(12, 1, 1, 1)
-	teacher.Password = teacher.HashPassword(tempPass)
-	teacher.TempPassword = true
+	teacher.AccountData.Password = teacher.HashPassword(tempPass)
+	teacher.AccountData.TempPassword = true
 
 	// Send teacher personal email temp password
 	message := []byte("Your temporary password is " + tempPass)
 	auth := smtp.PlainAuth("", systemEmail, systemPassword, "smtp.gmail.com")
 
-	err := smtp.SendMail("smtp.gmail.com:587", auth, systemEmail, []string{teacher.Email}, message)
+	err := smtp.SendMail("smtp.gmail.com:587", auth, systemEmail, []string{teacher.PersonalData.Email}, message)
 	if err != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -283,7 +308,7 @@ func RegisterTeacher(c *fiber.Ctx) error {
 			break
 		}
 	}
-	teacher.TID = tid
+	teacher.SchoolData.TID = tid
 
 	teacher.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	teacher.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
@@ -541,7 +566,7 @@ func TeacherLogin(c *fiber.Ctx) error {
 	}
 
 	var teacher models.Teacher
-	err := teacherCollection.FindOne(ctx, bson.M{"tid": data["tid"]}).Decode(&teacher)
+	err := teacherCollection.FindOne(ctx, bson.M{"schooldata.tid": data["tid"]}).Decode(&teacher)
 	defer cancel()
 
 	if err != nil {
@@ -563,7 +588,7 @@ func TeacherLogin(c *fiber.Ctx) error {
 	}
 
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer:    teacher.TID,
+		Issuer:    teacher.SchoolData.TID,
 		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), // 1 Day
 	})
 	token, err := claims.SignedString([]byte(SecretKey))
@@ -762,7 +787,7 @@ func Teacher(c *fiber.Ctx) error {
 	claims := token.Claims.(*jwt.StandardClaims)
 
 	var teacher models.Teacher
-	findErr := teacherCollection.FindOne(context.TODO(), bson.M{"tid": claims.Issuer}).Decode(&teacher)
+	findErr := teacherCollection.FindOne(context.TODO(), bson.M{"schooldata.tid": claims.Issuer}).Decode(&teacher)
 	if findErr != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,

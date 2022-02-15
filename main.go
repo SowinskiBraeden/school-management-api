@@ -1,7 +1,10 @@
 package main
 
 import (
+	"os"
+
 	"github.com/SowinskiBraeden/school-management-api/routes"
+	"github.com/joho/godotenv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -16,5 +19,7 @@ func main() {
 
 	routes.Setup(app)
 
-	app.Listen(":8000")
+	godotenv.Load(".env")
+	port := os.Getenv("port")
+	app.Listen(":" + port)
 }

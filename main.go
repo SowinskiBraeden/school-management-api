@@ -20,6 +20,6 @@ func main() {
 	routes.Setup(app)
 
 	godotenv.Load(".env")
-	port := os.Getenv("port")
+	port := os.Getenv("PORT")
 	app.Listen(":" + port)
 }

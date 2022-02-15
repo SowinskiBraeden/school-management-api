@@ -9,58 +9,61 @@ import (
 func Setup(app *fiber.App) {
 	// API Handling
 
+	var routerPrefix string = "/api/v1"
+
 	// Student Authentication Handler
-	app.Get("/api/student", controllers.Student)
-	app.Post("/api/student/enroll", controllers.Enroll)
-	app.Post("/api/student/login", controllers.StudentLogin)
+	app.Get(routerPrefix+"/student", controllers.Student)
+	app.Post(routerPrefix+"/student/enroll", controllers.Enroll)
+	app.Post(routerPrefix+"/student/login", controllers.StudentLogin)
 
 	// Update Student Handler
-	app.Post("/api/student/updateName", controllers.UpdateStudentName)
-	app.Post("/api/student/updateGradeLevel", controllers.UpdateStudentGradeLevel)
-	app.Post("/api/student/updateHomeroom", controllers.UpdateStudentHomeroom)
-	app.Post("/api/student/updateLocker", controllers.UpdateStudentLocker)
-	app.Post("/api/studnet/updateYOG", controllers.UpdateStudentYOG)
-	app.Post("/api/studnet/addContact", controllers.AddStudentContact)
-	app.Post("/api/student/removeContact", controllers.RemoveStudentContact)
-	app.Post("/api/student/updatePassword", controllers.UpdateStudentPassword)
-	app.Post("/api/student/resetPassword", controllers.ResetStudentPassword)
-	app.Post("/api/student/updateAddress", controllers.UpdateStudentAddress)
-	app.Post("/api/student/updatePhoto", controllers.UpdateStudentPhoto)
-	app.Post("/api/student/updateEmail", controllers.UpdateStudentEmail)
+	app.Post(routerPrefix+"/student/updateName", controllers.UpdateStudentName)
+	app.Post(routerPrefix+"/student/updateGradeLevel", controllers.UpdateStudentGradeLevel)
+	app.Post(routerPrefix+"/student/updateHomeroom", controllers.UpdateStudentHomeroom)
+	app.Post(routerPrefix+"/student/updateLocker", controllers.UpdateStudentLocker)
+	app.Post(routerPrefix+"/studnet/updateYOG", controllers.UpdateStudentYOG)
+	app.Post(routerPrefix+"/studnet/addContact", controllers.AddStudentContact)
+	app.Post(routerPrefix+"/student/removeContact", controllers.RemoveStudentContact)
+	app.Post(routerPrefix+"/student/updatePassword", controllers.UpdateStudentPassword)
+	app.Post(routerPrefix+"/student/resetPassword", controllers.ResetStudentPassword)
+	app.Post(routerPrefix+"/student/updateAddress", controllers.UpdateStudentAddress)
+	app.Post(routerPrefix+"/student/updatePhoto", controllers.UpdateStudentPhoto)
+	app.Post(routerPrefix+"/student/updateEmail", controllers.UpdateStudentEmail)
 
 	// Student Contact Handler
-	app.Post("/api/student/createContact", controllers.CreateContact)
-	app.Post("/api/student/contact/updateName", controllers.UpdateContactName)
-	app.Post("/api/student/contact/updateAddress", controllers.UpdateContactAddress)
-	app.Post("/api/student/contact/updateHomePhone", controllers.UpdateContactHomePhone)
-	app.Post("/api/student/contact/updateWorkPhone", controllers.UpdateContactWorkPhone)
-	app.Post("/api/student/contact/updateEmail", controllers.UpdateContactEmail)
-	app.Post("/api/student/contact/updatePriority", controllers.UpdateContactPriority)
-	app.Post("/api/student/contact/deleteContact", controllers.DeleteContact)
+	app.Post(routerPrefix+"/student/createContact", controllers.CreateContact)
+	app.Post(routerPrefix+"/student/contact/updateName", controllers.UpdateContactName)
+	app.Post(routerPrefix+"/student/contact/updateAddress", controllers.UpdateContactAddress)
+	app.Post(routerPrefix+"/student/contact/updateHomePhone", controllers.UpdateContactHomePhone)
+	app.Post(routerPrefix+"/student/contact/updateWorkPhone", controllers.UpdateContactWorkPhone)
+	app.Post(routerPrefix+"/student/contact/updateEmail", controllers.UpdateContactEmail)
+	app.Post(routerPrefix+"/student/contact/updatePriority", controllers.UpdateContactPriority)
+	app.Post(routerPrefix+"/student/contact/deleteContact", controllers.DeleteContact)
 
-	// Teacher Login Handling
-	app.Get("/api/teacher", controllers.Teacher)
-	app.Post("/api/teacher/register", controllers.RegisterTeacher)
-	app.Post("/api/teacher/login", controllers.TeacherLogin)
+	// Teacher Authentication Handler
+	app.Get(routerPrefix+"/teacher", controllers.Teacher)
+	app.Post(routerPrefix+"/teacher/register", controllers.RegisterTeacher)
+	app.Post(routerPrefix+"/teacher/login", controllers.TeacherLogin)
 
-	// Update Teacher Handler
-	app.Post("/api/teacher/updatePassword", controllers.UpdateTeacherPassword)
-	app.Post("/api/teacher/updateAddress", controllers.UpdateTeacherAddress)
-	app.Post("/api/teacher/updatePhoto", controllers.UpdateTeacherPhoto)
-	app.Post("/api/teacher/updateName", controllers.UpdateTeacherName)
-	app.Post("/api/teacher/updateHomeroom", controllers.UpdateTeacherHomeroom)
-	app.Post("/api/teacher/updateEmail", controllers.UpdateTeacherEmail)
-	app.Post("/api/teacher/resetPassword", controllers.ResetTeacherPassword)
+	// Teacher Update Handler
+	app.Post(routerPrefix+"/teacher/updatePassword", controllers.UpdateTeacherPassword)
+	app.Post(routerPrefix+"/teacher/updateAddress", controllers.UpdateTeacherAddress)
+	app.Post(routerPrefix+"/teacher/updatePhoto", controllers.UpdateTeacherPhoto)
+	app.Post(routerPrefix+"/teacher/updateName", controllers.UpdateTeacherName)
+	app.Post(routerPrefix+"/teacher/updateHomeroom", controllers.UpdateTeacherHomeroom)
+	app.Post(routerPrefix+"/teacher/updateEmail", controllers.UpdateTeacherEmail)
+	app.Post(routerPrefix+"/teacher/resetPassword", controllers.ResetTeacherPassword)
 
 	// General Routes
-	app.Post("/api/logout", controllers.Logout)
+	app.Post(routerPrefix+"/logout", controllers.Logout)
 
 	// Admin Login Handling
-	app.Get("/api/admin", controllers.Admin)
-	app.Post("/api/admin/create", controllers.CreateAdmin)
-	app.Post("/api/admin/login", controllers.AdminLogin)
+	app.Get(routerPrefix+"/admin", controllers.Admin)
+	app.Post(routerPrefix+"/admin/create", controllers.CreateAdmin)
+	app.Post(routerPrefix+"/admin/login", controllers.AdminLogin)
 
 	// General Command Handling
-	app.Post("/api/admin/updateLockerCombo", controllers.UpdateLockerCombo)
-	app.Post("/api/admin/renableStudent", controllers.RemoveStudentsDisabled)
+	app.Post(routerPrefix+"/admin/updateLockerCombo", controllers.UpdateLockerCombo)
+	app.Post(routerPrefix+"/admin/renableStudent", controllers.RemoveStudentsDisabled)
+	app.Post(routerPrefix+"/admin/renableTeacher", controllers.RemoveTeachersDisabled)
 }

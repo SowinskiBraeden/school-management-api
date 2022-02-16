@@ -1,4 +1,4 @@
-# School Management API [![GoLang](https://pkg.go.dev/badge/golang.org/x/example.svg)](https://go.dev/)
+# School Management API [![asdasd](https://pkg.go.dev/badge/golang.org/x/example.svg)](https://go.dev/)
 
 The backend API for a school management system accessible by staff and students.
 

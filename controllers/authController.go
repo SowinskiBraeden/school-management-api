@@ -23,7 +23,7 @@ var studentCollection *mongo.Collection = database.OpenCollection(database.Clien
 var contactCollection *mongo.Collection = database.OpenCollection(database.Client, "contacts")
 var adminCollection *mongo.Collection = database.OpenCollection(database.Client, "admins")
 
-const SecretKey = "secret"
+var SecretKey = os.Getenv("secret")
 
 var systemEmail string = os.Getenv("SYSTEM_EMAIL")
 var systemPassword string = os.Getenv("SYSTEM_PASSWORD")

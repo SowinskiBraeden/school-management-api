@@ -94,6 +94,6 @@ Distributed under the MIT License. See [`LICENSE`](LICENSE) for more information
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@BraedenSowinski](https://twitter.com/BraedenSowinski) - sowinskibraeden@gmail.com
+Braeden Sowinski - [@BraedenSowinski](https://twitter.com/BraedenSowinski) - sowinskibraeden@gmail.com
 
 Project Link: [https://github.com/SowinskiBraeden/school-management-api](https://github.com/SowinskiBraeden/school-management-api)

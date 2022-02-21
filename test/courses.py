@@ -5,7 +5,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl2": {
     "name": "class2",
@@ -13,7 +13,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl3": {
     "name": "class3",
@@ -21,7 +21,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl4": {
     "name": "class4",
@@ -29,7 +29,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl5": {
     "name": "class5",
@@ -37,7 +37,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl6": {
     "name": "class6",
@@ -45,7 +45,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl7": {
     "name": "class7",
@@ -53,7 +53,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl8": {
     "name": "class8",
@@ -61,7 +61,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl9": {
     "name": "class9",
@@ -69,7 +69,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl10": {
     "name": "class10",
@@ -77,7 +77,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl11": {
     "name": "class11",
@@ -85,7 +85,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl12": {
     "name": "class12",
@@ -93,7 +93,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl13": {
     "name": "class13",
@@ -101,7 +101,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl14": {
     "name": "class14",
@@ -109,7 +109,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl15": {
     "name": "class15",
@@ -117,7 +117,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl16": {
     "name": "class16",
@@ -125,7 +125,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl17": {
     "name": "class17",
@@ -133,7 +133,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl18": {
     "name": "class18",
@@ -141,7 +141,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl19": {
     "name": "class19",
@@ -149,7 +149,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl20": {
     "name": "class20",
@@ -157,7 +157,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl21": {
     "name": "class21",
@@ -165,7 +165,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl22": {
     "name": "class22",
@@ -173,7 +173,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl23": {
     "name": "class23",
@@ -181,7 +181,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   },
   "cl24": {
     "name": "class24",
@@ -189,7 +189,7 @@ courses = {
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexs": []
+    "studentindexes": []
   }
 }
 

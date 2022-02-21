@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 import random
+import names
+import math
+from prettytable import PrettyTable
 from courses import courses, activeCourses
 
 '''
@@ -34,16 +37,16 @@ schedule: {
 running example:
 running: {
   "semester1": {
-    "block1": {classCode:{"className":name,"remaining":number},classCode:{"className":name,"remaining":number}},
-    "block2": {classCode:{"className":name,"remaining":number},classCode:{"className":name,"remaining":number}},
-    "block3": {classCode:{"className":name,"remaining":number},classCode:{"className":name,"remaining":number}},
-    "block4": {classCode:{"className":name,"remaining":number},classCode:{"className":name,"remaining":number}}
+    "block1": {classCode:{"className":name,"students":[student Name]},classCode:{"className":name,"students":[student Name]}},
+    "block2": {classCode:{"className":name,"students":[student Name]},classCode:{"className":name,"students":[student Name]}},
+    "block3": {classCode:{"className":name,"students":[student Name]},classCode:{"className":name,"students":[student Name]}},
+    "block4": {classCode:{"className":name,"students":[student Name]},classCode:{"className":name,"students":[student Name]}}
   },
   "semester2": {
-    "block1": {classCode:{"className":name,"remaining":number},classCode:{"className":name,"remaining":number}},
-    "block2": {classCode:{"className":name,"remaining":number},classCode:{"className":name,"remaining":number}},
-    "block3": {classCode:{"className":name,"remaining":number},classCode:{"className":name,"remaining":number}},
-    "block4": {classCode:{"className":name,"remaining":number},classCode:{"className":name,"remaining":number}}
+    "block1": {classCode:{"className":name,"students":[student Name]},classCode:{"className":name,"students":[student Name]}},
+    "block2": {classCode:{"className":name,"students":[student Name]},classCode:{"className":name,"students":[student Name]}},
+    "block3": {classCode:{"className":name,"students":[student Name]},classCode:{"className":name,"students":[student Name]}},
+    "block4": {classCode:{"className":name,"students":[student Name]},classCode:{"className":name,"students":[student Name]}}
   ]
 }
 '''
@@ -57,15 +60,15 @@ running = []
 def generateMockStudents(n):
   for _ in range(n):
     newStudent = {
-      "name": "someName",
-      "requests": [],
+      "name": names.get_full_name(),
+      "requests": [], # list of class codes
       "schedule": {}
     }
     # Get list of random class choices with no repeats
     # 8 primary choices, 2 secondary choices
-    courseSelection = random.sample(range(0, len(courses), 10))
+    courseSelection = random.sample(range(0, len(courses)), 10)
     for courseNum in courseSelection:
-      newStudent["requests"] = courses[courseNum]["code"]
+      newStudent["requests"].append(list(courses)[courseNum])
     mockStudents.append(newStudent)
 
 
@@ -75,20 +78,51 @@ def generateSchedule():
     # Tally class request
     for request in student["requests"]:
       courses[request]["totalrequests"] += 1
-      courses[request]["studentindexes"].append(i)
-      # Add course to active list if enough requests
-      if courses[request]["totalRequests"] > minReq and courses[request] not in activeCourses: activeCourses.append(courses[request])
+      courses[request]["studentindexes"].append(mockStudents.index(student))
+      # Add course to active list if enough requests      
+      if courses[request]["totalrequests"] > minReq and courses[request]["code"] not in activeCourses: activeCourses[courses[request]["code"]] = courses[request]
+
+  # calculate # of times to run class
+  for i in range(len(activeCourses)):
+    classRunCount = math.floor(activeCourses[list(activeCourses)[i]]["totalrequests"] / classCap)
+    # If there is 18+ requests left, 1 more class could be run
+    if (activeCourses[list(activeCourses)[i]]["totalrequests"] % classCap) > minReq: classRunCount += 1
+    activeCourses[list(activeCourses)[i]]["classRunCount"] = classRunCount
 
   for student in mockStudents:
-    blockIndex = 0
-    semesterIndex = 0
-    for i in range(len(student["requests"])-2): # Subtract last 2 classes as they are alternatives
-      currentClass = student
-      if student["requests"][i] in activeCourses:
-        pass
-      elif student["requests"][i] not in activeCourses:
-        # Get first alternative
-        student["requests"][len(student["requests"])-2]
+    alternateOffset = len(student["requests"])-8
+    for i in range(len(student["requests"])-alternateOffset): # Subtract x classes as they are alternatives
+      currentCourse = student["requests"][i]
+      while True:
+        if currentCourse in activeCourses:
+          blockIndex = 1
+          semesterIndex = 1
+          while True:
+            block = f"block{blockIndex}"
+            semester = f"semester{semesterIndex}"
+            if currentCourse in running[semester][block]:
+              # Add student to class
+              if len(running[semester][block][currentCourse]["students"]) == classCap:
+                # TODO: Class is full, find next class or generate new class
+                break
+              else:
+                running[semester][block][currentCourse]["students"].append(student["name"])
+                student["schedule"][semester][block] = running[semester][block][currentCourse]["name"]
+            else:
+              if semesterIndex == 2 and blockIndex == 4:
+                # TODO: Class does not exist, create class in first available slot
+                break
+              elif blockIndex == 4: # 4th Block (final block)
+                blockIndex = 0
+                semesterIndex += 1
+              else: blockIndex += 1
+          break
+        elif currentCourse not in activeCourses:
+          if alternateOffset == 0:
+            # TODO: No more alternatives, solve problem
+            break
+          currentCourse = student["requests"][len(student["requests"])-alternateOffset]
+          alternateOffset -= 1
 
     # for course in courses:
     #   blockIndex = 0
@@ -125,8 +159,9 @@ def generateSchedule():
         #   else: 
         #     running["semester1"][blockIndex].append(q)
 
-      # for studentIndex in course["studentindexs"]:
+      # for studentIndex in course["studentindexes"]:
       #   if studentIndex == i:
       #     pass
 
 generateMockStudents(400)
+generateSchedule()

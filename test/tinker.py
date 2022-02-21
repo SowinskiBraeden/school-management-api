@@ -6,6 +6,10 @@ import json
 from prettytable import PrettyTable
 from courses import courses, activeCourses
 
+# FIXME: Student is assigned multiple classes per block
+# FIXME: Classes are ran more than they should be according to ln 124 count
+# FIXME: Student List around 240 causes "No more room in school for classes" problem
+
 '''
   I will be using python to test and
   develop course selection / schedule

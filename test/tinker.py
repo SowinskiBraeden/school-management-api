@@ -2,7 +2,7 @@
 import random
 import names
 import math
-from prettytable import PrettyTable
+import json
 from courses import courses, activeCourses
 
 '''
@@ -53,7 +53,20 @@ running: {
 
 minReq, classCap, blockClassLimit = 18, 30, 15
 mockStudents = []
-running = []
+running = {
+  "semester1": {
+    "block1": {},
+    "block2": {},
+    "block3": {},
+    "block4": {}
+  },
+  "semester2": {
+    "block1": {},
+    "block2": {},
+    "block3": {},
+    "block4": {}
+  }
+}
 
 
 # Generate n students for mock data
@@ -62,7 +75,20 @@ def generateMockStudents(n):
     newStudent = {
       "name": names.get_full_name(),
       "requests": [], # list of class codes
-      "schedule": {}
+      "schedule": {
+        "semester1": {
+          "block1": "",
+          "block2": "",
+          "block3": "",
+          "block4": ""
+        },
+        "semester2": {
+          "block1": "",
+          "block2": "",
+          "block3": "",
+          "block4": ""
+        }
+      }
     }
     # Get list of random class choices with no repeats
     # 8 primary choices, 2 secondary choices
@@ -100,68 +126,72 @@ def generateSchedule():
           while True:
             block = f"block{blockIndex}"
             semester = f"semester{semesterIndex}"
+            if student["schedule"][semester][block] != "":
+              if semesterIndex == 2 and blockIndex == 4:
+                # No available classes
+                print("No more available classes")
+                break
+              elif blockIndex == 4:
+                blockIndex = 1
+                semesterIndex += 1
+              else: blockIndex += 1
             if currentCourse in running[semester][block]:
               # Add student to class
-              if len(running[semester][block][currentCourse]["students"]) == classCap:
-                # TODO: Class is full, find next class or generate new class
-                break
-              else:
+              if len(running[semester][block][currentCourse]["students"]) < classCap:
                 running[semester][block][currentCourse]["students"].append(student["name"])
                 student["schedule"][semester][block] = running[semester][block][currentCourse]["name"]
+                break
+              else: # Find next available class or create new one
+                if semesterIndex == 2 and blockIndex == 4:
+                  # No available classes
+                  print("No more available classes")
+                  break
+                elif blockIndex == 4:
+                  blockIndex = 1
+                  semesterIndex += 1
+                else: blockIndex += 1
             else:
               if semesterIndex == 2 and blockIndex == 4:
-                # TODO: Class does not exist, create class in first available slot
+                # Class does not exists
+                # Create new class in first available slot 
+                blockNum = 1
+                semesterNum = 1
+                while True:
+                  newBlock = f"block{blockNum}"
+                  newSemester = f"semester{semesterNum}"
+                  if currentCourse not in running[newSemester][newBlock] and len(running[newSemester][newBlock]) < blockClassLimit:
+                    running[newSemester][newBlock][currentCourse] = {
+                      "name": courses[currentCourse]["name"],
+                      "students": [student["name"]]
+                    }
+                    break
+                  else:
+                    if semesterNum == 2 and blockNum == 4:
+                      # No room in school for more classes
+                      print("No room in school for more classes")
+                      break
+                    elif blockNum == 4:
+                      blockNum = 1
+                      semesterNum += 1
+                    else: blockNum += 1
                 break
               elif blockIndex == 4: # 4th Block (final block)
-                blockIndex = 0
+                blockIndex = 1
                 semesterIndex += 1
               else: blockIndex += 1
           break
         elif currentCourse not in activeCourses:
           if alternateOffset == 0:
             # TODO: No more alternatives, solve problem
+            print("No more alternatives, solve this problem somehow")
             break
           currentCourse = student["requests"][len(student["requests"])-alternateOffset]
           alternateOffset -= 1
 
-    # for course in courses:
-    #   blockIndex = 0
-    #   semesterIndex = 0
-    #   if course["totalrequests"] > minReq:
-    #     # Create course query
-    #     q = {
-    #       "name": course["name"],
-    #       "remaining": classCap
-    #     }
-        
-    #     # Generate x amount of courses based on requests number
-    #     for j in range(len(course["studentindexes"])):
-    #       classRunCount = course["totalrequests"] % 30
-    #       if ((course["totalrequests"] / 30) - classRunCount) > minReq:
-    #         pass
-          
-    #       # Add one student to class
-    #       q["remaining"] -= 1
-          
-    #       if q["remaining"] == 0 and (len(course["studentindexes"])-classCap) > minReq:
-    #         if course["code"] in running[semesterIndex][blockIndex]:
-    #           blockIndex += 1
-            
-    #         # courseIndex = list(running[semesterIndex][blockIndex]).index(course["code"])
-    #         running[semesterIndex][blockIndex][course["code"]] = q
-        
-    #       mockStudents[i]["schedule"][f"semester{semesterIndex+1}"][f"block{blockIndex+1}"] = course["name"]
 
-        # course["totalRequests"] -= minReq
-        # while True:
-        #   if q in running["semester1"]["block1"]:
-        #     running["semester1"][blockIndex][running["semester1"]["block1"].index(q)][]
-        #   else: 
-        #     running["semester1"][blockIndex].append(q)
+if __name__ == '__main__':
+  generateMockStudents(400)
+  generateSchedule()
 
-      # for studentIndex in course["studentindexes"]:
-      #   if studentIndex == i:
-      #     pass
-
-generateMockStudents(400)
-generateSchedule()
+  with open("schedule.json", "w") as outfile:
+    json.dump(running, outfile, indent=2)

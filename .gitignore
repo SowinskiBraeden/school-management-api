@@ -3,3 +3,7 @@
 
 # Pycache
 /test/__pycache__/*
+
+# Test output
+/test/schedule.json
+/test/students.json

@@ -72,14 +72,14 @@ The usage for this API is in the name, school management, it's not an easy task 
 <!-- CONTRIBUTING -->
 ## Contributing
 
-Please refer to [`CONTRIBUTING`](CONTRIBUTING.md) for contributing to the project.
+Please refer to [CONTRIBUTING](CONTRIBUTING.md) for contributing to the project.
 
 
 
 <!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See [`LICENSE`](LICENSE) for more information.
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 
 <!-- CONTACT -->

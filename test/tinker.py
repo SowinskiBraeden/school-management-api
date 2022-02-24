@@ -1,10 +1,10 @@
 #!/usr/bin/python3
-import random
-import names
-import math
+import sys
 import json
+import math
 from prettytable import PrettyTable
 from courses import courses, activeCourses
+from mock import generateMockStudents
 
 '''
   I will be using python to test and
@@ -49,11 +49,12 @@ running: {
 
 # Error 1: No classes in schedule can fit this student
 # Error 2: No more room in schedule for another class
-# Error 3: No more alternatives
 
+# 400 by default
+studentsNum = 400
 
-err1, err2, err3 = 0,0,0
-minReq, classCap, blockClassLimit = 18, 30, 15
+err1, err2, = 0,0
+minReq, classCap, blockClassLimit = 18, 30, 21
 mockStudents = []
 running = {
   "block1": {},
@@ -67,53 +68,7 @@ running = {
 }
 
 
-# Generate n students for mock data
-def generateMockStudents(n):
-  newStudent = {
-    "name": "Braeden Sowinski",
-    "requests": [], # list of class codes
-    "schedule": {
-      "block1": "",
-      "block2": "",
-      "block3": "",
-      "block4": "",
-      "block5": "",
-      "block6": "",
-      "block7": "",
-      "block8": ""
-    }
-  }
-  # Get list of random class choices with no repeats
-  # 8 primary choices, 2 secondary choices
-  courseSelection = random.sample(range(0, len(courses)), 10)
-  for courseNum in courseSelection:
-    newStudent["requests"].append(list(courses)[courseNum])
-  mockStudents.append(newStudent)
-
-  for _ in range(n):
-    newStudent = {
-      "name": names.get_full_name(),
-      "requests": [], # list of class codes
-      "schedule": {
-        "block1": "",
-        "block2": "",
-        "block3": "",
-        "block4": "",
-        "block5": "",
-        "block6": "",
-        "block7": "",
-        "block8": ""
-      }
-    }
-    # Get list of random class choices with no repeats
-    # 8 primary choices, 2 secondary choices
-    courseSelection = random.sample(range(0, len(courses)), 10)
-    for courseNum in courseSelection:
-      newStudent["requests"].append(list(courses)[courseNum])
-    mockStudents.append(newStudent)
-
-
-def generateSchedule():
+def generateScheduleV1():
   global err1, err2, err3
   # Collect data and calculate schedules
   for student in mockStudents:
@@ -123,20 +78,10 @@ def generateSchedule():
       courses[request]["studentindexes"].append(mockStudents.index(student))
       # Add course to active list if enough requests
       if courses[request]["totalrequests"] > minReq and courses[request]["code"] not in activeCourses: activeCourses[courses[request]["code"]] = courses[request]
-  
-  # This is just for data testing/visualizations
-  # calculate # of times to run class
-  # t = PrettyTable(["Class Name", "Class Runcount"])
-  # for i in range(len(activeCourses)):
-  #   classRunCount = math.floor(activeCourses[list(activeCourses)[i]]["totalrequests"] / classCap)
-  #   # If there is 18+ requests left, 1 more class could be run
-  #   if (activeCourses[list(activeCourses)[i]]["totalrequests"] % classCap) > minReq: classRunCount += 1
-  #   activeCourses[list(activeCourses)[i]]["classRunCount"] = classRunCount
-  #   t.add_row([activeCourses[list(activeCourses)[i]]["code"], classRunCount])
-  # print(t)
 
   for student in mockStudents:
     alternateOffset = len(student["requests"])-8
+    alternateIndex = 8
     for i in range(len(student["requests"])-alternateOffset): # Subtract x classes as they are alternatives
       currentCourse = student["requests"][i]
       generate = True
@@ -155,15 +100,40 @@ def generateSchedule():
                   getFreeBlock = False
                 else: # Find next available class or create new one
                   if blockIndex == 8:  # No available classes
-                    # print(f"\nError 1: No more available classes for student {student['name']}")
-                    err1 += 1
+                    if len(student["requests"]) == 8:
+                      # This student never had any alternatives
+                      # How to solve?
+
+                      # print(f"\nError 1: No more available classes for student {student['name']}")
+                      err1 += 1
+                      generate = False
+                    else:
+                      if alternateIndex <= (len(student["requests"]) - 1):
+                        currentCourse = student["requests"][alternateIndex]
+                        alternateIndex += 1
+                      else: # No more alterantive
+                        # print(f"\nError 1: No more available classes for student {student['name']}")
+                        err1 += 1
+                        generate = False
                     getFreeBlock = False
                   else: blockIndex += 1
               else:
                 if blockIndex == 8: # No available classes
-                  # print(f"\nError 1: No more available classes for student {student['name']}")
-                  err1 += 1
-                  # Resort to alternative
+                  if len(student["requests"]) == 8:
+                    # This student never had any alternatives
+                    # How to solve?
+
+                    # print(f"\nError 1: No more available classes for student {student['name']}")
+                    err1 += 1
+                    generate = False
+                  else:
+                    if alternateIndex <= (len(student["requests"]) - 1):
+                      currentCourse = student["requests"][alternateIndex]
+                      alternateIndex += 1
+                    else: # No more alternatives
+                      # print(f"\nError 1: No more available classes for student {student['name']}")
+                      err1 += 1
+                      generate = False
                   getFreeBlock = False
                 else: blockIndex += 1
             else:
@@ -174,7 +144,7 @@ def generateSchedule():
                 while True:
                   newBlock = f"block{blockNum}"
                   if currentCourse not in running[newBlock] and len(running[newBlock]) < blockClassLimit:
-                    if student["schedule"][newBlock] == "":
+                    if student["schedule"][newBlock] == "": # Add student to class
                       running[newBlock][currentCourse] = {
                         "name": courses[currentCourse]["name"],
                         "students": [student["name"]]
@@ -183,10 +153,7 @@ def generateSchedule():
                       break
                     else:
                       if blockNum == 8:
-                        # No available classes
-                        # print(f"\nError 1: No more available classes for student {student['name']}")
-                        err1 += 1
-                        # TODO: Resort to alternative
+                        # All student classes have been filled
                         break
                       else: blockNum += 1
                   else:
@@ -200,24 +167,68 @@ def generateSchedule():
               else: blockIndex += 1
           break
         elif currentCourse not in activeCourses:
-          if alternateOffset == 0:
-            # TODO: No more alternatives, solve problem
-            # print("Error 3: No more alternatives")
-            err3 += 1
+          if len(student["requests"]) == 8:
+            # This student never had any alternatives
             # How to solve?
+
+            # print(f"\nError 1: No more available classes for student {student['name']}")
+            err1 += 1
             generate = False
-          currentCourse = student["requests"][len(student["requests"])-alternateOffset]
-          alternateOffset -= 1
+          else:
+            if alternateIndex <= (len(student["requests"]) - 1):
+              currentCourse = student["requests"][alternateIndex]
+              alternateIndex += 1
+            else: # Out of alternatives
+              # print(f"\nError 1: No more available classes for student {student['name']}")
+              err1 += 1
+              generate = False
+
+
+def generateScheduleV2():
+  # This is just for data testing/visualizations
+  # calculate # of times to run class
+  # t = PrettyTable(["Class Name", "Class Runcount"])
+  for i in range(len(activeCourses)):
+    classRunCount = math.floor(activeCourses[list(activeCourses)[i]]["totalrequests"] / classCap)
+    # If there is minReq+ requests left, 1 more class could be run
+    if (activeCourses[list(activeCourses)[i]]["totalrequests"] % classCap) > minReq: classRunCount += 1
+    activeCourses[list(activeCourses)[i]]["classRunCount"] = classRunCount
+    # t.add_row([activeCourses[list(activeCourses)[i]]["code"], classRunCount])
+  # print(t)
 
 
 if __name__ == '__main__':
-  generateMockStudents(400)
-  generateSchedule()
+  if len(sys.argv) == 1:
+    print("Missing argument")
+    exit()
+  if sys.argv[1].upper() == 'V1':
+    if len(sys.argv) == 3:
+      try:
+        studentsNum = int(sys.argv[2])
+      except:
+        print("Error parsing number of students")
+        exit()
+    print("Processing...")
+    mockStudents = generateMockStudents(studentsNum)
+    generateScheduleV1()
+  elif sys.argv[1].upper() == 'V2':
+    if len(sys.argv) == 3:
+      try:
+        studentsNum = int(sys.argv[2])
+      except:
+        print("Error parsing number of students")
+        exit()
+    print("Processing...")
+    mockStudents = generateMockStudents(studentsNum)
+    generateScheduleV1()
+  else: 
+    print("Invalid argument")
+    exit()
 
+  print("\n")
   print(f"Error 1: x{err1}")
   print(f"Error 2: x{err2}")
-  print(f"Error 3: x{err3}")
-  print("\n\n")
+  print("\n")
 
   ### Displays the number of students in each class
   # for block in running:
@@ -228,8 +239,21 @@ if __name__ == '__main__':
   #     students = len(running[block][cl]["students"])
   #     print(f"Class: {name} | Students: {students}")
 
+  # Count errors in students schedules
+  errors = 0
+  for i in range(len(mockStudents)):
+    count = 0
+    for course in mockStudents[i]["schedule"]:
+      if mockStudents[i]["schedule"][course]=="": count+=1
+    if count > 0: errors += 1
+  
+  print(f"{errors}/{studentsNum} student(s) have a issue with their schedule")
+
+
   with open("schedule.json", "w") as outfile:
     json.dump(running, outfile, indent=2)
 
   with open("students.json", "w") as outfile:
     json.dump(mockStudents, outfile, indent=2)
+
+  print("Done")

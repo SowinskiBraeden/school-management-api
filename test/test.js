@@ -16,17 +16,6 @@ let students = require('./students.json');
 // console.table(schedule.block8)
 
 // Display each students schedule
-// for (let i = 0; i < students.length; i++) {
-//   console.table(students[i].schedule)
-// }
-
-let errors = 0;
-let classes;
 for (let i = 0; i < students.length; i++) {
-  for (let j = 0; j < students[i].schedule.length; j++) {
-    if (students[i].schedule[j] != "") classes++;
-  }
-  if (classes != 8) errors++;
+  console.table(students[i].schedule)
 }
-
-console.log(`${errors} student(s) have a issue with their schedule`)

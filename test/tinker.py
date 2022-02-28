@@ -2,7 +2,6 @@
 import sys
 import json
 import math
-from prettytable import PrettyTable
 from courses import courses, activeCourses
 from mock import generateMockStudents
 
@@ -69,7 +68,7 @@ running = {
 
 
 def generateScheduleV1():
-  global err1, err2, err3
+  global err1, err2
   # Collect data and calculate schedules
   for student in mockStudents:
     # Tally class request
@@ -185,16 +184,41 @@ def generateScheduleV1():
 
 
 def generateScheduleV2():
-  # This is just for data testing/visualizations
+  global err1, err2
+  # Collect data and calculate schedules
+  for student in mockStudents:
+    # Tally class request
+    for request in student["requests"]:
+      courses[request]["totalrequests"] += 1
+      courses[request]["studentindexes"].append(mockStudents.index(student))
+      # Add course to active list if enough requests
+      if courses[request]["totalrequests"] > minReq and courses[request]["code"] not in activeCourses: activeCourses[courses[request]["code"]] = courses[request]
+
   # calculate # of times to run class
-  # t = PrettyTable(["Class Name", "Class Runcount"])
   for i in range(len(activeCourses)):
     classRunCount = math.floor(activeCourses[list(activeCourses)[i]]["totalrequests"] / classCap)
     # If there is minReq+ requests left, 1 more class could be run
     if (activeCourses[list(activeCourses)[i]]["totalrequests"] % classCap) > minReq: classRunCount += 1
     activeCourses[list(activeCourses)[i]]["classRunCount"] = classRunCount
-    # t.add_row([activeCourses[list(activeCourses)[i]]["code"], classRunCount])
-  # print(t)
+
+    blockIndex = 1
+    while classRunCount > 0:
+      block = f"block{blockIndex}"
+      if activeCourses[i] not in running[block]:
+        # Generate class and sub 1 from classRunCount
+        running[block][activeCourses[i]] = {
+          "name": courses[activeCourses[i]]["name"],
+          "students": []
+        }
+        classRunCount -= 1
+      else:
+        if blockIndex == 8:
+          # No room in school for more classes
+          # print(f"\nError 2: No more room in school for another class")
+          err2 += 1
+          classRunCount = 0
+        else:
+          blockIndex += 1
 
 
 if __name__ == '__main__':

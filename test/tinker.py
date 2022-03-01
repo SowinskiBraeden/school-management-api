@@ -53,7 +53,7 @@ running: {
 studentsNum = 400
 
 err1, err2, = 0,0
-minReq, classCap, blockClassLimit = 18, 30, 21
+minReq, classCap, blockClassLimit = 18, 30, 18
 mockStudents = []
 running = {
   "block1": {},
@@ -196,18 +196,19 @@ def generateScheduleV2():
 
   # calculate # of times to run class
   for i in range(len(activeCourses)):
-    classRunCount = math.floor(activeCourses[list(activeCourses)[i]]["totalrequests"] / classCap)
+    index = list(activeCourses)[i]
+    classRunCount = math.floor(activeCourses[index]["totalrequests"] / classCap)
     # If there is minReq+ requests left, 1 more class could be run
-    if (activeCourses[list(activeCourses)[i]]["totalrequests"] % classCap) > minReq: classRunCount += 1
-    activeCourses[list(activeCourses)[i]]["classRunCount"] = classRunCount
+    if (activeCourses[index]["totalrequests"] % classCap) > minReq: classRunCount += 1
+    activeCourses[index]["classRunCount"] = classRunCount
 
     blockIndex = 1
     while classRunCount > 0:
       block = f"block{blockIndex}"
-      if activeCourses[i] not in running[block]:
+      if activeCourses[index]["code"] not in running[block] and len(running[block]) < blockClassLimit:
         # Generate class and sub 1 from classRunCount
-        running[block][activeCourses[i]] = {
-          "name": courses[activeCourses[i]]["name"],
+        running[block][activeCourses[index]["code"]] = {
+          "name": activeCourses[index]["name"],
           "students": []
         }
         classRunCount -= 1
@@ -244,7 +245,7 @@ if __name__ == '__main__':
         exit()
     print("Processing...")
     mockStudents = generateMockStudents(studentsNum)
-    generateScheduleV1()
+    generateScheduleV2()
   else: 
     print("Invalid argument")
     exit()
@@ -264,14 +265,14 @@ if __name__ == '__main__':
   #     print(f"Class: {name} | Students: {students}")
 
   # Count errors in students schedules
-  errors = 0
-  for i in range(len(mockStudents)):
-    count = 0
-    for course in mockStudents[i]["schedule"]:
-      if mockStudents[i]["schedule"][course]=="": count+=1
-    if count > 0: errors += 1
+  # errors = 0
+  # for i in range(len(mockStudents)):
+  #   count = 0
+  #   for course in mockStudents[i]["schedule"]:
+  #     if mockStudents[i]["schedule"][course]=="": count+=1
+  #   if count > 0: errors += 1
   
-  print(f"{errors}/{studentsNum} student(s) have a issue with their schedule")
+  # print(f"{errors}/{studentsNum} student(s) have a issue with their schedule")
 
 
   with open("schedule.json", "w") as outfile:

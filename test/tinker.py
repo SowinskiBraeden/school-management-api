@@ -50,7 +50,7 @@ running: {
 # Error 2: No more room in schedule for another class
 
 # 400 by default
-studentsNum = 400
+studentsNum = 1000
 
 err1, err2, = 0,0
 minReq, classCap, blockClassLimit = 18, 30, 18
@@ -221,6 +221,95 @@ def generateScheduleV2():
         else:
           blockIndex += 1
 
+  for student in mockStudents:
+    alternateOffset = len(student["requests"])-8
+    alternateIndex = 8
+    for i in range(len(student["requests"])-alternateOffset): # Subtract x classes as they are alternatives
+      currentCourse = student["requests"][i]
+      generate = True
+      while generate:
+        # If class is allowed to run
+        if currentCourse in activeCourses:
+          blockIndex = 1
+          getFreeBlock = True
+          while getFreeBlock:
+            block = f"block{blockIndex}"
+            if currentCourse in running[block]:
+              if student["schedule"][block] == "": # Add student to class
+                if len(running[block][currentCourse]["students"]) < classCap:
+                  running[block][currentCourse]["students"].append(student["name"])
+                  student["schedule"][block] = courses[currentCourse]["name"]
+                  getFreeBlock = False
+                else: # Find next available class or create new one
+                  if blockIndex == 8:  # No available classes
+                    if len(student["requests"]) == 8:
+                      # This student never had any alternatives
+                      # How to solve?
+
+                      # print(f"\nError 1: No more available classes for student {student['name']}")
+                      err1 += 1
+                      generate = False
+                    else:
+                      if alternateIndex <= (len(student["requests"]) - 1):
+                        currentCourse = student["requests"][alternateIndex]
+                        alternateIndex += 1
+                      else: # No more alterantive
+                        # print(f"\nError 1: No more available classes for student {student['name']}")
+                        err1 += 1
+                        generate = False
+                    getFreeBlock = False
+                  else: blockIndex += 1
+              else:
+                if blockIndex == 8: # No available classes
+                  if len(student["requests"]) == 8:
+                    # This student never had any alternatives
+                    # How to solve?
+
+                    # print(f"\nError 1: No more available classes for student {student['name']}")
+                    err1 += 1
+                    generate = False
+                  else:
+                    if alternateIndex <= (len(student["requests"]) - 1):
+                      currentCourse = student["requests"][alternateIndex]
+                      alternateIndex += 1
+                    else: # No more alternatives
+                      # print(f"\nError 1: No more available classes for student {student['name']}")
+                      err1 += 1
+                      generate = False
+                  getFreeBlock = False
+                else: blockIndex += 1
+            else:
+              if blockIndex == 8:
+                # Class does not exists
+                # Resort to alternative
+                if alternateIndex <= (len(student["requests"]) - 1):
+                  currentCourse = student["requests"][alternateIndex]
+                  alternateIndex += 1
+                else: # Out of alternatives
+                  # print(f"\nError 1: No more available classes for student {student['name']}")
+                  err1 += 1
+                  generate = False
+                break
+              else: blockIndex += 1
+          break
+        elif currentCourse not in activeCourses:
+          if len(student["requests"]) == 8:
+            # This student never had any alternatives
+            # How to solve?
+
+            # print(f"\nError 1: No more available classes for student {student['name']}")
+            err1 += 1
+            generate = False
+          else:
+            if alternateIndex <= (len(student["requests"]) - 1):
+              currentCourse = student["requests"][alternateIndex]
+              alternateIndex += 1
+            else: # Out of alternatives
+              # print(f"\nError 1: No more available classes for student {student['name']}")
+              err1 += 1
+              generate = False
+      
+
 
 if __name__ == '__main__':
   if len(sys.argv) == 1:
@@ -265,14 +354,14 @@ if __name__ == '__main__':
   #     print(f"Class: {name} | Students: {students}")
 
   # Count errors in students schedules
-  # errors = 0
-  # for i in range(len(mockStudents)):
-  #   count = 0
-  #   for course in mockStudents[i]["schedule"]:
-  #     if mockStudents[i]["schedule"][course]=="": count+=1
-  #   if count > 0: errors += 1
+  errors = 0
+  for i in range(len(mockStudents)):
+    count = 0
+    for course in mockStudents[i]["schedule"]:
+      if mockStudents[i]["schedule"][course]=="": count+=1
+    if count > 0: errors += 1
   
-  # print(f"{errors}/{studentsNum} student(s) have a issue with their schedule")
+  print(f"{errors}/{studentsNum} student(s) have a issue with their schedule")
 
 
   with open("schedule.json", "w") as outfile:

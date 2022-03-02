@@ -50,7 +50,7 @@ running: {
 # Error 2: No more room in schedule for another class
 
 # 400 by default
-studentsNum = 1000
+studentsNum = 500
 
 err1, err2, = 0,0
 minReq, classCap, blockClassLimit = 18, 30, 18
@@ -88,14 +88,16 @@ def generateScheduleV1():
         # If class is allowed to run
         if currentCourse in activeCourses:
           blockIndex = 1
+          courseNum = 1
           getFreeBlock = True
           while getFreeBlock:
             block = f"block{blockIndex}"
-            if currentCourse in running[block]:
+            cname = f"{courses[currentCourse]['name']}-{courseNum}"
+            if cname in running[block]:
               if student["schedule"][block] == "": # Add student to class
-                if len(running[block][currentCourse]["students"]) < classCap:
-                  running[block][currentCourse]["students"].append(student["name"])
-                  student["schedule"][block] = courses[currentCourse]["name"]
+                if len(running[block][cname]["students"]) < classCap:
+                  running[block][cname]["students"].append(student["name"])
+                  student["schedule"][block] = cname
                   getFreeBlock = False
                 else: # Find next available class or create new one
                   if blockIndex == 8:  # No available classes
@@ -104,7 +106,6 @@ def generateScheduleV1():
                       # How to solve?
 
                       # print(f"\nError 1: No more available classes for student {student['name']}")
-                      err1 += 1
                       generate = False
                     else:
                       if alternateIndex <= (len(student["requests"]) - 1):
@@ -115,7 +116,12 @@ def generateScheduleV1():
                         err1 += 1
                         generate = False
                     getFreeBlock = False
-                  else: blockIndex += 1
+                  else:
+                    if (courses[currentCourse]["teachers"] - courseNum) > 0:
+                      courseNum += 1
+                    else:
+                      blockIndex += 1
+                      courseNum = 1
               else:
                 if blockIndex == 8: # No available classes
                   if len(student["requests"]) == 8:
@@ -134,7 +140,9 @@ def generateScheduleV1():
                       err1 += 1
                       generate = False
                   getFreeBlock = False
-                else: blockIndex += 1
+                else:
+                  blockIndex += 1
+                  courseNum = 1
             else:
               if blockIndex == 8:
                 # Class does not exists
@@ -142,28 +150,37 @@ def generateScheduleV1():
                 blockNum = 1
                 while True:
                   newBlock = f"block{blockNum}"
-                  if currentCourse not in running[newBlock] and len(running[newBlock]) < blockClassLimit:
+                  if cname not in running[newBlock] and len(running[newBlock]) < blockClassLimit:
                     if student["schedule"][newBlock] == "": # Add student to class
-                      running[newBlock][currentCourse] = {
+                      running[newBlock][cname] = {
                         "name": courses[currentCourse]["name"],
                         "students": [student["name"]]
                       }
-                      student["schedule"][newBlock] = courses[currentCourse]["name"]
+                      student["schedule"][newBlock] = cname
                       break
                     else:
                       if blockNum == 8:
                         # All student classes have been filled
                         break
-                      else: blockNum += 1
+                      else:
+                        blockNum += 1
+                        courseNum = 1
                   else:
                     if blockNum == 8:
                       # No room in school for more classes
                       # print(f"\nError 2: No more room in school for another class")
                       err2 += 1
                       break
-                    else: blockNum += 1
+                    else:
+                      if (courses[currentCourse]["teachers"] - courseNum) > 0:
+                        courseNum += 1
+                      else:
+                        blockNum += 1
+                        courseNum = 1
                 break
-              else: blockIndex += 1
+              else:
+                blockIndex += 1
+                courseNum = 1
           break
         elif currentCourse not in activeCourses:
           if len(student["requests"]) == 8:

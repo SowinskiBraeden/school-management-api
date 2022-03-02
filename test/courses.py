@@ -1,195 +1,219 @@
 courses = {
-  "cl1": {
-    "name": "class1",
-    "code": "cl1",
+  "P-CL": {
+    "name": "Pre-Calculus",
+    "code": "P-CL",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl2": {
-    "name": "class2",
-    "code": "cl2",
+  "CL": {
+    "name": "Calculus",
+    "code": "CL",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl3": {
-    "name": "class3",
-    "code": "cl3",
+  "EN-CW": {
+    "name": "English: Creative Writing",
+    "code": "EN-CW",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl4": {
-    "name": "class4",
-    "code": "cl4",
+  "EN-LS": {
+    "name": "English: Literary Studies",
+    "code": "EN-LS",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl5": {
-    "name": "class5",
-    "code": "cl5",
+  "EN-C": {
+    "name": "English: Compisition",
+    "code": "EN-C",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl6": {
-    "name": "class6",
-    "code": "cl6",
+  "S-J": {
+    "name": "Social Justice",
+    "code": "S-J",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl7": {
-    "name": "class7",
-    "code": "cl7",
+  "S-H": {
+    "name": "History",
+    "code": "S-H",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl8": {
-    "name": "class8",
-    "code": "cl8",
+  "S-P": {
+    "name": "Psychology",
+    "code": "S-P",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl9": {
-    "name": "class9",
-    "code": "cl9",
+  "SC-P": {
+    "name": "Physics",
+    "code": "SC-P",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl10": {
-    "name": "class10",
-    "code": "cl10",
+  "SC-B": {
+    "name": "Biology",
+    "code": "SC-B",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl11": {
-    "name": "class11",
-    "code": "cl11",
+  "SC-C": {
+    "name": "Chemistry",
+    "code": "SC-C",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl12": {
-    "name": "class12",
+  "SC-ES": {
+    "name": "SC-ES",
     "code": "cl12",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl13": {
-    "name": "class13",
-    "code": "cl13",
+  "M": {
+    "name": "Music",
+    "code": "Ms",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl14": {
-    "name": "class14",
-    "code": "cl14",
+  "CH": {
+    "name": "Choir",
+    "code": "CH",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl15": {
-    "name": "class15",
-    "code": "cl15",
+  "DN": {
+    "name": "Dance",
+    "code": "DN",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl16": {
-    "name": "class16",
-    "code": "cl16",
+  "CS": {
+    "name": "Computer Science",
+    "code": "CS",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl17": {
-    "name": "class17",
-    "code": "cl17",
+  "GD": {
+    "name": "Game Development",
+    "code": "GD",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl18": {
-    "name": "class18",
-    "code": "cl18",
+  "WW": {
+    "name": "Woodwork",
+    "code": "WW",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl19": {
-    "name": "class19",
-    "code": "cl19",
+  "MW": {
+    "name": "MetwalWork",
+    "code": "MW",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl20": {
-    "name": "class20",
-    "code": "cl20",
+  "M-WP": {
+    "name": "Math: Workplace",
+    "code": "M-WP",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl21": {
-    "name": "class21",
-    "code": "cl21",
+  "M-F": {
+    "name": "Math: Foundations",
+    "code": "M-F",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl22": {
-    "name": "class22",
-    "code": "cl22",
+  "BN": {
+    "name": "Band",
+    "code": "BN",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl23": {
-    "name": "class23",
-    "code": "cl23",
+  "TH": {
+    "name": "Theatre",
+    "code": "TH",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   },
-  "cl24": {
-    "name": "class24",
-    "code": "cl24",
+  "VD-P": {
+    "name": "Video Production",
+    "code": "VD-P",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
-    "studentindexes": []
+    "studentindexes": [],
+    "teachers": 3
   }
 }
 

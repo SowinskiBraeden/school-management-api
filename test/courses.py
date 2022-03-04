@@ -99,8 +99,8 @@ courses = {
     "teachers": 3
   },
   "SC-ES": {
-    "name": "SC-ES",
-    "code": "cl12",
+    "name": "Earth Science",
+    "code": "SC-ES",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,
@@ -109,7 +109,7 @@ courses = {
   },
   "M": {
     "name": "Music",
-    "code": "Ms",
+    "code": "M",
     "credits": 4,
     "gradelevel": 11,
     "totalrequests": 0,

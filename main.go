@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/SowinskiBraeden/school-management-api/routes"
@@ -10,7 +11,10 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
+const version string = "\nv0.8.2-Alpha"
+
 func main() {
+	fmt.Println(version)
 	app := fiber.New()
 
 	app.Use(cors.New(cors.Config{

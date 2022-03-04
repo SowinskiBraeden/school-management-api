@@ -8,7 +8,7 @@ The backend API for a school management system accessible by staff and students.
 
 ## About The Project
 
-Originally started as a personal project to improve my overall Go knowledge and skills, driven by the complains
+Originally started as a personal project to improve my overall Go knowledge and skills, driven by the complaints
 of my current school management system for students to view their grades, credits, course selections etc. I took
 this on as a full project to work on for my Software Engineering class and is now a staple of my work. I plan to
 work on this till completion, starting with this API, and then the front end, learning new tricks and languages
@@ -33,7 +33,7 @@ idea is to have a modern designed website capable of being used easily on any de
 
 ## Getting Started
 
-The systems is easy to start and your local machine. Eliminating and long unforgiving configurations you may face in other software.
+The systems is easy to start and your local machine. Eliminating any long unforgiving configurations you may face in other software.
 
 ### Installation
 
@@ -53,7 +53,7 @@ The systems is easy to start and your local machine. Eliminating and long unforg
     SYSTEM_EMAIL='your system email'
     SYSTEM_PASSWORD='your system email password'
    ```
-4. Run the sytem in your console
+4. Run the system in your console
 ```
   go run main.go
 ```

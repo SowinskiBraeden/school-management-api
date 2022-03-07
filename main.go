@@ -11,7 +11,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
-// Current version
 const version string = "\nv0.8.2-Alpha"
 
 func main() {

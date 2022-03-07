@@ -5,15 +5,9 @@ import math
 from courses import courses, activeCourses
 from mock import generateMockStudents
 
+
+
 '''
-  I will be using python to test and
-  develop course selection / schedule
-  generation
-
-  this is honestly terrible code but 
-  this is not an easy task for me to
-  do
-
   Block 1-4 is first semester while
   block 5-8 is second semester
 '''

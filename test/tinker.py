@@ -3,8 +3,7 @@ import sys
 import json
 import math
 from courses import courses, activeCourses
-from mock import generateMockStudents
-
+from mockStudents import generateMockStudents
 
 
 '''
@@ -44,10 +43,10 @@ running: {
 # Error 2: No more room in schedule for another class
 
 # 400 by default
-studentsNum = 1000
+studentsNum = 340
 
 err1, err2, = 0,0
-minReq, classCap, blockClassLimit = 18, 30, 18
+minReq, classCap, blockClassLimit = 18, 30, 12
 mockStudents = []
 running = {
   "block1": {},
@@ -60,7 +59,7 @@ running = {
   "block8": {}
 }
 
-
+# Currently V1 has an average of 9.4% success rate, with an avverage of 90.6% error rate
 def generateScheduleV1():
   global err1, err2
   # Collect data and calculate schedules
@@ -194,6 +193,7 @@ def generateScheduleV1():
               generate = False
 
 
+# Currently V2 has an average of 0.35% success rate, with an avverage of 99.65% error rate
 def generateScheduleV2():
   global err1, err2
   # Collect data and calculate schedules
@@ -346,6 +346,60 @@ def generateScheduleV2():
               generate = False
 
 
+# V3 differs a lot by V1/2 as it does not focus on fitting the classes
+# into the time table first.
+# It starts by trying to get all classes full and give all students a full class list.
+# Then it starts to attempt to fit all classes into a timetable, making corretions along
+# the way. Corrections being moving a students class
+def generateScheduleV3():
+  # Step 1 - Calculate which classes can run
+  global err1, err2
+  # Collect data and calculate schedules
+  for student in mockStudents:
+    # Tally class request
+    for request in student["requests"]:
+      courses[request]["totalrequests"] += 1
+      courses[request]["studentindexes"].append(mockStudents.index(student))
+      # Add course to active list if enough requests
+      if courses[request]["totalrequests"] > minReq and courses[request]["code"] not in activeCourses: activeCourses[courses[request]["code"]] = courses[request]
+
+  # Step 2 - Generate class list without timetable
+  selectedCourses = {}
+  # calculate # of times to run class
+  for i in range(len(activeCourses)):
+    index = list(activeCourses)[i]
+    classRunCount = math.floor(activeCourses[index]["totalrequests"] / classCap)
+    # If there is minReq+ requests left, 1 more class could be run
+    if (activeCourses[index]["totalrequests"] % classCap) > minReq: classRunCount += 1
+    activeCourses[index]["classRunCount"] = classRunCount
+    classNum = classRunCount
+    for student in mockStudents:
+      alternateOffset = len(student["requests"])-8
+      for j in range(len(student["requests"])-alternateOffset): # Subtract x classes as they are alternatives
+        currentCourse = student["requests"][j]
+        if currentCourse == activeCourses[index]["code"]:
+          cname = f"{activeCourses[index]['name']}-{classNum-(classRunCount-1)}"
+          if cname in selectedCourses:
+            if student["name"] not in selectedCourses[cname]["students"]:
+              if len(selectedCourses[cname]["students"]) < classCap:
+                # Class exists and there is room
+                selectedCourses[cname]["students"].append(student["name"])
+              elif len(selectedCourses[cname]["students"]) == classCap:
+                classRunCount -= 1
+          elif cname not in selectedCourses:
+            selectedCourses[cname] = {
+              "students": [student["name"]],
+              "code": currentCourse
+            }
+
+  with open("classes.json", "w") as outfile:
+    json.dump(selectedCourses, outfile, indent=2)
+
+  # Step 3 - Attempt to fit classes into timetable
+
+  # Step 4 - Evaluate, move classes or students to fix
+  
+
 if __name__ == '__main__':
   if len(sys.argv) == 1:
     print("Missing argument")
@@ -370,6 +424,16 @@ if __name__ == '__main__':
     print("Processing...")
     mockStudents = generateMockStudents(studentsNum)
     generateScheduleV2()
+  elif sys.argv[1].upper() == 'V3':
+    if len(sys.argv) == 3:
+      try:
+        studentsNum = int(sys.argv[2])
+      except:
+        print("Error parsing number of students")
+        exit()
+    print("Processing...")
+    mockStudents = generateMockStudents(studentsNum)
+    generateScheduleV3()
   else: 
     print("Invalid argument")
     exit()

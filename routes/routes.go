@@ -67,6 +67,11 @@ func Setup(app *fiber.App) {
 	app.Post(routerPrefix+"/admin/renableStudent", controllers.RemoveStudentsDisabled)
 	app.Post(routerPrefix+"/admin/renableTeacher", controllers.RemoveTeachersDisabled)
 
+	// Delete Handler
+	app.Post(routerPrefix+"/remove/student", controllers.RemoveStudent)
+	app.Post(routerPrefix+"/remove/teacher", controllers.RemoveTeacher)
+	app.Post(routerPrefix+"/remove/admin", controllers.RemoveAdmin)
+
 	// 404 Handler
 	app.Use(func(c *fiber.Ctx) error {
 		return c.SendStatus(404) // => 404 "Not Found"

@@ -7,3 +7,6 @@
 # Test output
 /test/schedule.json
 /test/students.json
+
+# Sample Data
+/test/course_selection_data.csv

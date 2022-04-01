@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 import random
 import names
+import json
+import csv
 from courses import courses
 
 mockStudents = []
@@ -30,3 +32,47 @@ def generateMockStudents(n):
     mockStudents.append(newStudent)
 
   return mockStudents
+
+
+# sort real sample data into usable dictionary
+def getSampleStudents():
+  with open("course_selection_data.csv", newline='') as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+      exists = False
+      for student in mockStudents:
+        exists = True if student["Pupil #"] == row["Pupil #"] else False
+        if exists: break
+      alternate = True if row["Alternate?"] == 'TRUE' else False
+      if exists:
+        mockStudents[student["studentIndex"]]["requests"].append({"code":row["CrsNo"],"alt":alternate})
+      else:
+        newStudent = {
+          "Pupil #": row["Pupil #"],
+          "requests": [{
+            "CrsNo": row["CrsNo"],
+            "Description": row["Description"],
+            "Alternate?": alternate
+          }],
+          "schedule": {
+            "block1": "",
+            "block2": "",
+            "block3": "",
+            "block4": "",
+            "block5": "",
+            "block6": "",
+            "block7": "",
+            "block8": ""
+          },
+          "studentIndex": len(mockStudents)
+        }
+        mockStudents.append(newStudent)
+
+  return mockStudents
+
+
+if __name__ == '__main__':
+  studentRequests = getSampleStudents()
+
+  with open("students.json", "w") as outfile:
+    json.dump(studentRequests, outfile, indent=2)

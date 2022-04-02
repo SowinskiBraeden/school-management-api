@@ -3,7 +3,7 @@ import random
 import names
 import json
 import csv
-from courses import courses
+from courses import mockCourses
 
 mockStudents = []
 
@@ -26,16 +26,16 @@ def generateMockStudents(n):
     }
     # Get list of random class choices with no repeats
     # 8 primary choices, 2 secondary choices
-    courseSelection = random.sample(range(0, len(courses)), 10)
+    courseSelection = random.sample(range(0, len(mockCourses)), 10)
     for courseNum in courseSelection:
-      newStudent["requests"].append(list(courses)[courseNum])
+      newStudent["requests"].append(list(mockCourses)[courseNum])
     mockStudents.append(newStudent)
 
   return mockStudents
 
 
 # sort real sample data into usable dictionary
-def getSampleStudents():
+def getSampleStudents(log=False):
   with open("course_selection_data.csv", newline='') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
@@ -45,14 +45,18 @@ def getSampleStudents():
         if exists: break
       alternate = True if row["Alternate?"] == 'TRUE' else False
       if exists:
-        mockStudents[student["studentIndex"]]["requests"].append({"code":row["CrsNo"],"alt":alternate})
+        mockStudents[student["studentIndex"]]["requests"].append({
+            "CrsNo": row["CrsNo"],
+            "Description": row["Description"],
+            "alt": alternate
+          })
       else:
         newStudent = {
           "Pupil #": row["Pupil #"],
           "requests": [{
             "CrsNo": row["CrsNo"],
             "Description": row["Description"],
-            "Alternate?": alternate
+            "alt": alternate
           }],
           "schedule": {
             "block1": "",
@@ -67,6 +71,10 @@ def getSampleStudents():
           "studentIndex": len(mockStudents)
         }
         mockStudents.append(newStudent)
+
+  if log:
+    with open("students.json", "w") as outfile:
+      json.dump(mockStudents, outfile, indent=2)
 
   return mockStudents
 

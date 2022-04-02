@@ -2,8 +2,9 @@
 import sys
 import json
 import math
-from courses import courses, activeCourses
-from mockStudents import generateMockStudents
+from courses import mockCourses, activeCourses
+from mockStudents import generateMockStudents, getSampleStudents
+from generateCourses import getSampleCourses
 
 
 '''
@@ -66,10 +67,10 @@ def generateScheduleV1():
   for student in mockStudents:
     # Tally class request
     for request in student["requests"]:
-      courses[request]["totalrequests"] += 1
-      courses[request]["studentindexes"].append(mockStudents.index(student))
+      mockCourses[request]["totalrequests"] += 1
+      mockCourses[request]["studentindexes"].append(mockStudents.index(student))
       # Add course to active list if enough requests
-      if courses[request]["totalrequests"] > minReq and courses[request]["code"] not in activeCourses: activeCourses[courses[request]["code"]] = courses[request]
+      if mockCourses[request]["totalrequests"] > minReq and mockCourses[request]["code"] not in activeCourses: activeCourses[mockCourses[request]["code"]] = mockCourses[request]
 
   for student in mockStudents:
     alternateOffset = len(student["requests"])-8
@@ -85,7 +86,7 @@ def generateScheduleV1():
           getFreeBlock = True
           while getFreeBlock:
             block = f"block{blockIndex}"
-            cname = f"{courses[currentCourse]['name']}-{courseNum}"
+            cname = f"{mockCourses[currentCourse]['name']}-{courseNum}"
             if cname in running[block]:
               if student["schedule"][block] == "": # Add student to class
                 if len(running[block][cname]["students"]) < classCap:
@@ -110,7 +111,7 @@ def generateScheduleV1():
                         generate = False
                     getFreeBlock = False
                   else:
-                    if (courses[currentCourse]["teachers"] - courseNum) > 0:
+                    if (mockCourses[currentCourse]["teachers"] - courseNum) > 0:
                       courseNum += 1
                     else:
                       blockIndex += 1
@@ -146,7 +147,7 @@ def generateScheduleV1():
                   if cname not in running[newBlock] and len(running[newBlock]) < blockClassLimit:
                     if student["schedule"][newBlock] == "": # Add student to class
                       running[newBlock][cname] = {
-                        "name": courses[currentCourse]["name"],
+                        "name": mockCourses[currentCourse]["name"],
                         "students": [student["name"]]
                       }
                       student["schedule"][newBlock] = cname
@@ -165,7 +166,7 @@ def generateScheduleV1():
                       err2 += 1
                       break
                     else:
-                      if (courses[currentCourse]["teachers"] - courseNum) > 0:
+                      if (mockCourses[currentCourse]["teachers"] - courseNum) > 0:
                         courseNum += 1
                       else:
                         blockNum += 1
@@ -200,10 +201,10 @@ def generateScheduleV2():
   for student in mockStudents:
     # Tally class request
     for request in student["requests"]:
-      courses[request]["totalrequests"] += 1
-      courses[request]["studentindexes"].append(mockStudents.index(student))
+      mockCourses[request]["totalrequests"] += 1
+      mockCourses[request]["studentindexes"].append(mockStudents.index(student))
       # Add course to active list if enough requests
-      if courses[request]["totalrequests"] > minReq and courses[request]["code"] not in activeCourses: activeCourses[courses[request]["code"]] = courses[request]
+      if mockCourses[request]["totalrequests"] > minReq and mockCourses[request]["code"] not in activeCourses: activeCourses[mockCourses[request]["code"]] = mockCourses[request]
 
   # calculate # of times to run class
   for i in range(len(activeCourses)):
@@ -249,7 +250,7 @@ def generateScheduleV2():
         if currentCourse in activeCourses:
           blockIndex = 1
           getFreeBlock = True
-          cname = f"{courses[currentCourse]['name']}-{courseNum}"
+          cname = f"{mockCourses[currentCourse]['name']}-{courseNum}"
           while getFreeBlock:
             block = f"block{blockIndex}"
             if cname in running[block]:
@@ -304,7 +305,7 @@ def generateScheduleV2():
                       generate = False
                   getFreeBlock = False
                 else:
-                  if (courses[currentCourse]["teachers"] - courseNum) > 0:
+                  if (mockCourses[currentCourse]["teachers"] - courseNum) > 0:
                     courseNum += 1
                   else:
                     blockIndex += 1
@@ -322,7 +323,7 @@ def generateScheduleV2():
                   generate = False
                 break
               else:
-                if (courses[currentCourse]["teachers"] - courseNum) > 0:
+                if (mockCourses[currentCourse]["teachers"] - courseNum) > 0:
                   courseNum += 1
                 else:
                   blockIndex += 1
@@ -351,46 +352,54 @@ def generateScheduleV2():
 # It starts by trying to get all classes full and give all students a full class list.
 # Then it starts to attempt to fit all classes into a timetable, making corretions along
 # the way. Corrections being moving a students class
-def generateScheduleV3():
+def generateScheduleV3(students, courses):
   # Step 1 - Calculate which classes can run
   global err1, err2
   # Collect data and calculate schedules
-  for student in mockStudents:
+  for student in students:
     # Tally class request
     for request in student["requests"]:
-      courses[request]["totalrequests"] += 1
-      courses[request]["studentindexes"].append(mockStudents.index(student))
-      # Add course to active list if enough requests
-      if courses[request]["totalrequests"] > minReq and courses[request]["code"] not in activeCourses: activeCourses[courses[request]["code"]] = courses[request]
+      if not bool([i for i in ["XAT--12A-S", "XAT--12B-S"] if (i in request["CrsNo"])]):
+        code = request["CrsNo"]
+        courses[code]["Requests"] += 1
+        # Add course to active list if enough requests
+        if courses[code]["Requests"] > minReq and courses[code]["CrsNo"] not in activeCourses: activeCourses[code] = courses[code]
 
   # Step 2 - Generate class list without timetable
   selectedCourses = {}
   # calculate # of times to run class
   for i in range(len(activeCourses)):
     index = list(activeCourses)[i]
-    classRunCount = math.floor(activeCourses[index]["totalrequests"] / classCap)
+    classRunCount = math.floor(activeCourses[index]["Requests"] / classCap)
     # If there is minReq+ requests left, 1 more class could be run
-    if (activeCourses[index]["totalrequests"] % classCap) > minReq: classRunCount += 1
+    if (activeCourses[index]["Requests"] % classCap) > minReq: classRunCount += 1
     activeCourses[index]["classRunCount"] = classRunCount
     classNum = classRunCount
-    for student in mockStudents:
-      alternateOffset = len(student["requests"])-8
-      for j in range(len(student["requests"])-alternateOffset): # Subtract x classes as they are alternatives
-        currentCourse = student["requests"][j]
-        if currentCourse == activeCourses[index]["code"]:
-          cname = f"{activeCourses[index]['name']}-{classNum-(classRunCount-1)}"
+    
+    for student in students:
+      for request in (request for request in student["requests"] if not request["alt"]):
+        currentCourse = request["CrsNo"]
+        if currentCourse == activeCourses[index]["CrsNo"]:
+          cname = f"{activeCourses[index]['Description']}-{classNum-(classRunCount-1)}"
           if cname in selectedCourses:
-            if student["name"] not in selectedCourses[cname]["students"]:
+            if student["Pupil #"] not in selectedCourses[cname]["students"]:
               if len(selectedCourses[cname]["students"]) < classCap:
                 # Class exists and there is room
-                selectedCourses[cname]["students"].append(student["name"])
+                selectedCourses[cname]["students"].append(student["Pupil #"])
               elif len(selectedCourses[cname]["students"]) == classCap:
                 classRunCount -= 1
           elif cname not in selectedCourses:
             selectedCourses[cname] = {
-              "students": [student["name"]],
-              "code": currentCourse
+              "students": [student["Pupil #"]],
+              "CrsNo": currentCourse,
+              "Description": courses[currentCourse]["Description"]
             }
+
+  for course in selectedCourses:
+    print("Class: ", selectedCourses[course]["Description"])
+    print("Students: ", len(selectedCourses[course]["students"]), "\n")
+  print("==============================")
+  print("Total: ", len(selectedCourses))
 
   with open("classes.json", "w") as outfile:
     json.dump(selectedCourses, outfile, indent=2)
@@ -398,7 +407,7 @@ def generateScheduleV3():
   # Step 3 - Attempt to fit classes into timetable
 
   # Step 4 - Evaluate, move classes or students to fix
-  
+  return []
 
 if __name__ == '__main__':
   if len(sys.argv) == 1:
@@ -425,23 +434,18 @@ if __name__ == '__main__':
     mockStudents = generateMockStudents(studentsNum)
     generateScheduleV2()
   elif sys.argv[1].upper() == 'V3':
-    if len(sys.argv) == 3:
-      try:
-        studentsNum = int(sys.argv[2])
-      except:
-        print("Error parsing number of students")
-        exit()
     print("Processing...")
-    mockStudents = generateMockStudents(studentsNum)
-    generateScheduleV3()
-  else: 
+    sampleStudents = getSampleStudents(True)
+    samplemockCourses = getSampleCourses(True) 
+    coursesList = generateScheduleV3(sampleStudents, samplemockCourses)
+  else:
     print("Invalid argument")
     exit()
 
-  print("\n")
-  print(f"Error 1: x{err1}")
-  print(f"Error 2: x{err2}")
-  print("\n")
+  # print("\n")
+  # print(f"Error 1: x{err1}")
+  # print(f"Error 2: x{err2}")
+  # print("\n")
 
   ### Displays the number of students in each class
   # for block in running:
@@ -453,20 +457,20 @@ if __name__ == '__main__':
   #     print(f"Class: {name} | Students: {students}")
 
   # Count errors in students schedules
-  errors = 0
-  for i in range(len(mockStudents)):
-    count = 0
-    for course in mockStudents[i]["schedule"]:
-      if mockStudents[i]["schedule"][course]=="": count+=1
-    if count > 0: errors += 1
+  # errors = 0
+  # for i in range(len(mockStudents)):
+  #   count = 0
+  #   for course in mockStudents[i]["schedule"]:
+  #     if mockStudents[i]["schedule"][course]=="": count+=1
+  #   if count > 0: errors += 1
   
-  print(f"{errors}/{studentsNum} student(s) have a issue with their schedule")
+  # print(f"{errors}/{studentsNum} student(s) have a issue with their schedule")
 
 
-  with open("schedule.json", "w") as outfile:
-    json.dump(running, outfile, indent=2)
+  # with open("schedule.json", "w") as outfile:
+  #   json.dump(running, outfile, indent=2)
 
-  with open("students.json", "w") as outfile:
-    json.dump(mockStudents, outfile, indent=2)
+  # with open("students.json", "w") as outfile:
+  #   json.dump(mockStudents, outfile, indent=2)
 
   print("Done")

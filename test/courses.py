@@ -1,4 +1,4 @@
-courses = {
+mockCourses = {
   "P-CL": {
     "name": "Pre-Calculus",
     "code": "P-CL",

@@ -47,7 +47,7 @@ running: {
 studentsNum = 340
 
 err1, err2, = 0,0
-minReq, classCap, blockClassLimit = 18, 30, 12
+minReq, median, classCap, blockClassLimit = 18, 24, 30, 12
 mockStudents = []
 running = {
   "block1": {},
@@ -359,21 +359,39 @@ def generateScheduleV3(students, courses):
   for student in students:
     # Tally class request
     for request in student["requests"]:
-      if not bool([i for i in ["XAT--12A-S", "XAT--12B-S"] if (i in request["CrsNo"])]):
+      if not bool([i for i in ["XAT--12A-S", "XAT--12B-S"] if (i in request["CrsNo"])]): # Filters any requested study blocks (flex: no class block)
         code = request["CrsNo"]
         courses[code]["Requests"] += 1
         # Add course to active list if enough requests
-        if courses[code]["Requests"] > minReq and courses[code]["CrsNo"] not in activeCourses: activeCourses[code] = courses[code]
-
+        if courses[code]["Requests"] > 12 and courses[code]["CrsNo"] not in activeCourses:
+          activeCourses[code] = courses[code]
+          
   # Step 2 - Generate class list without timetable
   selectedCourses = {}
   # calculate # of times to run class
   for i in range(len(activeCourses)):
     index = list(activeCourses)[i]
-    classRunCount = math.floor(activeCourses[index]["Requests"] / classCap)
-    # If there is minReq+ requests left, 1 more class could be run
-    if (activeCourses[index]["Requests"] % classCap) > minReq: classRunCount += 1
-    activeCourses[index]["classRunCount"] = classRunCount
+    classRunCount = math.floor(activeCourses[index]["Requests"] / median)
+    remaining = activeCourses[index]["Requests"] % median
+
+    if remaining <= (classCap - median):
+      for j in classRunCount:
+        pass
+        # Equally disperse remaining into classRunCount
+
+    # Elif we can fit them in, and there is more than 12, drain classRunCount
+    # to fill another class, add 1 to classRunCount
+
+    # else fold students into another class (alternate?)
+
+    if remaining >= minReq: classRunCount += 1
+    elif 6 <= remaining < minReq:
+      evenClasses = True if classRunCount > 0 else False
+      offset = classRunCount
+      while evenClasses:
+        lastIndex = list(activeCourses)[len(activeCourses)-offset]
+
+
     classNum = classRunCount
     
     for student in students:
@@ -395,11 +413,11 @@ def generateScheduleV3(students, courses):
               "Description": courses[currentCourse]["Description"]
             }
 
-  for course in selectedCourses:
-    print("Class: ", selectedCourses[course]["Description"])
-    print("Students: ", len(selectedCourses[course]["students"]), "\n")
-  print("==============================")
-  print("Total: ", len(selectedCourses))
+  # for course in selectedCourses:
+  #   print("Class: ", selectedCourses[course]["Description"])
+  #   print("Students: ", len(selectedCourses[course]["students"]), "\n")
+  # print("==============================")
+  # print("Total: ", len(selectedCourses))
 
   with open("classes.json", "w") as outfile:
     json.dump(selectedCourses, outfile, indent=2)

@@ -355,7 +355,6 @@ def generateScheduleV2():
 def generateScheduleV3(students, courses):
   # Step 1 - Calculate which classes can run
   global err1, err2
-  # Collect data and calculate schedules
   for student in students:
     # Tally class request
     for request in student["requests"]:
@@ -363,35 +362,45 @@ def generateScheduleV3(students, courses):
         code = request["CrsNo"]
         courses[code]["Requests"] += 1
         # Add course to active list if enough requests
-        if courses[code]["Requests"] > 12 and courses[code]["CrsNo"] not in activeCourses:
+        if courses[code]["Requests"] > minReq and courses[code]["CrsNo"] not in activeCourses:
           activeCourses[code] = courses[code]
           
   # Step 2 - Generate class list without timetable
   selectedCourses = {}
+  emptyClasses = {} # List of all classes with how many students should be entered during generation
   # calculate # of times to run class
   for i in range(len(activeCourses)):
     index = list(activeCourses)[i]
+    if index not in emptyClasses: emptyClasses[index] = {}
     classRunCount = math.floor(activeCourses[index]["Requests"] / median)
     remaining = activeCourses[index]["Requests"] % median
 
-    if remaining <= (classCap - median):
-      for j in classRunCount:
-        pass
-        # Equally disperse remaining into classRunCount
+    # Put # of classRunCount classes in emptyClasses
+    for j in classRunCount:
+      emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"] = {
+        "CrsNo": index,
+        "Description": activeCourses[index]["Description"],
+        "expectedLen": median # Number of students expected in this class / may be altered
+      }
+    SomeCondition = True # Just so I don't get an error
 
-    # Elif we can fit them in, and there is more than 12, drain classRunCount
-    # to fill another class, add 1 to classRunCount
+    # If remaining fit in open slots in existing classes
+    # equally disperse remaining into existing classes
+    if remaining <= classRunCount * (classCap - median): 
+      for j in classRunCount:
+        # TODO: Equally disperse remaining into existing classes
+        pass
+
+    # Else if we can't fit remaining in, 
+    # and there is more than 12, equally drain expectedLen from each classRunCount
+    # to fill another class, add 1 to classRunCount        
+    elif remaining > classRunCount * (classCap - median) and SomeCondition:
+      pass
 
     # else fold students into another class (alternate?)
 
-    if remaining >= minReq: classRunCount += 1
-    elif 6 <= remaining < minReq:
-      evenClasses = True if classRunCount > 0 else False
-      offset = classRunCount
-      while evenClasses:
-        lastIndex = list(activeCourses)[len(activeCourses)-offset]
-
-
+    #=================================================================
+ 
     classNum = classRunCount
     
     for student in students:

@@ -371,6 +371,8 @@ def generateScheduleV3(students, courses):
           activeCourses[code] = courses[code]
           
   # Step 2 - Generate class list without timetable
+
+  # Step 2 part A
   existingClasses = []
   selectedCourses = {}
   emptyClasses = {} # List of all classes with how many students should be entered during generation
@@ -451,6 +453,7 @@ def generateScheduleV3(students, courses):
           emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"]["expectedLen"] += 1
           remaining -= 1
 
+  # Step 2 part B
   tempStudents = students
   while len(tempStudents) > 0:
     student = tempStudents[random.randint(0, len(students)-1)]

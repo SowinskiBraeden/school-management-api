@@ -353,6 +353,10 @@ def generateScheduleV2():
 # Then it starts to attempt to fit all classes into a timetable, making corretions along
 # the way. Corrections being moving a students class
 def generateScheduleV3(students, courses):
+  def equal(l): # Used to equalize list of numbers
+    q,r = divmod(sum(l),len(l))
+    return [q+1]*r + [q]*(len(l)-r)
+
   # Step 1 - Calculate which classes can run
   global err1, err2
   for student in students:
@@ -376,31 +380,75 @@ def generateScheduleV3(students, courses):
     remaining = activeCourses[index]["Requests"] % median
 
     # Put # of classRunCount classes in emptyClasses
-    for j in classRunCount:
+    for j in range(classRunCount):
       emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"] = {
         "CrsNo": index,
         "Description": activeCourses[index]["Description"],
         "expectedLen": median # Number of students expected in this class / may be altered
       }
-    SomeCondition = True # Just so I don't get an error
 
     # If remaining fit in open slots in existing classes
-    # equally disperse remaining into existing classes
     if remaining <= classRunCount * (classCap - median): 
-      for j in classRunCount:
-        # TODO: Equally disperse remaining into existing classes
-        pass
+      # Equally disperse remaining into existing classes
+      for j in range(classRunCount):
+        if remaining == 0: break
+        emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"]["expectedLen"] += 1
+        remaining -= 1
 
-    # Else if we can't fit remaining in, 
-    # and there is more than 12, equally drain expectedLen from each classRunCount
-    # to fill another class, add 1 to classRunCount        
-    elif remaining > classRunCount * (classCap - median) and SomeCondition:
-      pass
+    # Else if the remaining can create a class
+    elif remaining >= minReq:
+      # Create a class using remaining
+      emptyClasses[index][f"{activeCourses[index]['Description']}-{classRunCount}"] = {
+        "CrsNo": index,
+        "Description": activeCourses[index]["Description"],
+        "expectedLen": remaining
+      }
+      
+      classRunCount += 1
+      
+      # Equalize (level) class expectedLen's
+      expectedLengths = [emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"]["expectedLen"] for j in range(classRunCount)]
+      newExpectedLens = equal(expectedLengths)
+      for j in range(len(newExpectedLens)):
+        emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"]["expectedLen"] = newExpectedLens[j]
 
-    # else fold students into another class (alternate?)
+    # Else if we can't fit remaining in open slots in existing classes
+    # and it is unable to create its own class,
+    # and requiered number to make a class is less than the max number we can provide from existing classes
+    elif minReq - remaining < classRunCount * (median - minReq):
+      # Take 1 from each class till min requirment met
+      for j in range(classRunCount):
+        emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"]["expectedLen"] -= 1
+        remaining += 1
+        if remaining == minReq: break
+
+      # Create a class using remaining
+      emptyClasses[index][f"{activeCourses[index]['Description']}-{classRunCount}"] = {
+        "CrsNo": index,
+        "Description": activeCourses[index]["Description"],
+        "expectedLen": remaining
+      }
+      
+      classRunCount += 1
+
+      # Equalize (level) class expectedLen's
+      expectedLengths = [emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"]["expectedLen"] for j in range(classRunCount)]
+      newExpectedLens = equal(expectedLengths)
+      for j in range(len(newExpectedLens)):
+        emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"]["expectedLen"] = newExpectedLens[j]
+
+    else:
+      print("rem: ", remaining)
+      print("running: ", classRunCount)
+      # I don't think it is possible to get to this point
+      # but just in case
+      print("Unhandled error!!!!!")
+
+    # print(emptyClasses)
 
     #=================================================================
- 
+    pass
+
     classNum = classRunCount
     
     for student in students:

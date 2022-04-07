@@ -2,6 +2,7 @@
 import sys
 import json
 import math
+import random
 from courses import mockCourses, activeCourses
 from mockStudents import generateMockStudents, getSampleStudents
 from generateCourses import getSampleCourses
@@ -370,6 +371,7 @@ def generateScheduleV3(students, courses):
           activeCourses[code] = courses[code]
           
   # Step 2 - Generate class list without timetable
+  existingClasses = []
   selectedCourses = {}
   emptyClasses = {} # List of all classes with how many students should be entered during generation
   # calculate # of times to run class
@@ -378,6 +380,8 @@ def generateScheduleV3(students, courses):
     if index not in emptyClasses: emptyClasses[index] = {}
     classRunCount = math.floor(activeCourses[index]["Requests"] / median)
     remaining = activeCourses[index]["Requests"] % median
+
+    if classRunCount >= 1: existingClasses.append(index)
 
     # Put # of classRunCount classes in emptyClasses
     for j in range(classRunCount):
@@ -438,37 +442,65 @@ def generateScheduleV3(students, courses):
         emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"]["expectedLen"] = newExpectedLens[j]
 
     else:
-      print("rem: ", remaining)
-      print("running: ", classRunCount)
-      # I don't think it is possible to get to this point
-      # but just in case
-      print("Unhandled error!!!!!")
+      # In the case that the remaining requests are unable to be resolved
+      # Fill as many requests into class as possible, any left that can't fit,
+      # Will need to be ignored so later we can fold them into their alternative
+      # choices
+      for j in range(classRunCount):
+        if emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"]["expectedLen"] < classCap and remaining > 0: 
+          emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"]["expectedLen"] += 1
+          remaining -= 1
 
-    # print(emptyClasses)
-
-    #=================================================================
-    pass
-
-    classNum = classRunCount
-    
-    for student in students:
-      for request in (request for request in student["requests"] if not request["alt"]):
-        currentCourse = request["CrsNo"]
-        if currentCourse == activeCourses[index]["CrsNo"]:
-          cname = f"{activeCourses[index]['Description']}-{classNum-(classRunCount-1)}"
-          if cname in selectedCourses:
-            if student["Pupil #"] not in selectedCourses[cname]["students"]:
-              if len(selectedCourses[cname]["students"]) < classCap:
+  tempStudents = students
+  while len(tempStudents) > 0:
+    student = tempStudents[random.randint(0, len(students)-1)]
+  
+    altOffset = 0
+    alternates = [request for request in student["requests"] if request["alt"]]
+    for request in (request for request in student["requests"] if not request["alt"] and request not in ["XAT--12A-S", "XAT--12B-S"]):
+      course = request["CrsNo"]
+      if course in existingClasses:
+        done = False
+        while not done:
+          breakCname = False
+          for cname in emptyClasses[course]:
+            if breakCname: break
+            if cname in selectedCourses:
+              if len(selectedCourses[cname]["students"]) < emptyClasses[course][cname]["expectedLen"]:
                 # Class exists and there is room
                 selectedCourses[cname]["students"].append(student["Pupil #"])
-              elif len(selectedCourses[cname]["students"]) == classCap:
-                classRunCount -= 1
-          elif cname not in selectedCourses:
-            selectedCourses[cname] = {
-              "students": [student["Pupil #"]],
-              "CrsNo": currentCourse,
-              "Description": courses[currentCourse]["Description"]
-            }
+                done = True
+                breakCname = True
+              elif len(selectedCourses[cname]["students"]) == emptyClasses[course][cname]["expectedLen"]:
+                # Class exists and there no room
+                
+                # If this is the last class in that course, fold student to alternate
+                if cname[len(cname)-1] == str((len(emptyClasses[course])-1)):
+                  for i in range(len(alternates)):
+                    if i == altOffset:
+                      if i < len(alternates)-1:
+                        done = True # force stop to move to next class
+                      else:
+                        course = alternates[i]
+                        altOffset += 1 # Change offset in case we need another alternate
+                  breakCname = True
+
+
+            elif cname not in selectedCourses:
+              selectedCourses[cname] = {
+                "students": [student["Pupil #"]],
+                "CrsNo": course,
+                "Description": courses[course]["Description"]
+              }
+              done = True
+              breakCname = True
+
+      
+      else:
+        #use alternate
+        print("use alternate")
+
+    tempStudents.remove(student)
 
   # for course in selectedCourses:
   #   print("Class: ", selectedCourses[course]["Description"])

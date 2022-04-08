@@ -397,6 +397,8 @@ def generateScheduleV3(students, courses):
           emptyClasses[index][f"{index}-{j}"]["expectedLen"] += 1
           remaining -= 1
 
+    # If we can create a class using remaining, but no other classes
+    # exists, create class, and do not equalize
     elif remaining >= minReq and classRunCount == 0:
       # Create a class using remaining
       emptyClasses[index][f"{index}-{classRunCount}"] = {
@@ -517,6 +519,10 @@ def generateScheduleV3(students, courses):
             getAvailableCourse = False
           
     tempStudents.remove(student)
+
+  
+  with open("classes.json", "w") as outfile:
+    json.dump(selectedCourses, outfile, indent=2)
 
   # Step 4 - Attempt to fit classes into timetable
 

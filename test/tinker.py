@@ -3,6 +3,7 @@ import sys
 import json
 import math
 import random
+from xml.etree.ElementTree import TreeBuilder
 from courses import mockCourses, activeCourses
 from mockStudents import generateMockStudents, getSampleStudents
 from generateCourses import getSampleCourses
@@ -370,11 +371,7 @@ def generateScheduleV3(students, courses):
         if courses[code]["Requests"] > minReq and courses[code]["CrsNo"] not in activeCourses:
           activeCourses[code] = courses[code]
           
-  # Step 2 - Generate class list without timetable
-
-  # Step 2 part A
-  existingClasses = []
-  selectedCourses = {}
+  # Step 2 - Generate empty classes
   emptyClasses = {} # List of all classes with how many students should be entered during generation
   # calculate # of times to run class
   for i in range(len(activeCourses)):
@@ -383,28 +380,38 @@ def generateScheduleV3(students, courses):
     classRunCount = math.floor(activeCourses[index]["Requests"] / median)
     remaining = activeCourses[index]["Requests"] % median
 
-    if classRunCount >= 1: existingClasses.append(index)
-
     # Put # of classRunCount classes in emptyClasses
     for j in range(classRunCount):
-      emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"] = {
+      emptyClasses[index][f"{index}-{j}"] = {
         "CrsNo": index,
         "Description": activeCourses[index]["Description"],
         "expectedLen": median # Number of students expected in this class / may be altered
       }
 
     # If remaining fit in open slots in existing classes
-    if remaining <= classRunCount * (classCap - median): 
+    if remaining <= classRunCount * (classCap - median):
       # Equally disperse remaining into existing classes
-      for j in range(classRunCount):
-        if remaining == 0: break
-        emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"]["expectedLen"] += 1
-        remaining -= 1
+      while remaining > 0:
+        for j in range(classRunCount):
+          if remaining == 0: break
+          emptyClasses[index][f"{index}-{j}"]["expectedLen"] += 1
+          remaining -= 1
+
+    elif remaining >= minReq and classRunCount == 0:
+      # Create a class using remaining
+      emptyClasses[index][f"{index}-{classRunCount}"] = {
+        "CrsNo": index,
+        "Description": activeCourses[index]["Description"],
+        "expectedLen": remaining
+      }
+      
+      classRunCount += 1
+
 
     # Else if the remaining can create a class
-    elif remaining >= minReq:
+    elif remaining >= minReq and classRunCount > 0:
       # Create a class using remaining
-      emptyClasses[index][f"{activeCourses[index]['Description']}-{classRunCount}"] = {
+      emptyClasses[index][f"{index}-{classRunCount}"] = {
         "CrsNo": index,
         "Description": activeCourses[index]["Description"],
         "expectedLen": remaining
@@ -413,10 +420,10 @@ def generateScheduleV3(students, courses):
       classRunCount += 1
       
       # Equalize (level) class expectedLen's
-      expectedLengths = [emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"]["expectedLen"] for j in range(classRunCount)]
+      expectedLengths = [emptyClasses[index][f"{index}-{j}"]["expectedLen"] for j in range(classRunCount)]
       newExpectedLens = equal(expectedLengths)
       for j in range(len(newExpectedLens)):
-        emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"]["expectedLen"] = newExpectedLens[j]
+        emptyClasses[index][f"{index}-{j}"]["expectedLen"] = newExpectedLens[j]
 
     # Else if we can't fit remaining in open slots in existing classes
     # and it is unable to create its own class,
@@ -424,12 +431,12 @@ def generateScheduleV3(students, courses):
     elif minReq - remaining < classRunCount * (median - minReq):
       # Take 1 from each class till min requirment met
       for j in range(classRunCount):
-        emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"]["expectedLen"] -= 1
+        emptyClasses[index][f"{index}-{j}"]["expectedLen"] -= 1
         remaining += 1
         if remaining == minReq: break
 
       # Create a class using remaining
-      emptyClasses[index][f"{activeCourses[index]['Description']}-{classRunCount}"] = {
+      emptyClasses[index][f"{index}-{classRunCount}"] = {
         "CrsNo": index,
         "Description": activeCourses[index]["Description"],
         "expectedLen": remaining
@@ -438,10 +445,10 @@ def generateScheduleV3(students, courses):
       classRunCount += 1
 
       # Equalize (level) class expectedLen's
-      expectedLengths = [emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"]["expectedLen"] for j in range(classRunCount)]
+      expectedLengths = [emptyClasses[index][f"{index}-{j}"]["expectedLen"] for j in range(classRunCount)]
       newExpectedLens = equal(expectedLengths)
       for j in range(len(newExpectedLens)):
-        emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"]["expectedLen"] = newExpectedLens[j]
+        emptyClasses[index][f"{index}-{j}"]["expectedLen"] = newExpectedLens[j]
 
     else:
       # In the case that the remaining requests are unable to be resolved
@@ -449,45 +456,46 @@ def generateScheduleV3(students, courses):
       # Will need to be ignored so later we can fold them into their alternative
       # choices
       for j in range(classRunCount):
-        if emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"]["expectedLen"] < classCap and remaining > 0: 
-          emptyClasses[index][f"{activeCourses[index]['Description']}-{j}"]["expectedLen"] += 1
+        if emptyClasses[index][f"{index}-{j}"]["expectedLen"] < classCap and remaining > 0: 
+          emptyClasses[index][f"{index}-{j}"]["expectedLen"] += 1
           remaining -= 1
 
-  # Step 2 part B
+  # Step 3 Fill emptyClasses with Students
+  selectedCourses = {}
   tempStudents = students
+  
   while len(tempStudents) > 0:
     student = tempStudents[random.randint(0, len(students)-1)]
-  
-    altOffset = 0
+
     alternates = [request for request in student["requests"] if request["alt"]]
+    altOffset = None
+    if len(alternates) > 0: altOffset = 0
     for request in (request for request in student["requests"] if not request["alt"] and request not in ["XAT--12A-S", "XAT--12B-S"]):
       course = request["CrsNo"]
-      if course in existingClasses:
-        done = False
-        while not done:
-          breakCname = False
+      getAvailableCourse = True
+      while getAvailableCourse:
+        if course in emptyClasses: 
+          # if course exists, get first available class
           for cname in emptyClasses[course]:
-            if breakCname: break
             if cname in selectedCourses:
               if len(selectedCourses[cname]["students"]) < emptyClasses[course][cname]["expectedLen"]:
-                # Class exists and there is room
+                # Class exists with room for student
                 selectedCourses[cname]["students"].append(student["Pupil #"])
-                done = True
-                breakCname = True
+                getAvailableCourse = False
+                break
               elif len(selectedCourses[cname]["students"]) == emptyClasses[course][cname]["expectedLen"]:
-                # Class exists and there no room
-                
-                # If this is the last class in that course, fold student to alternate
-                if cname[len(cname)-1] == str((len(emptyClasses[course])-1)):
-                  for i in range(len(alternates)):
-                    if i == altOffset:
-                      if i < len(alternates)-1:
-                        done = True # force stop to move to next class
-                      else:
-                        course = alternates[i]
-                        altOffset += 1 # Change offset in case we need another alternate
-                  breakCname = True
-
+                # If class is full, and is last class of that course
+                if cname[len(cname)-1] == f"{len(emptyClasses[course])-1}":
+                  if altOffset is not None and altOffset <= len(alternates)-1:
+                    # Use alternate
+                    course = alternates[altOffset]["CrsNo"]
+                    altOffset += 1
+                    break
+                  else:
+                    # Force break loop, ignore and let an admin
+                    # handle options to solve for missing class
+                    getAvailableCourse = False
+                    break
 
             elif cname not in selectedCourses:
               selectedCourses[cname] = {
@@ -495,28 +503,25 @@ def generateScheduleV3(students, courses):
                 "CrsNo": course,
                 "Description": courses[course]["Description"]
               }
-              done = True
-              breakCname = True
+              getAvailableCourse = False
+              break
 
-      
-      else:
-        #use alternate
-        print("use alternate")
-
+        elif course not in emptyClasses:
+          if altOffset is not None and altOffset <= len(alternates)-1:
+            # Use alternate
+            course = alternates[altOffset]["CrsNo"]
+            altOffset += 1
+          else:
+            # Force break loop, ignore and let an admin
+            # handle options to solve for missing class
+            getAvailableCourse = False
+          
     tempStudents.remove(student)
 
-  # for course in selectedCourses:
-  #   print("Class: ", selectedCourses[course]["Description"])
-  #   print("Students: ", len(selectedCourses[course]["students"]), "\n")
-  # print("==============================")
-  # print("Total: ", len(selectedCourses))
+  # Step 4 - Attempt to fit classes into timetable
 
-  with open("classes.json", "w") as outfile:
-    json.dump(selectedCourses, outfile, indent=2)
 
-  # Step 3 - Attempt to fit classes into timetable
-
-  # Step 4 - Evaluate, move classes or students to fix
+  # Step 5 - Evaluate, move classes or students to fix
   return []
 
 if __name__ == '__main__':

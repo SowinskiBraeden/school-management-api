@@ -4,10 +4,9 @@ import csv
 
 realCourses = {}
 
-
 # Get all courses from real sample data
-def getSampleCourses(log=False):
-  with open("course_selection_data.csv", newline='') as csvfile:
+def getSampleCourses(data_dir, log=False):
+  with open(data_dir, newline='') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
       exists = False
@@ -20,19 +19,18 @@ def getSampleCourses(log=False):
           "Requests": 0,
           "Description": row["Description"],
           "Credits": 4,
-          "Teachers": 3,
           "students": []
         }
 
   if log:
-    with open("realCourses.json", "w") as outfile:
+    with open("./output/realCourses.json", "w") as outfile:
       json.dump(realCourses, outfile, indent=2)
         
   return realCourses
 
 
 if __name__ == '__main__':
-  courseSet = getSampleCourses()
+  courseSet = getSampleCourses("../sample_data/course_selection_data.csv")
 
-  with open("realCourses.json", "w") as outfile:
+  with open("../output/realCourses.json", "w") as outfile:
     json.dump(courseSet, outfile, indent=2)

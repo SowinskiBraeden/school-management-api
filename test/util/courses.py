@@ -1,3 +1,5 @@
+# Fake sample data
+
 mockCourses = {
   "P-CL": {
     "name": "Pre-Calculus",

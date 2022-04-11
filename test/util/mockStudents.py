@@ -3,7 +3,8 @@ import random
 import names
 import json
 import csv
-from courses import mockCourses
+import sys
+from util.courses import mockCourses
 
 mockStudents = []
 
@@ -35,8 +36,8 @@ def generateMockStudents(n):
 
 
 # sort real sample data into usable dictionary
-def getSampleStudents(log=False):
-  with open("course_selection_data.csv", newline='') as csvfile:
+def getSampleStudents(data_dir, log=False):
+  with open(data_dir, newline='') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
       exists = False
@@ -73,14 +74,28 @@ def getSampleStudents(log=False):
         mockStudents.append(newStudent)
 
   if log:
-    with open("students.json", "w") as outfile:
+    with open("./output/students.json", "w") as outfile:
       json.dump(mockStudents, outfile, indent=2)
 
   return mockStudents
 
 
 if __name__ == '__main__':
-  studentRequests = getSampleStudents()
+  if len(sys.argv) == 1:
+    print("Missing argument")
+    exit()
+  if sys.argv[1].lower() == 'sample':
+    studentRequests = getSampleStudents("../sample_data/course_selection_data.csv")
 
-  with open("students.json", "w") as outfile:
-    json.dump(studentRequests, outfile, indent=2)
+    with open("../output/students.json", "w") as outfile:
+      json.dump(studentRequests, outfile, indent=2)
+  elif sys.argv[1].lower() == 'mock':
+    studentRequests = generateMockStudents(400)
+
+    with open("../output/students.json", "w") as outfile:
+      json.dump(studentRequests, outfile, indent=2)
+  else:
+    print("Invalid argument")
+    exit()
+
+  print("done")

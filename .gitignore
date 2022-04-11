@@ -3,13 +3,14 @@
 
 # Pycache
 /test/__pycache__/*
+/test/util/__pycache__/*
+/test/scheduleGenerator/__pycache__/*
+
+# Test
+/test/test.py
 
 # Test output
-/test/schedule.json
-/test/students.json
-/test/classes.json
-/test/realCourses.json
+/test/output/*
 
 # Sample Data
-/test/course_selection_data.csv
-/test/course_Selection_data_table.txt
+/test/sample_data/*

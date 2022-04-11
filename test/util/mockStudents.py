@@ -67,7 +67,9 @@ def getSampleStudents(data_dir, log=False):
             "block5": "",
             "block6": "",
             "block7": "",
-            "block8": ""
+            "block8": "",
+            "block9": "",
+            "block10": ""
           },
           "studentIndex": len(mockStudents)
         }

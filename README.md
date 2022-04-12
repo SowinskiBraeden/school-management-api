@@ -14,6 +14,8 @@ this on as a full project to work on for my Software Engineering class and is no
 work on this till completion, starting with this API, and then the front end, learning new tricks and languages
 along the way.
 
+I highly recommend looking at the testing for [schedule generation](/test/scheduleGenerator), [version 3](/test/scheduleGenerator/v3.py)
+
 ## Future Plans
 
 After the majority completion of vital api functionalities such as the ability to update information, create new

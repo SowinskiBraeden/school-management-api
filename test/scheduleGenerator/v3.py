@@ -36,7 +36,7 @@ from util.generateCourses import getSampleCourses
   }
 '''
 
-minReq, median, classCap, blockClassLimit = 18, 24, 30, 12
+minReq, median, classCap, blockClassLimit = 18, 24, 30, 26
 mockStudents = []
 activeCourses = {}
 running = {
@@ -65,7 +65,6 @@ def generateScheduleV3(students, courses):
 
 
   # Step 1 - Calculate which classes can run
-  global err1, err2
   for student in students:
     # Tally class request
     for request in student["requests"]:
@@ -78,6 +77,8 @@ def generateScheduleV3(students, courses):
 
 
   # Step 2 - Generate empty classes
+  allClassRunCounts = []
+  courseRunInfo = {} # Generated now, used in step 4
   emptyClasses = {} # List of all classes with how many students should be entered during generation
   # calculate # of times to run class
   for i in range(len(activeCourses)):
@@ -105,33 +106,21 @@ def generateScheduleV3(students, courses):
 
     # If we can create a class using remaining, but no other classes
     # exists, create class, and do not equalize
-    elif remaining >= minReq and classRunCount == 0:
+    elif remaining >= minReq:
       # Create a class using remaining
       emptyClasses[index][f"{index}-{classRunCount}"] = {
         "CrsNo": index,
         "Description": activeCourses[index]["Description"],
         "expectedLen": remaining
       }
-      
-      classRunCount += 1
 
-
-    # Else if the remaining can create a class
-    elif remaining >= minReq and classRunCount > 0:
-      # Create a class using remaining
-      emptyClasses[index][f"{index}-{classRunCount}"] = {
-        "CrsNo": index,
-        "Description": activeCourses[index]["Description"],
-        "expectedLen": remaining
-      }
-      
       classRunCount += 1
-      
-      # Equalize (level) class expectedLen's
-      expectedLengths = [emptyClasses[index][f"{index}-{j}"]["expectedLen"] for j in range(classRunCount)]
-      newExpectedLens = equal(expectedLengths)
-      for j in range(len(newExpectedLens)):
-        emptyClasses[index][f"{index}-{j}"]["expectedLen"] = newExpectedLens[j]
+      if classRunCount >= 2:
+        # Equalize (level) class expectedLen's
+        expectedLengths = [emptyClasses[index][f"{index}-{j}"]["expectedLen"] for j in range(classRunCount)]
+        newExpectedLens = equal(expectedLengths)
+        for j in range(len(newExpectedLens)):
+          emptyClasses[index][f"{index}-{j}"]["expectedLen"] = newExpectedLens[j]
 
     # Else if we can't fit remaining in open slots in existing classes
     # and it is unable to create its own class,
@@ -168,6 +157,11 @@ def generateScheduleV3(students, courses):
           emptyClasses[index][f"{index}-{j}"]["expectedLen"] += 1
           remaining -= 1
 
+    courseRunInfo[index] = {
+      "Total": classRunCount,
+      "CrsNo": index
+    }
+    allClassRunCounts.append(classRunCount)
 
   # Step 3 Fill emptyClasses with Students
   selectedCourses = {}
@@ -228,11 +222,19 @@ def generateScheduleV3(students, courses):
     tempStudents.remove(student)
 
   # Step 4 - Attempt to fit classes into timetable
-  # TODO: Prioratize classes with maximum resouce limit;
-  #       for example, classes that have lowest run counts,
-  #       classes that have limited rooms dedicated for them.
-  #       Fit these into the timetable first, then work from
-  #       there on fitting other classes into the timetable.
+  while len(allClassRunCounts) > 0:
+    # Get lowest resource class (least times run)
+    index = allClassRunCounts.index(min(allClassRunCounts))
+    course = courseRunInfo[index]["CrsNo"]
+
+    # Insert 1 class into timetable
+    for i in range(courseRunInfo[index]["Total"]):
+      pass
+    
+    # Remove course when fully inserted
+    if allClassRunCounts[index] == 0:
+      allClassRunCounts.remove(allClassRunCounts[index])
+      courseRunInfo.pop(list(courseRunInfo)[index])
 
   # This will require knowing how many classrooms there are,
   # how many classrooms for a type of class, computer, wood,

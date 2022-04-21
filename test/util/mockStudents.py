@@ -6,10 +6,10 @@ import csv
 import sys
 from util.courses import mockCourses
 
-mockStudents = []
+mockStudents: list[dict] = []
 
 # Generate n students for mock data
-def generateMockStudents(n):
+def generateMockStudents(n: int) -> list[dict]:
   for _ in range(n):
     newStudent = {
       "name": names.get_full_name(),
@@ -36,7 +36,7 @@ def generateMockStudents(n):
 
 
 # sort real sample data into usable dictionary
-def getSampleStudents(data_dir, log=False):
+def getSampleStudents(data_dir: str, log: bool = False) -> list[dict]:
   with open(data_dir, newline='') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
@@ -87,12 +87,12 @@ if __name__ == '__main__':
     print("Missing argument")
     exit()
   if sys.argv[1].lower() == 'sample':
-    studentRequests = getSampleStudents("../sample_data/course_selection_data.csv")
+    studentRequests: list[dict] = getSampleStudents("../sample_data/course_selection_data.csv")
 
     with open("../output/students.json", "w") as outfile:
       json.dump(studentRequests, outfile, indent=2)
   elif sys.argv[1].lower() == 'mock':
-    studentRequests = generateMockStudents(400)
+    studentRequests: list[dict] = generateMockStudents(400)
 
     with open("../output/students.json", "w") as outfile:
       json.dump(studentRequests, outfile, indent=2)

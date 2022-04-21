@@ -5,7 +5,7 @@ import csv
 realCourses = {}
 
 # Get all courses from real sample data
-def getSampleCourses(data_dir, log=False):
+def getSampleCourses(data_dir, log=False) -> dict:
   with open(data_dir, newline='') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
@@ -30,7 +30,7 @@ def getSampleCourses(data_dir, log=False):
 
 
 if __name__ == '__main__':
-  courseSet = getSampleCourses("../sample_data/course_selection_data.csv")
+  courseSet: dict = getSampleCourses("../sample_data/course_selection_data.csv")
 
   with open("../output/realCourses.json", "w") as outfile:
     json.dump(courseSet, outfile, indent=2)

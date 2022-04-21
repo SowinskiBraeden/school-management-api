@@ -58,7 +58,7 @@ running = {
 # It starts by trying to get all classes full and give all students a full class list.
 # Then it starts to attempt to fit all classes into a timetable, making corretions along
 # the way. Corrections being moving a students class
-def generateScheduleV3(students, courses):
+def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
   def equal(l): # Used to equalize list of numbers
     q,r = divmod(sum(l),len(l))
     return [q+1]*r + [q]*(len(l)-r)
@@ -225,12 +225,22 @@ def generateScheduleV3(students, courses):
   while len(allClassRunCounts) > 0:
     # Get lowest resource class (least times run)
     index = allClassRunCounts.index(min(allClassRunCounts))
-    course = courseRunInfo[index]["CrsNo"]
+    course = list(courseRunInfo)[index]
 
-    # Insert 1 class into timetable
-    for i in range(courseRunInfo[index]["Total"]):
-      pass
-    
+    # Spread classes throughout both semesters
+    blockIndex = 0
+    offset = 0
+    for i in range(courseRunInfo[list(courseRunInfo)[index]]["Total"]):
+      cname = f"{course}-{i}"  
+      blockIndex += offset
+      running[list(running)[blockIndex]][cname] = {
+        "CrsNo": cname[:len(cname)-2],
+        "Description": course,
+        "students": selectedCourses[cname]["students"]
+      }
+      if offset == 0 or offset == -4: offset = 5
+      else: offset == -4
+
     # Remove course when fully inserted
     if allClassRunCounts[index] == 0:
       allClassRunCounts.remove(allClassRunCounts[index])
@@ -252,7 +262,7 @@ def generateScheduleV3(students, courses):
 
 
   # Step 5 - Evaluate, move classes or students to fix
-  return []
+  return running
 
 if __name__ == '__main__':
   print("Processing...")

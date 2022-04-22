@@ -67,13 +67,12 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
   # Step 1 - Calculate which classes can run
   for student in students:
     # Tally class request
-    for request in student["requests"]:
-      if not bool([i for i in ["XAT--12A-S", "XAT--12B-S"] if (i in request["CrsNo"])]): # Filters any requested study blocks (flex: no class block)
-        code = request["CrsNo"]
-        courses[code]["Requests"] += 1
-        # Add course to active list if enough requests
-        if courses[code]["Requests"] > minReq and courses[code]["CrsNo"] not in activeCourses:
-          activeCourses[code] = courses[code]
+    for request in (request for request in student["requests"] if not request["alt"] and request not in ["XAT--12A-S", "XAT--12B-S"]):
+      code = request["CrsNo"]
+      courses[code]["Requests"] += 1
+      # Add course to active list if enough requests
+      if courses[code]["Requests"] > minReq and courses[code]["CrsNo"] not in activeCourses:
+        activeCourses[code] = courses[code]
 
 
   # Step 2 - Generate empty classes
@@ -199,7 +198,6 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
                     # handle options to solve for missing class
                     getAvailableCourse = False
                     break
-
             elif cname not in selectedCourses:
               selectedCourses[cname] = {
                 "students": [student["Pupil #"]],
@@ -218,7 +216,7 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
             # Force break loop, ignore and let an admin
             # handle options to solve for missing class
             getAvailableCourse = False
-          
+
     tempStudents.remove(student)
 
   # Step 4 - Attempt to fit classes into timetable
@@ -230,7 +228,7 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
     # Spread classes throughout both semesters
     blockIndex = 0
     offset = 0
-    for i in range(courseRunInfo[list(courseRunInfo)[index]]["Total"]):
+    for i in range(courseRunInfo[course]["Total"]):
       cname = f"{course}-{i}"  
       blockIndex += offset
       running[list(running)[blockIndex]][cname] = {
@@ -239,7 +237,12 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
         "students": selectedCourses[cname]["students"]
       }
       if offset == 0 or offset == -4: offset = 5
-      else: offset == -4
+      else: offset = -4
+      allClassRunCounts[index] -= 1
+
+      if blockIndex >= 9:
+        blockIndex = 0
+        offset = 0
 
     # Remove course when fully inserted
     if allClassRunCounts[index] == 0:

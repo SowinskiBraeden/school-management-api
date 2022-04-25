@@ -67,7 +67,7 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
   # Step 1 - Calculate which classes can run
   for student in students:
     # Tally class request
-    for request in (request for request in student["requests"] if not request["alt"] and request not in ["XAT--12A-S", "XAT--12B-S"]):
+    for request in (request for request in student["requests"] if not request["alt"] and request["CrsNo"] not in ["XAT--12A-S", "XAT--12B-S"]):
       code = request["CrsNo"]
       courses[code]["Requests"] += 1
       # Add course to active list if enough requests
@@ -172,11 +172,11 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
     alternates = [request for request in student["requests"] if request["alt"]]
     altOffset = None
     if len(alternates) > 0: altOffset = 0
-    for request in (request for request in student["requests"] if not request["alt"] and request not in ["XAT--12A-S", "XAT--12B-S"]):
+    for request in (request for request in student["requests"] if not request["alt"] and request["CrsNo"] not in ["XAT--12A-S", "XAT--12B-S"]):
       course = request["CrsNo"]
       getAvailableCourse = True
       while getAvailableCourse:
-        if course in emptyClasses: 
+        if course in emptyClasses:
           # if course exists, get first available class
           for cname in emptyClasses[course]:
             if cname in selectedCourses:
@@ -249,20 +249,8 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
       allClassRunCounts.remove(allClassRunCounts[index])
       courseRunInfo.pop(list(courseRunInfo)[index])
 
-  # This will require knowing how many classrooms there are,
-  # how many classrooms for a type of class, computer, wood,
-  # metal, art, drama, music.
-  # Languages, socials, math, science, and English all share 
-  # the same classroom type and can be interchanged.
-  
-  # Teachers can be figured out at the end of this step,
-  # The school can hire more teachers in the area required,
-  # so we do not need to worry about how many tpye of classes
-  # are in the same block.
-  # For example: we don't need to worry if there is 4 english
-  # classes in the same block. even though the school may only
-  # have 2 english teachers. 
-
+  for block in running:
+    print(f"{block}: {len(running[block])}")
 
   # Step 5 - Evaluate, move classes or students to fix
   return running

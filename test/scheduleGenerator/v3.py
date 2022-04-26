@@ -221,15 +221,20 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
 
     tempStudents.remove(student)
 
-  # Step 4 - Attempt to fit classes into timetable
+   # Step 4 - Attempt to fit classes into timetable
   def stepIndex(offset: int, stepType: int) -> int:
+    # stepType 0 is for stepping between first and second semester
     if stepType == 0:
       if offset == 0 or offset == -4: return 5
       else: return -4
+    
+    # stepType 1 is for stepping between second and first semester
     elif stepType == 1:
       if offset == 0 or offset == 6: return -5
       else: return 6
-    else: return 0
+
+    # Return Error if code is altered to cause error
+    else: raise SystemExit("Invalid 'stepType' in func 'stepIndex' line 225")
 
   while len(allClassRunCounts) > 0:
     # Get highest resource class (most times run)
@@ -248,15 +253,10 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
 
     # If there is more than one class Running
     if allClassRunCounts[index] > 1:
-      blockIndex = 0
+      blockIndex = 0 if sem1 <= sem2 else 5
+      stepType = 0 if sem1 <= sem2 else 1
       offset = 0
-      stepType = 0
 
-      if sem1 > sem2:
-        # Update values to accomadate for sem2 fill priority
-        blockIndex = 5
-        stepType = 1
-        
       # Spread classes throughout both semesters
       for i in range(courseRunInfo[course]["Total"]):
         cname = f"{course}-{i}"
@@ -276,7 +276,7 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
           offset = stepIndex(offset, stepType)
 
           if blockIndex >= 9:
-            blockIndex = 0
+            blockIndex = 0 if sem1 <= sem2 else 5
             offset = 0
 
     # If the class only runs once, place in semester with least classes

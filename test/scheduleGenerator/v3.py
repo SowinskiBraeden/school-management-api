@@ -1,7 +1,9 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 import json
 import math
 import random
+
+from numpy import empty
 from util.mockStudents import getSampleStudents
 from util.generateCourses import getSampleCourses
 
@@ -225,24 +227,65 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
     index = allClassRunCounts.index(min(allClassRunCounts))
     course = list(courseRunInfo)[index]
 
-    # Spread classes throughout both semesters
-    blockIndex = 0
-    offset = 0
-    for i in range(courseRunInfo[course]["Total"]):
-      cname = f"{course}-{i}"  
-      blockIndex += offset
-      running[list(running)[blockIndex]][cname] = {
-        "CrsNo": cname[:len(cname)-2],
-        "Description": course,
-        "students": selectedCourses[cname]["students"]
-      }
-      if offset == 0 or offset == -4: offset = 5
-      else: offset = -4
-      allClassRunCounts[index] -= 1
+    # If there is more than one class Running
+    if allClassRunCounts[index] > 1:
+      # Spread classes throughout both semesters
+      blockIndex = 0
+      offset = 0
+      for i in range(courseRunInfo[course]["Total"]):
+        cname = f"{course}-{i}"  
+        blockIndex += offset
+        running[list(running)[blockIndex]][cname] = {
+          "CrsNo": course,
+          "Description": emptyClasses[course][cname]["Description"],
+          "students": selectedCourses[cname]["students"]
+        }
+        if offset == 0 or offset == -4: offset = 5
+        else: offset = -4
+        allClassRunCounts[index] -= 1
 
-      if blockIndex >= 9:
-        blockIndex = 0
-        offset = 0
+        if blockIndex >= 9:
+          blockIndex = 0
+          offset = 0
+    
+    # If the class only runs once, place in semester with least classes
+    elif allClassRunCounts[index] == 1:
+      # Tally first and second semester
+      sem1, sem2 = 0, 0
+      sem1List, sem2List = {}, {}
+      for i in range(1, 6):
+        sem1 += len(running[f"block{i}"])
+        sem1List[f"block{i}"] = running[f"block{i}"]
+      for i in range(5, 11):
+        sem2 += len(running[f"block{i}"])
+        sem2List[f"block{i}"] = running[f"block{i}"]
+ 
+      # Equally disperse into semesters classes
+      semBlocks = []
+      offset = 1
+
+      # If sem1 is less than or equal to sem2, add to sem1
+      if sem1 <= sem2:
+        for block in sem1List:
+          semBlocks.append(len(block))
+
+      # If sem2 is less than sem1, add to sem2
+      elif sem1 > sem2:
+        offset = 5
+        for block in sem2List:
+          semBlocks.append(len(block))
+
+      # Get block with least classes
+      leastBlock = semBlocks.index(min(semBlocks))
+      cname = f"{course}-0"
+
+      running[f"block{leastBlock+offset}"][course] = {
+        "CrsNo": course,
+        "Description": emptyClasses[course][cname]["Description"],
+        "Students": selectedCourses[cname]["students"],
+      }
+
+      allClassRunCounts[index] -= 1
 
     # Remove course when fully inserted
     if allClassRunCounts[index] == 0:

@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 from util.courses import mockCourses, activeCourses # Fake courses
 from util.mockStudents import generateMockStudents # Generate fake students
 import json

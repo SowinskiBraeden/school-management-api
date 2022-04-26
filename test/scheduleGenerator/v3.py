@@ -222,44 +222,65 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
     tempStudents.remove(student)
 
   # Step 4 - Attempt to fit classes into timetable
+  def stepIndex(offset: int, stepType: int) -> int:
+    if stepType == 0:
+      if offset == 0 or offset == -4: return 5
+      else: return -4
+    elif stepType == 1:
+      if offset == 0 or offset == 6: return -5
+      else: return 6
+    else: return 0
+
   while len(allClassRunCounts) > 0:
-    # Get lowest resource class (least times run)
+    # Get highest resource class (most times run)
     index = allClassRunCounts.index(min(allClassRunCounts))
     course = list(courseRunInfo)[index]
 
+    # Tally first and second semester
+    sem1, sem2 = 0, 0
+    sem1List, sem2List = {}, {}
+    for i in range(1, 6):
+      sem1 += len(running[f"block{i}"])
+      sem1List[f"block{i}"] = running[f"block{i}"]
+    for i in range(5, 11):
+      sem2 += len(running[f"block{i}"])
+      sem2List[f"block{i}"] = running[f"block{i}"]
+
     # If there is more than one class Running
     if allClassRunCounts[index] > 1:
-      # Spread classes throughout both semesters
       blockIndex = 0
       offset = 0
-      for i in range(courseRunInfo[course]["Total"]):
-        cname = f"{course}-{i}"  
-        blockIndex += offset
-        running[list(running)[blockIndex]][cname] = {
-          "CrsNo": course,
-          "Description": emptyClasses[course][cname]["Description"],
-          "students": selectedCourses[cname]["students"]
-        }
-        if offset == 0 or offset == -4: offset = 5
-        else: offset = -4
-        allClassRunCounts[index] -= 1
+      stepType = 0
 
-        if blockIndex >= 9:
-          blockIndex = 0
-          offset = 0
-    
+      if sem1 > sem2:
+        # Update values to accomadate for sem2 fill priority
+        blockIndex = 5
+        stepType = 1
+        
+      # Spread classes throughout both semesters
+      for i in range(courseRunInfo[course]["Total"]):
+        cname = f"{course}-{i}"
+        classInserted = False
+        while not classInserted:
+
+          blockIndex += offset
+          if len(running[list(running)[blockIndex]]) < 40:
+            running[list(running)[blockIndex]][cname] = {
+              "CrsNo": course,
+              "Description": emptyClasses[course][cname]["Description"],
+              "students": selectedCourses[cname]["students"]
+            }
+            allClassRunCounts[index] -= 1
+            classInserted = True
+
+          offset = stepIndex(offset, stepType)
+
+          if blockIndex >= 9:
+            blockIndex = 0
+            offset = 0
+
     # If the class only runs once, place in semester with least classes
     elif allClassRunCounts[index] == 1:
-      # Tally first and second semester
-      sem1, sem2 = 0, 0
-      sem1List, sem2List = {}, {}
-      for i in range(1, 6):
-        sem1 += len(running[f"block{i}"])
-        sem1List[f"block{i}"] = running[f"block{i}"]
-      for i in range(5, 11):
-        sem2 += len(running[f"block{i}"])
-        sem2List[f"block{i}"] = running[f"block{i}"]
- 
       # Equally disperse into semesters classes
       semBlocks = []
       offset = 1

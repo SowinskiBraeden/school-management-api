@@ -313,10 +313,9 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
       allClassRunCounts.remove(allClassRunCounts[index])
       courseRunInfo.pop(list(courseRunInfo)[index])
 
-  for block in running:
-    print(f"{block}: {len(running[block])}")
+  # Step 5 - Fill student schedule
 
-  # Step 5 - Evaluate, move classes or students to fix
+  # Step 6 - Evaluate, move classes or students to fix
   return running
 
 if __name__ == '__main__':

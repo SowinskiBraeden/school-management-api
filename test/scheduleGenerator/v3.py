@@ -331,10 +331,14 @@ def generateScheduleV3(students: list, courses: dict, blockClassLimit: int=40, s
     json.dump(students, outfile, indent=2)
 
 
-  # Step 6 - Evaluate, move classes or students to fix
+  # Step 6 - Evaluate, move students to fix
   for student in students:
+    blocksLen = []
     for block in student["schedule"]:
-      pass
+      blocksLen.append(len(student["schedule"][block]))
+      # If there is a cross over...
+      if len(student["schedule"][block]) > 1:
+        pass
 
   return running
 

@@ -51,6 +51,7 @@ def getSampleStudents(data_dir: str, log: bool = False) -> list[dict]:
             "Description": row["Description"],
             "alt": alternate
           })
+        if row["CrsNo"] in ["XAT--12A-S", "XAT--12B-S"]: mockStudents[student["studentIndex"]]["expectedClasses"] -= 1
       else:
         newStudent = {
           "Pupil #": row["Pupil #"],
@@ -60,19 +61,22 @@ def getSampleStudents(data_dir: str, log: bool = False) -> list[dict]:
             "alt": alternate
           }],
           "schedule": {
-            "block1": "",
-            "block2": "",
-            "block3": "",
-            "block4": "",
-            "block5": "",
-            "block6": "",
-            "block7": "",
-            "block8": "",
-            "block9": "",
-            "block10": ""
+            "block1": [],
+            "block2": [],
+            "block3": [],
+            "block4": [],
+            "block5": [],
+            "block6": [],
+            "block7": [],
+            "block8": [],
+            "block9": [],
+            "block10": []
           },
+          "expectedClasses": 8,
+          "remainingAlts": [],
           "studentIndex": len(mockStudents)
         }
+        if row["CrsNo"] in ["XAT--12A-S", "XAT--12B-S"]: mockStudents[student["studentIndex"]]["expectedClasses"] -= 1
         mockStudents.append(newStudent)
 
   if log:

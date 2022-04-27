@@ -38,7 +38,7 @@ from util.generateCourses import getSampleCourses
   }
 '''
 
-minReq, median, classCap, blockClassLimit = 18, 24, 30, 26
+minReq, median, classCap = 18, 24, 30
 mockStudents = []
 activeCourses = {}
 running = {
@@ -60,7 +60,7 @@ running = {
 # It starts by trying to get all classes full and give all students a full class list.
 # Then it starts to attempt to fit all classes into a timetable, making corretions along
 # the way. Corrections being moving a students class
-def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
+def generateScheduleV3(students: list, courses: dict, blockClassLimit: int=40, studentsDir: str="../output/students.json") -> dict[str, dict]:
   def equal(l): # Used to equalize list of numbers
     q,r = divmod(sum(l),len(l))
     return [q+1]*r + [q]*(len(l)-r)
@@ -80,7 +80,7 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
   # Step 2 - Generate empty classes
   allClassRunCounts = []
   courseRunInfo = {} # Generated now, used in step 4
-  emptyClasses = {} # List of all classes with how many students should be entered during generation
+  emptyClasses = {} # List of all classes with how many students should be entered during step 3
   # calculate # of times to run class
   for i in range(len(activeCourses)):
     index = list(activeCourses)[i]
@@ -164,16 +164,15 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
     }
     allClassRunCounts.append(classRunCount)
 
+
   # Step 3 Fill emptyClasses with Students
   selectedCourses = {}
-  tempStudents = students
+  tempStudents = list(students)
   
   while len(tempStudents) > 0:
-    student = tempStudents[random.randint(0, len(students)-1)]
+    student = tempStudents[random.randint(0, len(tempStudents)-1)]
 
     alternates = [request for request in student["requests"] if request["alt"]]
-    altOffset = None
-    if len(alternates) > 0: altOffset = 0
     for request in (request for request in student["requests"] if not request["alt"] and request["CrsNo"] not in ["XAT--12A-S", "XAT--12B-S"]):
       course = request["CrsNo"]
       getAvailableCourse = True
@@ -184,16 +183,19 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
             if cname in selectedCourses:
               if len(selectedCourses[cname]["students"]) < emptyClasses[course][cname]["expectedLen"]:
                 # Class exists with room for student
-                selectedCourses[cname]["students"].append(student["Pupil #"])
+                selectedCourses[cname]["students"].append({
+                  "Pupil #": student["Pupil #"],
+                  "index": student["studentIndex"]
+                })
                 getAvailableCourse = False
                 break
               elif len(selectedCourses[cname]["students"]) == emptyClasses[course][cname]["expectedLen"]:
                 # If class is full, and is last class of that course
                 if cname[len(cname)-1] == f"{len(emptyClasses[course])-1}":
-                  if altOffset is not None and altOffset <= len(alternates)-1:
+                  if len(alternates) > 0:
                     # Use alternate
-                    course = alternates[altOffset]["CrsNo"]
-                    altOffset += 1
+                    course = alternates[0]["CrsNo"]
+                    alternates.remove(course)
                     break
                   else:
                     # Force break loop, ignore and let an admin
@@ -202,7 +204,10 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
                     break
             elif cname not in selectedCourses:
               selectedCourses[cname] = {
-                "students": [student["Pupil #"]],
+                "students": [{
+                  "Pupil #": student["Pupil #"],
+                  "index": student["studentIndex"]
+                }],
                 "CrsNo": course,
                 "Description": courses[course]["Description"]
               }
@@ -210,18 +215,20 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
               break
 
         elif course not in emptyClasses:
-          if altOffset is not None and altOffset <= len(alternates)-1:
+          if len(alternates) > 0:
             # Use alternate
-            course = alternates[altOffset]["CrsNo"]
-            altOffset += 1
+            course = alternates[0]["CrsNo"]
+            alternates.remove(course)
           else:
             # Force break loop, ignore and let an admin
             # handle options to solve for missing class
             getAvailableCourse = False
 
+    students[student["studentIndex"]]["remainingAlts"] = alternates
     tempStudents.remove(student)
 
-   # Step 4 - Attempt to fit classes into timetable
+
+  # Step 4 - Attempt to fit classes into timetable
   def stepIndex(offset: int, stepType: int) -> int:
     # stepType 0 is for stepping between first and second semester
     if stepType == 0:
@@ -264,7 +271,7 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
         while not classInserted:
 
           blockIndex += offset
-          if len(running[list(running)[blockIndex]]) < 40:
+          if len(running[list(running)[blockIndex]]) < blockClassLimit:
             running[list(running)[blockIndex]][cname] = {
               "CrsNo": course,
               "Description": emptyClasses[course][cname]["Description"],
@@ -303,7 +310,7 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
       running[f"block{leastBlock+offset}"][course] = {
         "CrsNo": course,
         "Description": emptyClasses[course][cname]["Description"],
-        "Students": selectedCourses[cname]["students"],
+        "students": selectedCourses[cname]["students"],
       }
 
       allClassRunCounts[index] -= 1
@@ -313,10 +320,24 @@ def generateScheduleV3(students: list, courses: dict) -> dict[str, dict]:
       allClassRunCounts.remove(allClassRunCounts[index])
       courseRunInfo.pop(list(courseRunInfo)[index])
 
+
   # Step 5 - Fill student schedule
+  for block in running:
+    for cname in running[block]:
+      for student in running[block][cname]["students"]:
+        students[student["index"]]["schedule"][block].append(cname)
+
+  with open(studentsDir, "w") as outfile:
+    json.dump(students, outfile, indent=2)
+
 
   # Step 6 - Evaluate, move classes or students to fix
+  for student in students:
+    for block in student["schedule"]:
+      pass
+
   return running
+
 
 if __name__ == '__main__':
   print("Processing...")

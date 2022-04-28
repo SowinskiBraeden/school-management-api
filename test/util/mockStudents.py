@@ -51,7 +51,6 @@ def getSampleStudents(data_dir: str, log: bool = False) -> list[dict]:
             "Description": row["Description"],
             "alt": alternate
           })
-        if row["CrsNo"] in ["XAT--12A-S", "XAT--12B-S"]: mockStudents[student["studentIndex"]]["expectedClasses"] -= 1
       else:
         newStudent = {
           "Pupil #": row["Pupil #"],
@@ -76,9 +75,9 @@ def getSampleStudents(data_dir: str, log: bool = False) -> list[dict]:
           "remainingAlts": [],
           "studentIndex": len(mockStudents)
         }
-        if row["CrsNo"] in ["XAT--12A-S", "XAT--12B-S"]: mockStudents[student["studentIndex"]]["expectedClasses"] -= 1
         mockStudents.append(newStudent)
 
+      if row["CrsNo"] in ["XAT--12A-S", "XAT--12B-S"]: mockStudents[student["studentIndex"]]["expectedClasses"] -= 1
   if log:
     with open("./output/students.json", "w") as outfile:
       json.dump(mockStudents, outfile, indent=2)

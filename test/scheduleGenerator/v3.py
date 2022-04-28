@@ -176,11 +176,13 @@ def generateScheduleV3(students: list, courses: dict, blockClassLimit: int=40, s
     for request in (request for request in student["requests"] if not request["alt"] and request["CrsNo"] not in ["XAT--12A-S", "XAT--12B-S"]):
       course = request["CrsNo"]
       getAvailableCourse = True
+      isAlt = False
       while getAvailableCourse:
         if course in emptyClasses:
           # if course exists, get first available class
           for cname in emptyClasses[course]:
             if cname in selectedCourses:
+              if isAlt: emptyClasses[course][cname]["expectedLen"] += 1
               if len(selectedCourses[cname]["students"]) < emptyClasses[course][cname]["expectedLen"]:
                 # Class exists with room for student
                 selectedCourses[cname]["students"].append({
@@ -195,7 +197,8 @@ def generateScheduleV3(students: list, courses: dict, blockClassLimit: int=40, s
                   if len(alternates) > 0:
                     # Use alternate
                     course = alternates[0]["CrsNo"]
-                    alternates.remove(course)
+                    alternates.remove(alternates[0])
+                    isAlt = True
                     break
                   else:
                     # Force break loop, ignore and let an admin
@@ -218,7 +221,8 @@ def generateScheduleV3(students: list, courses: dict, blockClassLimit: int=40, s
           if len(alternates) > 0:
             # Use alternate
             course = alternates[0]["CrsNo"]
-            alternates.remove(course)
+            alternates.remove(alternates[0])
+            isAlt = True
           else:
             # Force break loop, ignore and let an admin
             # handle options to solve for missing class
@@ -333,12 +337,28 @@ def generateScheduleV3(students: list, courses: dict, blockClassLimit: int=40, s
 
   # Step 6 - Evaluate, move students to fix
   for student in students:
-    blocksLen = []
-    for block in student["schedule"]:
-      blocksLen.append(len(student["schedule"][block]))
-      # If there is a cross over...
-      if len(student["schedule"][block]) > 1:
-        pass
+    blocks = [student["schedule"][block] for block in student["schedule"]]
+    count, conflicts = 0, True
+    while conflicts:
+      count = sum(1 for b in blocks if len(b)==1)
+
+      print(blocks)
+      print(count)
+    
+      if count < student["expectedClasses"]:
+        # Attempt to fix
+        index = blocks.index(max(blocks))
+        for i in range(len(blocks[index])):
+          break
+
+      elif count == student["expectedClasses"]:
+        conflicts = False
+      elif count > student["expectedClasses"]:
+        print("Impossible error")
+
+      break
+
+    break # for debug
 
   return running
 

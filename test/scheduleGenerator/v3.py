@@ -343,7 +343,7 @@ def generateScheduleV3(students: list, courses: dict, blockClassLimit: int=40, s
     while conflicts:
       count = sum(1 for b in blocks if len(b)==1)
 
-      print(blocks)
+      print(blocks, "\n")
 
       if count < student["expectedClasses"]:
         # Attempt to fix
@@ -360,14 +360,28 @@ def generateScheduleV3(students: list, courses: dict, blockClassLimit: int=40, s
             if list(running).index(block) != index and list(running).index(block) in freeBlocks:
               for cname in running[block]:
                 if cname[:-2] == blocks[index][moveIndex][:-2] and len(running[block][cname]["students"]) < classCap:
+                                    
+                  print("index: ", index)
+                  print("blockOut: ", blockOut)
+                  print("classOut: ", classOut)
+                  print("blockIn: ", block)
+                  print("classIn: ", cname)
+
                   studentData = {
                     "Pupil #": student["Pupil #"],
                     "index": student["studentIndex"]
                   }
-                  print(running[blockOut][classOut]["students"])
                   studentIndex = running[blockOut][classOut]["students"].index(studentData)
-                  del running[blockOut][classOut]["students"][studentIndex]
+                  
+                  # Update current blocks to work with
+                  blocks[index].remove(classOut)
+                  blocks[list(running).index(block)].append(cname)
+
+                  # Update Final Records
+                  del running[blockOut][classOut]["students"][studentIndex] # Remove final
                   running[block][cname]["students"].append(studentData)
+                  
+                  print(blocks)
                   found, done = True, True
                   break
 
@@ -376,7 +390,10 @@ def generateScheduleV3(students: list, courses: dict, blockClassLimit: int=40, s
               moveIndex += 1
             elif moveIndex == len(blocks[index])-1:
               print("Failed")
+              done = True
               break
+
+        print("=========================\n")
 
       elif count == student["expectedClasses"]:
         conflicts = False

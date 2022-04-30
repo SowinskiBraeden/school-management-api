@@ -182,7 +182,8 @@ def generateScheduleV3(students: list, courses: dict, blockClassLimit: int=40, s
           # if course exists, get first available class
           for cname in emptyClasses[course]:
             if cname in selectedCourses:
-              if isAlt: emptyClasses[course][cname]["expectedLen"] += 1
+              if isAlt and emptyClasses[course][cname]["expectedLen"] > classCap:
+                emptyClasses[course][cname]["expectedLen"] += 1
               if len(selectedCourses[cname]["students"]) < emptyClasses[course][cname]["expectedLen"]:
                 # Class exists with room for student
                 selectedCourses[cname]["students"].append({
@@ -334,29 +335,53 @@ def generateScheduleV3(students: list, courses: dict, blockClassLimit: int=40, s
   with open(studentsDir, "w") as outfile:
     json.dump(students, outfile, indent=2)
 
-
   # Step 6 - Evaluate, move students to fix
   for student in students:
     blocks = [student["schedule"][block] for block in student["schedule"]]
+    blockLens = [len(block) for block in blocks]
     count, conflicts = 0, True
     while conflicts:
       count = sum(1 for b in blocks if len(b)==1)
 
       print(blocks)
-      print(count)
-    
+
       if count < student["expectedClasses"]:
         # Attempt to fix
-        index = blocks.index(max(blocks))
-        for i in range(len(blocks[index])):
-          break
+        index = blockLens.index(max(blockLens))
+        blockOut = f"block{index+1}"
+        done = False
+        moveIndex = 0
+        freeBlocks = [blockIndex for blockIndex in range(len(blocks)) if len(blocks[blockIndex]) == 0]
+        while not done:
+          classOut = blocks[index][moveIndex]
+          found = False
+          for block in running:
+            if found: break
+            if list(running).index(block) != index and list(running).index(block) in freeBlocks:
+              for cname in running[block]:
+                if cname[:-2] == blocks[index][moveIndex][:-2] and len(running[block][cname]["students"]) < classCap:
+                  studentData = {
+                    "Pupil #": student["Pupil #"],
+                    "index": student["studentIndex"]
+                  }
+                  print(running[blockOut][classOut]["students"])
+                  studentIndex = running[blockOut][classOut]["students"].index(studentData)
+                  del running[blockOut][classOut]["students"][studentIndex]
+                  running[block][cname]["students"].append(studentData)
+                  found, done = True, True
+                  break
+
+          if not found:
+            if moveIndex < len(blocks[index])-1:
+              moveIndex += 1
+            elif moveIndex == len(blocks[index])-1:
+              print("Failed")
+              break
 
       elif count == student["expectedClasses"]:
         conflicts = False
       elif count > student["expectedClasses"]:
         print("Impossible error")
-
-      break
 
     break # for debug
 

@@ -60,7 +60,14 @@ running = {
 # It starts by trying to get all classes full and give all students a full class list.
 # Then it starts to attempt to fit all classes into a timetable, making corretions along
 # the way. Corrections being moving a students class
-def generateScheduleV3(students: list, courses: dict, blockClassLimit: int=40, studentsDir: str="../output/students.json") -> dict[str, dict]:
+def generateScheduleV3(
+  students: list, 
+  courses: dict, 
+  blockClassLimit: int=40, 
+  studentsDir: str="../output/students.json", 
+  conflictsDir: str="../output/conflicts.json"
+  ) -> dict[str, dict]:
+  
   def equal(l): # Used to equalize list of numbers
     q,r = divmod(sum(l),len(l))
     return [q+1]*r + [q]*(len(l)-r)
@@ -332,28 +339,29 @@ def generateScheduleV3(students: list, courses: dict, blockClassLimit: int=40, s
       for student in running[block][cname]["students"]:
         students[student["index"]]["schedule"][block].append(cname)
 
-  with open(studentsDir, "w") as outfile:
-    json.dump(students, outfile, indent=2)
 
   # Step 6 - Evaluate, move students to fix
+  conflicts = []
+
   for student in students:
     blocks = [student["schedule"][block] for block in student["schedule"]]
-    final = list(block)
+    origin = list(block)
     exceptions = []
-    count, conflicts = 0, True
-    while conflicts:
+    count, hasConflict = 0, True
+    while hasConflict:
       count = sum(1 for b in blocks if len(b)==1)
 
       if count < student["expectedClasses"]:
+        blockLens = [len(block) for block in blocks]
+        
+        # Get clash
         index = None
-        # Attempt to fix
         if len(exceptions) > 0:
           blocks = [elem for i, elem in enumerate(blocks) if i not in exceptions]
-          for index in exceptions: blocks.insert(index, ['exception'])
+          for index in exceptions: blocks.insert(index, ['nil'])
         elif len(exceptions) == 0:
           index = blockLens.index(max(blockLens))
 
-        blockLens = [len(block) for block in blocks]
         blockOut = f"block{index+1}"
         done = False
         moveIndex = 0
@@ -392,11 +400,35 @@ def generateScheduleV3(students: list, courses: dict, blockClassLimit: int=40, s
               break
 
       elif count == student["expectedClasses"]:
-        conflicts = False
-      elif count > student["expectedClasses"]:
-        print("Impossible error")
+        if len(exceptions) > 0:
+          for i in range(len(exceptions)):
+            blocks[i] = origin[i]
 
-    break # for debug
+          conflicts.append({
+            "Pupil #": student["Pupil #"],
+            "Email": "",
+            "Conflict": "More than one class per block"
+          })
+
+        hasConflict = False
+      elif count > student["expectedClasses"]:
+        conflicts.append({
+          "Pupil #": student["Pupil #"],
+          "Email": "",
+          "Conflict": "More classes than expected"
+        })
+        hasConflict = False
+
+    # Update Student Schedule
+    student["schedule"] = blocks
+
+  # Update Student records
+  with open(studentsDir, "w") as outfile:
+      json.dump(students, outfile, indent=2)
+
+  # Log Conflict to records
+  with open(conflictsDir, "w") as outfile:
+    json.dump(conflicts, outfile, indent=2)
 
   return running
 

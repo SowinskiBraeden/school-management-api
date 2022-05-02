@@ -43,7 +43,7 @@ if __name__ == '__main__':
     samplemockCourses = getSampleCourses("./sample_data/course_selection_data.csv", True)
     timetable = {}
     timetable["Version"] = 3
-    timetable["timetable"] = generateScheduleV3(sampleStudents, samplemockCourses, 40, "./output/students.json")
+    timetable["timetable"] = generateScheduleV3(sampleStudents, samplemockCourses, 40, "./output/students.json", "./output/conflicts.json")
   
   else:
     print("Invalid argument")

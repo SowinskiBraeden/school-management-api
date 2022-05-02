@@ -338,16 +338,22 @@ def generateScheduleV3(students: list, courses: dict, blockClassLimit: int=40, s
   # Step 6 - Evaluate, move students to fix
   for student in students:
     blocks = [student["schedule"][block] for block in student["schedule"]]
-    blockLens = [len(block) for block in blocks]
+    final = list(block)
+    exceptions = []
     count, conflicts = 0, True
     while conflicts:
       count = sum(1 for b in blocks if len(b)==1)
 
-      print(blocks, "\n")
-
       if count < student["expectedClasses"]:
+        index = None
         # Attempt to fix
-        index = blockLens.index(max(blockLens))
+        if len(exceptions) > 0:
+          blocks = [elem for i, elem in enumerate(blocks) if i not in exceptions]
+          for index in exceptions: blocks.insert(index, ['exception'])
+        elif len(exceptions) == 0:
+          index = blockLens.index(max(blockLens))
+
+        blockLens = [len(block) for block in blocks]
         blockOut = f"block{index+1}"
         done = False
         moveIndex = 0
@@ -360,13 +366,6 @@ def generateScheduleV3(students: list, courses: dict, blockClassLimit: int=40, s
             if list(running).index(block) != index and list(running).index(block) in freeBlocks:
               for cname in running[block]:
                 if cname[:-2] == blocks[index][moveIndex][:-2] and len(running[block][cname]["students"]) < classCap:
-                                    
-                  print("index: ", index)
-                  print("blockOut: ", blockOut)
-                  print("classOut: ", classOut)
-                  print("blockIn: ", block)
-                  print("classIn: ", cname)
-
                   studentData = {
                     "Pupil #": student["Pupil #"],
                     "index": student["studentIndex"]
@@ -381,7 +380,6 @@ def generateScheduleV3(students: list, courses: dict, blockClassLimit: int=40, s
                   del running[blockOut][classOut]["students"][studentIndex] # Remove final
                   running[block][cname]["students"].append(studentData)
                   
-                  print(blocks)
                   found, done = True, True
                   break
 
@@ -389,11 +387,9 @@ def generateScheduleV3(students: list, courses: dict, blockClassLimit: int=40, s
             if moveIndex < len(blocks[index])-1:
               moveIndex += 1
             elif moveIndex == len(blocks[index])-1:
-              print("Failed")
+              exceptions.append(index)
               done = True
               break
-
-        print("=========================\n")
 
       elif count == student["expectedClasses"]:
         conflicts = False

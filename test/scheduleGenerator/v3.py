@@ -355,12 +355,11 @@ def generateScheduleV3(
         blockLens = [len(block) for block in blocks]
         
         # Get clash
-        index = None
         if len(exceptions) > 0:
           blocks = [elem for i, elem in enumerate(blocks) if i not in exceptions]
           for index in exceptions: blocks.insert(index, ['nil'])
-        elif len(exceptions) == 0:
-          index = blockLens.index(max(blockLens))
+        
+        index = blockLens.index(max(blockLens))
 
         blockOut = f"block{index+1}"
         done = False
@@ -395,7 +394,7 @@ def generateScheduleV3(
             if moveIndex < len(blocks[index])-1:
               moveIndex += 1
             elif moveIndex == len(blocks[index])-1:
-              exceptions.append(index)
+              if index not in exceptions: exceptions.append(index)
               done = True
               break
 

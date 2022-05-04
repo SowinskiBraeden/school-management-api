@@ -338,27 +338,51 @@ def generateScheduleV3(
     for cname in running[block]:
       for student in running[block][cname]["students"]:
         students[student["index"]]["schedule"][block].append(cname)
+        students[student["index"]]["classes"] += 1
 
 
   # Step 6 - Evaluate, move students to fix
   conflicts = []
 
   for student in students:
+    print(student["Pupil #"])
     blocks = [student["schedule"][block] for block in student["schedule"]]
     origin = list(block)
     exceptions = []
     count, hasConflict = 0, True
+    initialCount = sum(1 for b in blocks if len(b)==1)
+    if initialCount == student["classes"]:
+      hasConflict = False
+      
+      if initialCount < student["expectedClasses"]:
+        conflicts.append({
+          "Pupil #": student["Pupil #"],
+          "Email": "",
+          "Conflict": "Missing classes"
+        })
+
     while hasConflict:
+      # Get clash
+      if len(exceptions) > 0:
+        blocks = [elem for i, elem in enumerate(blocks) if i not in exceptions]
+        exceptCopy = list(exceptions)
+        while len(exceptCopy) > 0:
+          minIndex = exceptCopy.index(min(exceptCopy))  
+          blocks.insert(minIndex, ['nil'])
+
       count = sum(1 for b in blocks if len(b)==1)
 
       if count < student["expectedClasses"]:
+        if count == student["classes"]:
+          conflicts.append({
+            "Pupil #": student["Pupil #"],
+            "Email": "",
+            "Conflict": "Missing classes"
+          })
+          hasConflict = False
+          break
+
         blockLens = [len(block) for block in blocks]
-        
-        # Get clash
-        if len(exceptions) > 0:
-          blocks = [elem for i, elem in enumerate(blocks) if i not in exceptions]
-          for index in exceptions: blocks.insert(index, ['nil'])
-        
         index = blockLens.index(max(blockLens))
 
         blockOut = f"block{index+1}"
@@ -395,8 +419,14 @@ def generateScheduleV3(
               moveIndex += 1
             elif moveIndex == len(blocks[index])-1:
               if index not in exceptions: exceptions.append(index)
-              done = True
-              break
+              
+            else:
+              print('impossible err 3')
+         
+          elif found: done = True
+          
+          else:
+            print('impossible err 2')
 
       elif count == student["expectedClasses"]:
         if len(exceptions) > 0:
@@ -417,6 +447,8 @@ def generateScheduleV3(
           "Conflict": "More classes than expected"
         })
         hasConflict = False
+      else:
+        print('impossible err 1')
 
     # Update Student Schedule
     student["schedule"] = blocks

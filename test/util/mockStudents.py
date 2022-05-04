@@ -47,10 +47,12 @@ def getSampleStudents(data_dir: str, log: bool = False) -> list[dict]:
       alternate = True if row["Alternate?"] == 'TRUE' else False
       if exists:
         mockStudents[student["studentIndex"]]["requests"].append({
-            "CrsNo": row["CrsNo"],
-            "Description": row["Description"],
-            "alt": alternate
-          })
+          "CrsNo": row["CrsNo"],
+          "Description": row["Description"],
+          "alt": alternate
+        })
+        if row["CrsNo"] not in ["XAT--12A-S", "XAT--12B-S"] and not alternate:
+          mockStudents[student["studentIndex"]]["expectedClasses"] += 1
       else:
         newStudent = {
           "Pupil #": row["Pupil #"],
@@ -71,13 +73,13 @@ def getSampleStudents(data_dir: str, log: bool = False) -> list[dict]:
             "block9": [],
             "block10": []
           },
-          "expectedClasses": 8,
+          "expectedClasses": 1,
+          "classes": 0,
           "remainingAlts": [],
           "studentIndex": len(mockStudents)
         }
         mockStudents.append(newStudent)
 
-      if row["CrsNo"] in ["XAT--12A-S", "XAT--12B-S"]: mockStudents[student["studentIndex"]]["expectedClasses"] -= 1
   if log:
     with open("./output/students.json", "w") as outfile:
       json.dump(mockStudents, outfile, indent=2)

@@ -1,13 +1,13 @@
 # Testing
 
-If you're looking in here, I know this codespace is a mess, I didn't think I would include it.  
-But to be fair, I think a problem as complex as schedule generation should be seen. Currently  
-the tests are being run in python since it is a lot easier for me to quickly test and edit the   
-algorithm. Once I get the algorithm complete, I plan on rewriting it in GoLang, using the python  
-script as a reference.
+Hello there! If you are in this part of the codespace, I have cleaned it up compared to the 
+original codespace. The algorithms have been moved out of `tinker.py` into their own python  
+script from version 1 to 3. These are in the `/scheduleGenerator` folder. I suggest to look  
+at the latest work in `v3.py` where the algorithm has come a long way. Using real 2018 course  
+selection data from my school I am able to test the script to its full potential compared to  
+V1 and V2.
 
-Hello again! If you're reading this part, again ingore the awful codespace, but `generateScheduleV3`  
-in `tinker.py` is the best one yet. It uses real sample data from my school in 2018. This puts the  
-algorithm through the realistic obstacles it may face. It uses a different approach that you can read  
-about in `tinker.py` about the function. Hopefully this will get a larger success rate than the previous  
-versions!
+V3 has a entirely different approach from V1 and V2, that you can read about at the top of  
+the function in `v3.py`. The function is broken up into 6 steps, each step is labeled within  
+the function with a comment, giving a brief explination of what that step contributes to the  
+algorithm.

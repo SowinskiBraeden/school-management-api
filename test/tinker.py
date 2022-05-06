@@ -45,6 +45,17 @@ if __name__ == '__main__':
     timetable["Version"] = 3
     timetable["timetable"] = generateScheduleV3(sampleStudents, samplemockCourses, 40, "./output/students.json", "./output/conflicts.json")
   
+    f = open('./output/conflicts.json')
+    conflicts = json.load(f)
+ 
+    print(f"{len(conflicts)}/{len(sampleStudents)} have errors")
+    percent = len(conflicts) / len(sampleStudents) * 100
+
+    print(f"{round(percent, 2)}% errors")
+    print(f"{100-(round(percent, 2))}% success")
+ 
+    f.close()
+
   else:
     print("Invalid argument")
     exit()

@@ -8,9 +8,9 @@ from util.generateCourses import getSampleCourses
 from util.courses import mockCourses
 
 # Import Algorithms
-from scheduleGenerator.v1 import generateScheduleV1
-from scheduleGenerator.v2 import generateScheduleV2
-from scheduleGenerator.v3 import generateScheduleV3
+from scheduleGenerator.generator_v1 import generateScheduleV1
+from scheduleGenerator.generator_v2 import generateScheduleV2
+from scheduleGenerator.generator_v3 import generateScheduleV3
 
 if __name__ == '__main__':
   

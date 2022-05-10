@@ -6,6 +6,8 @@ import csv
 import sys
 from util.courses import mockCourses
 
+flex= ["XAT--12A-S", "XAT--12B-S"]
+
 mockStudents: list[dict] = []
 
 # Generate n students for mock data
@@ -46,13 +48,13 @@ def getSampleStudents(data_dir: str, log: bool = False) -> list[dict]:
         if exists: break
       alternate = True if row["Alternate?"] == 'TRUE' else False
       if exists:
-        if not alternate and len(mockStudents[student["studentIndex"]]["requests"]) >= 10: alternate = True 
+        if len(mockStudents[student["studentIndex"]]["requests"]) >= 10 and not alternate and row["CrsNo"] not in flex: alternate = True
         mockStudents[student["studentIndex"]]["requests"].append({
           "CrsNo": row["CrsNo"],
           "Description": row["Description"],
           "alt": alternate
         })
-        if row["CrsNo"] not in ["XAT--12A-S", "XAT--12B-S"] and not alternate and mockStudents[student["studentIndex"]]["expectedClasses"] < 10:
+        if row["CrsNo"] not in flex and not alternate and mockStudents[student["studentIndex"]]["expectedClasses"] < 10:
           mockStudents[student["studentIndex"]]["expectedClasses"] += 1
       else:
         newStudent = {

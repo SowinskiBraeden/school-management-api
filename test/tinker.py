@@ -49,10 +49,11 @@ if __name__ == '__main__':
     conflicts = json.load(f)
  
     print(f"{len(conflicts)}/{len(sampleStudents)} have errors")
-    percent = len(conflicts) / len(sampleStudents) * 100
+    errors = round(len(conflicts) / len(sampleStudents) * 100, 2)
+    success = round(100 - errors, 2)
 
-    print(f"{round(percent, 2)}% errors")
-    print(f"{100-(round(percent, 2))}% success")
+    print(f"{errors}% errors")
+    print(f"{success}% success")
  
     f.close()
 

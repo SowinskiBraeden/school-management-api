@@ -46,12 +46,13 @@ def getSampleStudents(data_dir: str, log: bool = False) -> list[dict]:
         if exists: break
       alternate = True if row["Alternate?"] == 'TRUE' else False
       if exists:
+        if not alternate and len(mockStudents[student["studentIndex"]]["requests"]) >= 10: alternate = True 
         mockStudents[student["studentIndex"]]["requests"].append({
           "CrsNo": row["CrsNo"],
           "Description": row["Description"],
           "alt": alternate
         })
-        if row["CrsNo"] not in ["XAT--12A-S", "XAT--12B-S"] and not alternate:
+        if row["CrsNo"] not in ["XAT--12A-S", "XAT--12B-S"] and not alternate and mockStudents[student["studentIndex"]]["expectedClasses"] < 10:
           mockStudents[student["studentIndex"]]["expectedClasses"] += 1
       else:
         newStudent = {

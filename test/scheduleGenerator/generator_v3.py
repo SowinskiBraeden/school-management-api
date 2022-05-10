@@ -341,145 +341,147 @@ def generateScheduleV3(
         students[student["index"]]["classes"] += 1
 
 
+  with open("./output/timetable.json", "w") as outfile:
+    json.dump(running, outfile, indent=2)
+
   # Step 6 - Evaluate, move students to fix
   conflicts = []
 
   for student in students:
-    #print("====New Student====")
-    # print(student["Pupil #"])
+    # print("====New Student====")
+    print(student["Pupil #"])
     blocks = [student["schedule"][block] for block in student["schedule"]]
-    #print("Blocks: ", blocks)
+    # print("Blocks: ", blocks)
     origin = list(block)
     exceptions = []
     count, hasConflict = 0, True
     initialCount = sum(1 for b in blocks if len(b)==1)
-    #print("Initial Count: ", initialCount)
+    # print("Initial Count: ", initialCount)
     if initialCount == student["classes"]:
-      #print("Classes already set")
+      # print("Classes already set")
       hasConflict = False
       
       if initialCount < student["expectedClasses"]:
-        #print("New Conflict 1: Missing Classes")
+        # print("New Conflict 1: Missing Classes")
         conflicts.append({
           "Pupil #": student["Pupil #"],
           "Email": "",
           "Conflict": "Missing classes"
         })
 
-    #print("Begin conflic Check...")
-    #print("Has Conflict: ", hasConflict)
+    # print("Begin conflic Check...")
+    # print("Has Conflict: ", hasConflict)
     while hasConflict:
-      #print("Retrieve clash...")
+      # print("Retrieve clash...")
       # Get clash
       if len(exceptions) > 0:
-        #print("Exceptions exists, make new list to ignore exceptions")
-        blocks = [elem for i, elem in enumerate(blocks) if i not in exceptions]
+        # print("Exceptions exists, make new list to ignore exceptions")
         exceptCopy = list(exceptions)
         while len(exceptCopy) > 0:
           minIndex = exceptCopy.index(min(exceptCopy))  
-          blocks.insert(minIndex, ['nil'])
+          blocks[minIndex] = ['nil']
+          exceptCopy.remove(min(exceptCopy))
 
       count = sum(1 for b in blocks if len(b)==1)
-      #print("New Count: ", count)
+      c = sum(1 for b in blocks if len(b)>1)
+      if c == 0:
+        hasConflict = False
+        student["classes"] = c
+        break
+      # print("New Count: ", count)
 
       if count < student["expectedClasses"]:
-        #print("There must be a clash...")
+        # print(student["expectedClasses"])
+        # print(student["classes"])
+        # print("There must be a clash...")
         if count == student["classes"]:
-          #print("New Conflict 2: Missing Classes")
+          # print("New Conflict 2: Missing Classes")
           conflicts.append({
             "Pupil #": student["Pupil #"],
             "Email": "",
             "Conflict": "Missing classes"
           })
           hasConflict = False
-          #print("end conflicts...")
+          # print("end conflicts...")
           break
 
         blockLens = [len(block) for block in blocks]
         index = blockLens.index(max(blockLens))
-        #print("Block Lengths: ", blockLens)
-        #print("Clash Index: ", index)
+        # print("Block Lengths: ", blockLens)
+        # print("Clash Index: ", index)
 
         blockOut = f"block{index+1}"
-        #print("blockOut: ", blockOut)
+        # print("blockOut: ", blockOut)
         done = False
         moveIndex = 0
-        #print("moveIndex: ", moveIndex)
+        # print("moveIndex: ", moveIndex)
         freeBlocks = [blockIndex for blockIndex in range(len(blocks)) if len(blocks[blockIndex]) == 0]
-        #print("Free blocks: ", freeBlocks)
-        #print("Begin attempt to move...")
+        # print("Free blocks: ", freeBlocks)
+        # print("Begin attempt to move...")
         while not done:
           classOut = blocks[index][moveIndex]
-          #print("classOut: ",classOut)
+          # print("classOut: ",classOut)
           found = False
-          #print("begin check for blocks in running...")
-          for block in running:
-            #print("Block: ", block)
+          # print("begin check for blocks in running...")
+          for blockIndex in freeBlocks:
+            # print("Block index: ", blockIndex)
             if found:
-              #print("Found, breaking check for blocks in running")
+              # print("Found, breaking check for blocks in running")
               break
-            if list(running).index(block) != index and list(running).index(block) in freeBlocks:
-              #print("This block is available, begin check for classes in this block")
+            if blockIndex != index:
+              block = list(running)[blockIndex]
+              # print("This block is available, begin check for classes in this block")
               for cname in running[block]:
-                #print("Class: ", cname)
-                if cname[:-2] == blocks[index][moveIndex][:-2] and len(running[block][cname]["students"]) < classCap:
-                  #print("Exists! This class matches target and has space!")
+                # print("Class: ", cname)
+                if cname[:-2] == classOut[:-2] and len(running[block][cname]["students"]) < classCap:
+                  # print("Exists! This class matches target and has space!")
                   studentData = {
                     "Pupil #": student["Pupil #"],
                     "index": student["studentIndex"]
                   }
-                  studentIndex = running[blockOut][classOut]["students"].index(studentData)
-                  
+
                   # Update current blocks to work with
                   blocks[index].remove(classOut)
-                  blocks[list(running).index(block)].append(cname)
+                  blocks[blockIndex].append(cname)
 
                   # Update Final Records
-                  del running[blockOut][classOut]["students"][studentIndex] # Remove final
+                  running[blockOut][classOut]["students"].remove(studentData) # Remove final
                   running[block][cname]["students"].append(studentData)
                   
                   found, done = True, True
-                  #print("Found: ", found)
-                  #print("done: ", done)
+                  # print("Found: ", found)
+                  # print("done: ", done)
                   break
                 # else:
-                  #print("This class does not match the target, or this class is full")
-              #print("Found: ", found)
-            # else:
-              #print("This block is the conflict, or is not free")
-
+                  # print("This class does not match the target, or this class is full")
+                          # else:
+              # print("This block is the conflict, or is not free")
           
-          #print("end check for blocks in running...")
+          # print("end check for blocks in running...")
           if not found:
-            #print("Could not find a solution for this class")
+            # print("Could not find a solution for this class")
             if moveIndex < len(blocks[index])-1:
-              #print("Trying next class")
+              # print("Trying next class")
               moveIndex += 1
             elif moveIndex == len(blocks[index])-1:
-              #print("No more attempts possible, add to exceptions")
+              # print("No more attempts possible, add to exceptions")
               if index not in exceptions: exceptions.append(index)
-              conflicts.append({
-                "Pupil #": student["Pupil #"],
-                "Email": "",
-                "Conflict": "Error"
-              })
               done = True
-              hasConflict = False
               
             else:
               print('impossible err 3')
          
           elif found:
             done = True
-            #print("Done: ", done)
+            # print("Done: ", done)
 
           else:
             print('impossible err 2')
 
       elif count == student["expectedClasses"]:
-        #print("No conflicts")
+        # print("No conflicts")
         if len(exceptions) > 0:
-          #print("Exceptions exist, new conflict 3: More than one class per block")
+          # print("Exceptions exist, new conflict 3: More than one class per block")
           for i in range(len(exceptions)):
             blocks[i] = origin[i]
 
@@ -491,7 +493,7 @@ def generateScheduleV3(
 
         hasConflict = False
       elif count > student["expectedClasses"]:
-        #print("New conflict 4: More classes than expected")
+        # print("New conflict 4: More classes than expected")
         conflicts.append({
           "Pupil #": student["Pupil #"],
           "Email": "",

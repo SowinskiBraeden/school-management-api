@@ -345,7 +345,7 @@ def generateScheduleV3(
   with open("./output/timetable.json", "w") as outfile:
     json.dump(running, outfile, indent=2)
 
-  # Step 6 - Evaluate, move students to fix
+  # Step 6 | Part A - Evaluate, move students to fix conflicts
   conflicts = []
 
   for student in students:
@@ -354,8 +354,13 @@ def generateScheduleV3(
 
     # If there is no conflicts: continue
     if student["classes"] == student["expectedClasses"] and count == student["classes"]: continue
+
+
+
+    # Step 6 | Part B - Check difference between 
+    #                   classes vs expectedClasses
     
-    
+    # If difference is too great, attempt to fix
 
   # Update Student records
   with open(studentsDir, "w") as outfile:

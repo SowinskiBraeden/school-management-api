@@ -2,6 +2,7 @@
 import json
 import math
 import random
+from inspect import currentframe
 
 # Import from custom utilities
 from util.mockStudents import getSampleStudents
@@ -37,6 +38,9 @@ from util.generateCourses import getSampleCourses
     ...
   }
 '''
+
+def getLineNumber(): return currentframe().f_back.f_lineno
+
 
 minReq, median, classCap = 18, 24, 30
 mockStudents = []
@@ -373,23 +377,41 @@ def generateScheduleV3(
     while hasConflicts:
       # Check if conflicts have been resolved
       conflicts = sum(1 for b in block if len(b)>1)
-      if (
-        conflicts == 0 and
-        student["classes"] < student["expectedClasses"] and 
-        student["classes"] >= (student["expectedClasses"]-2)
-      ):
+      
+      if conflicts == 0: hasConflicts = False
+      
+      elif conflicts > 0:
+        blocks = [student["scheudle"][block] for block in student["schedule"]]
+      
+      else:
+        print(f"Fatal error ({getLineNumber()}): Impossible error")
+        continue
+
+    metSelfRequirements = False
+    while not metSelfRequirements:
+      if student["classes"] == student["expectedClasses"]: metSelfRequirements = True
+      
+      elif (student["expectedClasses"] - 2) <= student["classes"] < student["expectedClasses"]:
         acceptableConflictLogs.append({
           "Pupil #": student["Pupil #"],
           "Email": "",
           "Conflict": "Acceptable: Missing 1-2 classes"
         })
-        hasConflicts = False
+        metSelfRequirements = True
 
-      elif conflicts > 0:
+      elif student["classes"] < (student["expectedClasses"] - 2):
+        # Difference between classes inserted to and
+        # expected classes is too great, attempt to fix
         pass
 
+      else:
+        print(f"Fatal error ({getLineNumber()}): Impossible error")
+        continue
 
-    # If difference is too great, attempt to fix
+  finalConflictLogs = {
+    "Fatal": conflictLogs,
+    "Acceptable": acceptableConflictLogs
+  }
 
   # Update Student records
   with open(studentsDir, "w") as outfile:
@@ -397,7 +419,7 @@ def generateScheduleV3(
 
   # Log Conflict to records
   with open(conflictsDir, "w") as outfile:
-    json.dump(conflicts, outfile, indent=2)
+    json.dump(finalConflictLogs, outfile, indent=2)
 
   return running
 

@@ -346,20 +346,49 @@ def generateScheduleV3(
     json.dump(running, outfile, indent=2)
 
   # Step 6 | Part A - Evaluate, move students to fix conflicts
-  conflicts = []
+  conflictLogs = [] # Counts as an error that is an issue
+  acceptableConflictLogs = [] # Is minor error that is not an issue
 
   for student in students:
     blocks = [student["schedule"][block] for block in student["schedule"]]
-    count, hasConflict = sum(1 for b in blocks if len(b)==1), True
-
-    # If there is no conflicts: continue
-    if student["classes"] == student["expectedClasses"] and count == student["classes"]: continue
-
-
-
-    # Step 6 | Part B - Check difference between 
-    #                   classes vs expectedClasses
+    conflicts = sum(1 for b in block if len(b)>1)
     
+    
+    hasConflicts = True if conflicts > 0 else False
+
+    # If there is no conflicts
+    # and student is inserted to expectedClasses
+    # or classes the student is inserted do is missing
+    # no more than two:
+    # continue to next student
+    if (
+      not hasConflicts and (
+        student["classes"] == student["expectedClasses"] or (
+          student["classes"] < student["expectedClasses"] and 
+          student["classes"] >= (student["expectedClasses"]-2)
+        )
+      )
+    ): continue
+
+    while hasConflicts:
+      # Check if conflicts have been resolved
+      conflicts = sum(1 for b in block if len(b)>1)
+      if (
+        conflicts == 0 and
+        student["classes"] < student["expectedClasses"] and 
+        student["classes"] >= (student["expectedClasses"]-2)
+      ):
+        acceptableConflictLogs.append({
+          "Pupil #": student["Pupil #"],
+          "Email": "",
+          "Conflict": "Acceptable: Missing 1-2 classes"
+        })
+        hasConflicts = False
+
+      elif conflicts > 0:
+        pass
+
+
     # If difference is too great, attempt to fix
 
   # Update Student records

@@ -346,22 +346,17 @@ def generateScheduleV3(
         students[student["index"]]["classes"] += 1
 
 
-  with open("./output/timetable.json", "w") as outfile:
-    json.dump(running, outfile, indent=2)
-
   # Step 6 | Part A - Evaluate, move students to fix conflicts
   conflictLogs = [] # Counts as an error that is an issue
   acceptableConflictLogs = [] # Is minor error that is not an issue
 
   for student in students:
-    blocks = [student["schedule"][block] for block in student["schedule"]]
     conflicts = sum(1 for b in block if len(b)>1)
-    
     
     hasConflicts = True if conflicts > 0 else False
 
     # If there is no conflicts
-    # and student is inserted to expectedClasses
+    # and classes inserted to is equal to expectedClasses
     # or classes the student is inserted do is missing
     # no more than two:
     # continue to next student
@@ -382,16 +377,59 @@ def generateScheduleV3(
       
       elif conflicts > 0:
         blocks = [student["scheudle"][block] for block in student["schedule"]]
-      
+        blockLens = [len(block) for block in blocks]
+        freeBlocks = [index for index in range(len(blocks)) if len(blocks[index]) == 0]
+
+        clashIndex = blockLens.index(max(blockLens))
+        blockOut = f"block{clashIndex+1}"
+        classIndex = 0
+        done = False
+        advancedConflict = False
+
+        while not done:
+          classOut = blocks[clashIndex][classIndex]
+          found = False
+          for index in freeBlocks:
+            if found: break
+            if index != clashIndex:
+              blockIn = list(running)[index]
+              for cname in running[block]:
+                if cname[:-2] == classOut[:-2] and len(running[blockIn][cname]["students"]) < classCap:
+                  studentData = {
+                    "Pupil #": student["Pupil #"],
+                    "index": student["studentIndex"]
+                  }
+
+                  # Update current blocks
+                  blocks[clashIndex].remove(classOut)
+                  blocks[index].append(cname)
+
+                  # Update final records
+                  running[blockOut][classOut]["students"].remove(studentData)
+                  running[blockIn][cname]["students"].append(studentData)
+
+                  found = True
+                  break
+
+          if not found:
+            if classIndex < len(blocks[clashIndex])-1: classIndex += 1
+            elif classIndex == len(blocks[clashIndex])-1:
+              advancedConflict = True
+              done = True
+          
+          elif found: done = True
+
+        if advancedConflict:
+         pass
+
       else:
         print(f"Fatal error ({getLineNumber()}): Impossible error")
         continue
 
-    metSelfRequirements = False
+    metSelfRequirements = True if student["classes"] == student["expectedClasses"] else False
     while not metSelfRequirements:
-      if student["classes"] == student["expectedClasses"]: metSelfRequirements = True
       
-      elif (student["expectedClasses"] - 2) <= student["classes"] < student["expectedClasses"]:
+      if (student["expectedClasses"] - 2) <= student["classes"] < student["expectedClasses"]:
         acceptableConflictLogs.append({
           "Pupil #": student["Pupil #"],
           "Email": "",

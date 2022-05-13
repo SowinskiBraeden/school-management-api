@@ -353,6 +353,7 @@ def generateScheduleV3(
     initialBlocks = [student["schedule"][block] for block in student["schedule"]]
     conflicts = sum(1 for b in initialBlocks if len(b)>1)
     hasConflicts = True if conflicts > 0 else False
+
     # If there is no conflicts
     # and classes inserted to is equal to expectedClasses
     # or classes the student is inserted do is missing
@@ -364,6 +365,15 @@ def generateScheduleV3(
         (student["expectedClasses"]-2) <= student["classes"] < student["expectedClasses"]
       )
     ): continue
+    
+    studentData = {
+      "Pupil #": student["Pupil #"],
+      "index": student["studentIndex"]
+    }
+
+    # If we are unable to solve, we add to exceptions 
+    # and keep trying to resolve the rest of the schedule
+    exceptions = [] 
 
     while hasConflicts:
       # Check if conflicts have been resolved
@@ -390,10 +400,6 @@ def generateScheduleV3(
               blockIn = list(running)[index]
               for cname in running[blockIn]:
                 if cname[:-2] == classOut[:-2] and len(running[blockIn][cname]["students"]) < classCap:
-                  studentData = {
-                    "Pupil #": student["Pupil #"],
-                    "index": student["studentIndex"]
-                  }
 
                   # Update records
                   student["schedule"][blockOut].remove(classOut)
@@ -417,31 +423,43 @@ def generateScheduleV3(
           
           elif found: done = True
         if advancedConflict:
-          conflictLogs.append({
-            "Pupil #": student["Pupil #"],
-            "Email": "",
-            "Type": "Critical",
-            "Code": "C-CSS",
-            "Conflict": "Couldn't solve schedule"
-          })
-          hasConflicts = False
-          # classOut = blocks[clashIndex][classIndex]
-          # existsIn = []
-          # for blockIndex in range(len(running)):
-          #   for cname in running[list(running)[blockIndex]]:
-          #     if cname[:-2] == classOut[:-2]: existsIn.append(blockIndex)
+          classIndex = 0
+          solved, done = False, False
+          classOut = blocks[clashIndex][classIndex]
+          while not done:
+            for blockIndex in range(len(running)):
+              if solved: break
+              if blockIndex != clashIndex:
+                for cname in running[list(running)[blockIndex]]:
+                  if cname[:-2] == classOut[:-2]:
+                    blockIn = f"block{blockIndex+1}"
+                    if blockIndex in freeBlocks:
+                      if len(running[blockIn][cname]["students"]) < classCap:
+                        # In the rare or impossible case a student was not inserted to a class
+                        # And it weren't full, insert them into the class
+                        student["schedule"][blockOut].remove(classOut)
+                        student["schedule"][blockIn].append(cname)
 
-          # for blockIndex in existsIn:
-          #   if blockIndex in freeBlocks:
-          #     # If this was in a free block it should've been added
-          #     # But just in case I'll do it again here
-          #     pass
-          #   elif len(blocks[blockIndex]) == 1:
+                        running[blockOut][classOut]["students"].remove(studentData)
+                        running[blockIn][cname]["students"].append(studentData)
+                      
+                        solved = True
+                        break
+                      else:
 
-          #     pass
-          #   elif len(blocks[blockIndex]) > 1:
-          #     print("How to solve")
-
+                        # Resort to remaining alternates
+                        if len(student["remainingAlts"]) > 0:
+                          
+                          pass
+                        else:
+                          # Add to exceptions try to continue
+                          print("Create exception and continue")
+                          pass
+                    elif len(blocks[blockIndex]) == 1:
+                      pass
+                    elif len(blocks[blockIndex]) > 1:
+                      print("How to solve")
+                
       else:
         print(f"Fatal error ({getLineNumber()}): Impossible error")
         continue

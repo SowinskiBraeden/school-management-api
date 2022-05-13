@@ -346,9 +346,8 @@ def generateScheduleV3(
         students[student["index"]]["classes"] += 1
 
 
-  # Step 6 | Part A - Evaluate, move students to fix conflicts
-  conflictLogs = [] # Counts as an error that is an issue
-  acceptableConflictLogs = [] # Is minor error that is not an issue
+  # Step 6 - Evaluate, move students to fix conflicts
+  conflictLogs = []
 
   for student in students:
     initialBlocks = [student["schedule"][block] for block in student["schedule"]]
@@ -421,7 +420,9 @@ def generateScheduleV3(
           conflictLogs.append({
             "Pupil #": student["Pupil #"],
             "Email": "",
-            "Conflict": "Critical: Couldn't solve schedule"
+            "Type": "Critical",
+            "Code": "C-CSS",
+            "Conflict": "Couldn't solve schedule"
           })
           hasConflicts = False
           # classOut = blocks[clashIndex][classIndex]
@@ -449,10 +450,12 @@ def generateScheduleV3(
     while not metSelfRequirements:
       
       if (student["expectedClasses"] - 2) <= student["classes"] < student["expectedClasses"]:
-        acceptableConflictLogs.append({
+        conflictLogs.append({
           "Pupil #": student["Pupil #"],
           "Email": "",
-          "Conflict": "Acceptable: Missing 1-2 classes"
+          "Type": "Acceptable",
+          "Code": "A-MC",
+          "Conflict": "Missing 1-2 classes"
         })
         metSelfRequirements = True
 
@@ -462,7 +465,9 @@ def generateScheduleV3(
         conflictLogs.append({
           "Pupil #": student["Pupil #"],
           "Email": "",
-          "Conflict": "Critical: Missing too many classes"
+          "Type": "Critical",
+          "Code": "C-MC",
+          "Conflict": "Missing too many classes"
         })
         metSelfRequirements = True
 
@@ -471,8 +476,8 @@ def generateScheduleV3(
         continue
 
   finalConflictLogs = {
-    "Critical": conflictLogs,
-    "Acceptable": acceptableConflictLogs
+    "Critical": [conflict for conflict in conflictLogs if conflict["Type"] == "Critical"],
+    "Acceptable": [conflict for conflict in conflictLogs if conflict["Type"] == "Acceptable"]
   }
 
   # Update Student records

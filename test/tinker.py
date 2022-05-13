@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 from prettytable import PrettyTable
+from typing import Tuple
 import json
 import sys
 
@@ -12,6 +13,24 @@ from util.courses import mockCourses
 from scheduleGenerator.generator_v1 import generateScheduleV1
 from scheduleGenerator.generator_v2 import generateScheduleV2
 from scheduleGenerator.generator_v3 import generateScheduleV3
+
+def errorOutput(students) -> Tuple[PrettyTable, dict, dict]:
+  # Error Table calulation / output  
+  f = open('./output/conflicts.json')
+  conflicts = json.load(f)
+  f.close()
+
+  t = PrettyTable(['Type', 'Error %', 'Success %', 'Error Ratio'])
+  
+  errorsC = round(len(conflicts["Critical"]) / len(students) * 100, 2)
+  successC = round(100 - errorsC, 2)
+  errorsA = round(len(conflicts["Acceptable"]) / len(students) * 100, 2)
+  successA = round(100 - errorsA, 2)
+  
+  t.add_row(['Critical', f"{errorsC} %", f"{successC} %", f"{len(conflicts['Critical'])}/{len(students)}"])
+  t.add_row(['Acceptable', f"{errorsA} %", f"{successA} %", f"{len(conflicts['Acceptable'])}/{len(students)}"])
+  
+  return t, conflicts["Critical"], conflicts["Acceptable"]
 
 if __name__ == '__main__':
   
@@ -46,19 +65,36 @@ if __name__ == '__main__':
     timetable["Version"] = 3
     timetable["timetable"] = generateScheduleV3(sampleStudents, samplemockCourses, 40, "./output/students.json", "./output/conflicts.json")
 
-    # Error Table calulation / output  
-    f = open('./output/conflicts.json')
-    conflicts = json.load(f)
-    f.close()
+    errors, _, _ = errorOutput(sampleStudents)
+    print(errors)
 
-    t = PrettyTable(['Type', 'Error %', 'Success %', 'Error Ratio'])
-    errors = round(len(conflicts["Critical"]) / len(sampleStudents) * 100, 2)
-    success = round(100 - errors, 2)
-    t.add_row(['Critical', f"{errors} %", f"{success} %", f"{len(conflicts['Critical'])}/{len(sampleStudents)}"])
-    errors = round(len(conflicts["Acceptable"]) / len(sampleStudents) * 100, 2)
-    success = round(100 - errors, 2)
-    t.add_row(['Acceptable', f"{errors} %", f"{success} %", f"{len(conflicts['Acceptable'])}/{len(sampleStudents)}"])
-    print(t)
+  elif sys.argv[1].upper() == "ERRORS":
+    sampleStudents = getSampleStudents("./sample_data/course_selection_data.csv", True)
+    errors, critical, acceptable = errorOutput(sampleStudents)
+    print()
+    print(errors)
+
+    print(f"\n{len(critical)} critical errors")
+    c1, c2, co = 0, 0, 0
+    for error in critical:
+      if error["Code"] == "C-MC": c1 +=1
+      elif error["Code"] == "C-CSS": c2 += 1
+      else: co += 1
+
+    print(f"x{c1} C-MC Errors: Critical - Missing Classes")
+    print(f"x{c2} C-CSS Errors: Critical - Couldn't Solve Schedule")
+    print(f"x{co} Other/Undefined Critical Errors")
+
+    print(f"\n{len(acceptable)} acceptable errors")
+    a1, ao = 0, 0
+    for error in acceptable:
+      if error["Code"] == "A-MC": a1 +=1
+      else: ao += 1
+
+    print(f"x{a1} A-MC Errors: Acceptable - Missing 1-2 Classes")
+    print(f"x{ao} Other/Undefined Acceptable Errors")
+
+    exit()
 
   else:
     print("Invalid argument")

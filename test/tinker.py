@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+from prettytable import PrettyTable
 import json
 import sys
 
@@ -37,25 +38,27 @@ if __name__ == '__main__':
 
   elif sys.argv[1].upper() == 'V3':
   
-    print("Processing...")
+    print("Processing...\n")
   
     sampleStudents = getSampleStudents("./sample_data/course_selection_data.csv", True)
     samplemockCourses = getSampleCourses("./sample_data/course_selection_data.csv", True)
     timetable = {}
     timetable["Version"] = 3
     timetable["timetable"] = generateScheduleV3(sampleStudents, samplemockCourses, 40, "./output/students.json", "./output/conflicts.json")
-  
+
+    # Error Table calulation / output  
     f = open('./output/conflicts.json')
     conflicts = json.load(f)
- 
-    print(f"{len(conflicts['Fatal'])}/{len(sampleStudents)} have errors")
-    errors = round(len(conflicts["Fatal"]) / len(sampleStudents) * 100, 2)
-    success = round(100 - errors, 2)
-
-    print(f"{errors}% errors")
-    print(f"{success}% success")
- 
     f.close()
+
+    t = PrettyTable(['Type', 'Error %', 'Success %', 'Error Ratio'])
+    errors = round(len(conflicts["Critical"]) / len(sampleStudents) * 100, 2)
+    success = round(100 - errors, 2)
+    t.add_row(['Critical', f"{errors} %", f"{success} %", f"{len(conflicts['Critical'])}/{len(sampleStudents)}"])
+    errors = round(len(conflicts["Acceptable"]) / len(sampleStudents) * 100, 2)
+    success = round(100 - errors, 2)
+    t.add_row(['Acceptable', f"{errors} %", f"{success} %", f"{len(conflicts['Acceptable'])}/{len(sampleStudents)}"])
+    print(t)
 
   else:
     print("Invalid argument")
@@ -64,4 +67,4 @@ if __name__ == '__main__':
   with open("./output/timetable.json", "w") as outfile:
     json.dump(timetable, outfile, indent=2)
 
-  print("Done")
+  print("\nDone")

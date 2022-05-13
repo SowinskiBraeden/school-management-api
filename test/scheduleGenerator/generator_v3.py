@@ -194,7 +194,7 @@ def generateScheduleV3(
           # if course exists, get first available class
           for cname in emptyClasses[course]:
             if cname in selectedCourses:
-              if isAlt and emptyClasses[course][cname]["expectedLen"] > classCap:
+              if isAlt and emptyClasses[course][cname]["expectedLen"] < classCap:
                 emptyClasses[course][cname]["expectedLen"] += 1
               if len(selectedCourses[cname]["students"]) < emptyClasses[course][cname]["expectedLen"]:
                 # Class exists with room for student
@@ -258,7 +258,7 @@ def generateScheduleV3(
       else: return 6
 
     # Return Error if code is altered to cause error
-    else: raise SystemExit("Invalid 'stepType' in func 'stepIndex' line 225")
+    else: raise SystemExit(f"Invalid 'stepType' in func 'stepIndex' line {getLineNumber()}")
 
   while len(allClassRunCounts) > 0:
     # Get highest resource class (most times run)
@@ -351,10 +351,9 @@ def generateScheduleV3(
   acceptableConflictLogs = [] # Is minor error that is not an issue
 
   for student in students:
-    conflicts = sum(1 for b in block if len(b)>1)
-    
+    initialBlocks = [student["schedule"][block] for block in student["schedule"]]
+    conflicts = sum(1 for b in initialBlocks if len(b)>1)
     hasConflicts = True if conflicts > 0 else False
-
     # If there is no conflicts
     # and classes inserted to is equal to expectedClasses
     # or classes the student is inserted do is missing
@@ -362,29 +361,26 @@ def generateScheduleV3(
     # continue to next student
     if (
       not hasConflicts and (
-        student["classes"] == student["expectedClasses"] or (
-          student["classes"] < student["expectedClasses"] and 
-          student["classes"] >= (student["expectedClasses"]-2)
-        )
+        student["classes"] == student["expectedClasses"] or 
+        (student["expectedClasses"]-2) <= student["classes"] < student["expectedClasses"]
       )
     ): continue
 
     while hasConflicts:
       # Check if conflicts have been resolved
-      conflicts = sum(1 for b in block if len(b)>1)
+      blocks = [student["schedule"][block] for block in student["schedule"]]
+      conflicts = sum(1 for b in blocks if len(b)>1)
       
       if conflicts == 0: hasConflicts = False
       
       elif conflicts > 0:
-        blocks = [student["scheudle"][block] for block in student["schedule"]]
         blockLens = [len(block) for block in blocks]
         freeBlocks = [index for index in range(len(blocks)) if len(blocks[index]) == 0]
 
         clashIndex = blockLens.index(max(blockLens))
         blockOut = f"block{clashIndex+1}"
         classIndex = 0
-        done = False
-        advancedConflict = False
+        done, advancedConflict = False, False
 
         while not done:
           classOut = blocks[clashIndex][classIndex]
@@ -393,18 +389,17 @@ def generateScheduleV3(
             if found: break
             if index != clashIndex:
               blockIn = list(running)[index]
-              for cname in running[block]:
+              for cname in running[blockIn]:
                 if cname[:-2] == classOut[:-2] and len(running[blockIn][cname]["students"]) < classCap:
                   studentData = {
                     "Pupil #": student["Pupil #"],
                     "index": student["studentIndex"]
                   }
 
-                  # Update current blocks
-                  blocks[clashIndex].remove(classOut)
-                  blocks[index].append(cname)
+                  # Update records
+                  student["schedule"][blockOut].remove(classOut)
+                  student["schedule"][blockIn].append(cname)
 
-                  # Update final records
                   running[blockOut][classOut]["students"].remove(studentData)
                   running[blockIn][cname]["students"].append(studentData)
 
@@ -414,13 +409,37 @@ def generateScheduleV3(
           if not found:
             if classIndex < len(blocks[clashIndex])-1: classIndex += 1
             elif classIndex == len(blocks[clashIndex])-1:
+              classIndex = 0
               advancedConflict = True
               done = True
+            else:
+              print(f"Fatal error ({getLineNumber()}): Impossible error")
+              continue
           
           elif found: done = True
-
         if advancedConflict:
-         pass
+          conflictLogs.append({
+            "Pupil #": student["Pupil #"],
+            "Email": "",
+            "Conflict": "Critical: Couldn't solve schedule"
+          })
+          hasConflicts = False
+          # classOut = blocks[clashIndex][classIndex]
+          # existsIn = []
+          # for blockIndex in range(len(running)):
+          #   for cname in running[list(running)[blockIndex]]:
+          #     if cname[:-2] == classOut[:-2]: existsIn.append(blockIndex)
+
+          # for blockIndex in existsIn:
+          #   if blockIndex in freeBlocks:
+          #     # If this was in a free block it should've been added
+          #     # But just in case I'll do it again here
+          #     pass
+          #   elif len(blocks[blockIndex]) == 1:
+
+          #     pass
+          #   elif len(blocks[blockIndex]) > 1:
+          #     print("How to solve")
 
       else:
         print(f"Fatal error ({getLineNumber()}): Impossible error")
@@ -440,14 +459,19 @@ def generateScheduleV3(
       elif student["classes"] < (student["expectedClasses"] - 2):
         # Difference between classes inserted to and
         # expected classes is too great, attempt to fix
-        pass
+        conflictLogs.append({
+          "Pupil #": student["Pupil #"],
+          "Email": "",
+          "Conflict": "Critical: Missing too many classes"
+        })
+        metSelfRequirements = True
 
       else:
         print(f"Fatal error ({getLineNumber()}): Impossible error")
         continue
 
   finalConflictLogs = {
-    "Fatal": conflictLogs,
+    "Critical": conflictLogs,
     "Acceptable": acceptableConflictLogs
   }
 

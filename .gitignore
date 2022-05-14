@@ -8,7 +8,6 @@
 
 # Test
 /test/test.py
-/test/step6.py
 
 # Test output
 /test/output/*

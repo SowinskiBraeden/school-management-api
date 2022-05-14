@@ -4,6 +4,8 @@ import math
 import random
 from inspect import currentframe
 
+from click import pass_context
+
 # Import from custom utilities
 from util.mockStudents import getSampleStudents
 from util.generateCourses import getSampleCourses
@@ -347,7 +349,7 @@ def generateScheduleV3(
 
 
   # Step 6 - Evaluate, move students to fix conflicts
-  conflictLogs = []
+  conflictLogs = {}
 
   for student in students:
     initialBlocks = [student["schedule"][block] for block in student["schedule"]]
@@ -378,11 +380,18 @@ def generateScheduleV3(
     while hasConflicts:
       # Check if conflicts have been resolved
       blocks = [student["schedule"][block] for block in student["schedule"]]
+      # If there is exceptions, make them look normal in blocks
+      # list to ginore them when looking for clashes, and not to
+      # accidently overwrite while evaluating other classes
+      if len(exceptions) > 0:
+        for i, block in enumerate(blocks):
+          if i in exceptions: blocks[i] = ['EXPT']
       conflicts = sum(1 for b in blocks if len(b)>1)
-      
+
       if conflicts == 0: hasConflicts = False
       
       elif conflicts > 0:
+
         blockLens = [len(block) for block in blocks]
         freeBlocks = [index for index in range(len(blocks)) if len(blocks[index]) == 0]
 
@@ -422,44 +431,92 @@ def generateScheduleV3(
               continue
           
           elif found: done = True
+
         if advancedConflict:
-          classIndex = 0
-          solved, done = False, False
-          classOut = blocks[clashIndex][classIndex]
-          while not done:
+          attemptResolve = True
+          classOutIndex = 0
+          while attemptResolve:
+            foundSolution = False
+            newClassOut = blocks[clashIndex][classOutIndex]
             for blockIndex in range(len(running)):
-              if solved: break
-              if blockIndex != clashIndex:
+              if foundSolution: break
+              if blockIndex != clashIndex and blockIndex not in exceptions:
                 for cname in running[list(running)[blockIndex]]:
-                  if cname[:-2] == classOut[:-2]:
+                  if cname[:-2] == newClassOut[:-2]:
                     blockIn = f"block{blockIndex+1}"
                     if blockIndex in freeBlocks:
                       if len(running[blockIn][cname]["students"]) < classCap:
                         # In the rare or impossible case a student was not inserted to a class
                         # And it weren't full, insert them into the class
-                        student["schedule"][blockOut].remove(classOut)
+                        student["schedule"][blockOut].remove(newClassOut)
                         student["schedule"][blockIn].append(cname)
 
-                        running[blockOut][classOut]["students"].remove(studentData)
+                        running[blockOut][newClassOut]["students"].remove(studentData)
                         running[blockIn][cname]["students"].append(studentData)
-                      
-                        solved = True
+                        foundSolution = True
                         break
-                      else:
 
-                        # Resort to remaining alternates
-                        if len(student["remainingAlts"]) > 0:
-                          
-                          pass
-                        else:
-                          # Add to exceptions try to continue
-                          print("Create exception and continue")
-                          pass
                     elif len(blocks[blockIndex]) == 1:
-                      pass
-                    elif len(blocks[blockIndex]) > 1:
-                      print("How to solve")
-                
+                      oClassOut = blocks[blockIndex][0]
+                      found_oBlockSolution = False
+                      for oBlockIndex in range(len(running)):
+                        if found_oBlockSolution: break
+                        if oBlockIndex != clashIndex and oBlockIndex not in exceptions and oBlockIndex in freeBlocks:
+                          for ocname in running[list(running)[oBlockIndex]]:
+                            if ocname[:-2] == oClassOut[:-2]:
+                              oBlockIn = f"block{oBlockIndex+1}"
+                              if len(running[oBlockIn][ocname]["students"]) < classCap:
+                                student["schedule"][blockOut].remove(newClassOut)
+                                student["schedule"][blockIn].append(cname)
+                                student["schedule"][blockIn].remove(oClassOut)
+                                student["schedule"][oBlockIn].append(ocname)
+
+                                running[blockOut][newClassOut]["students"].remove(studentData)
+                                running[blockIn][cname]["students"].append(studentData)
+                                running[blockIn][oClassOut]["students"].remove(studentData)
+                                running[oBlockIn][ocname]["students"].append(studentData)
+
+                                found_oBlockSolution = True
+                                break
+
+                        
+                      if not found_oBlockSolution: exceptions.append(clashIndex)
+
+                      foundSolution = True
+                      break
+
+            if not foundSolution:
+              if classOutIndex < len(blocks[clashIndex]) - 1: classOutIndex += 1
+              elif classOutIndex == len(blocks[clashIndex]) - 1:
+                if len(student["remainingAlts"]) > 0:
+                  exceptions.append(clashIndex)
+                  print("Attempt to use alt")
+                  attemptResolve = False
+                  # Attempt to use alt
+                elif len(student["remainingAlts"]) == 0:
+                  exceptions.append(clashIndex)
+                  if student["Pupil #"] in conflictLogs:
+                    conflictLogs[student["Pupil #"]].append({
+                      "Pupil #": student["Pupil #"],
+                      "Email": "",
+                      "Type": "Critical",
+                      "Code": "C-CR",
+                      "Conflict": "Couldn't Resolve"
+                    })
+                  else:
+                    conflictLogs[student["Pupil #"]] = [{
+                        "Pupil #": student["Pupil #"],
+                        "Email": "",
+                        "Type": "Critical",
+                        "Code": "C-CR",
+                        "Conflict": "Couldn't Resolve"
+                      }]
+
+                  attemptResolve = False
+              else: print("Impossible - Thanos")
+            elif foundSolution:
+              attemptResolve = False
+      
       else:
         print(f"Fatal error ({getLineNumber()}): Impossible error")
         continue
@@ -468,34 +525,60 @@ def generateScheduleV3(
     while not metSelfRequirements:
       
       if (student["expectedClasses"] - 2) <= student["classes"] < student["expectedClasses"]:
-        conflictLogs.append({
-          "Pupil #": student["Pupil #"],
-          "Email": "",
-          "Type": "Acceptable",
-          "Code": "A-MC",
-          "Conflict": "Missing 1-2 classes"
-        })
+        if student["Pupil #"] in conflictLogs:
+          conflictLogs[student["Pupil #"]].append({
+            "Pupil #": student["Pupil #"],
+            "Email": "",
+            "Type": "Acceptable",
+            "Code": "A-MC",
+            "Conflict": "Missing 1-2 classes"
+          })
+        else:
+          conflictLogs[student["Pupil #"]] = [{
+            "Pupil #": student["Pupil #"],
+            "Email": "",
+            "Type": "Acceptable",
+            "Code": "A-MC",
+            "Conflict": "Missing 1-2 classes"
+          }]
         metSelfRequirements = True
 
       elif student["classes"] < (student["expectedClasses"] - 2):
         # Difference between classes inserted to and
         # expected classes is too great, attempt to fix
-        conflictLogs.append({
-          "Pupil #": student["Pupil #"],
-          "Email": "",
-          "Type": "Critical",
-          "Code": "C-MC",
-          "Conflict": "Missing too many classes"
-        })
+        if student["Pupil #"] in conflictLogs:
+          conflictLogs[student["Pupil #"]].append({
+            "Pupil #": student["Pupil #"],
+            "Email": "",
+            "Type": "Critical",
+            "Code": "C-MC",
+            "Conflict": "Missing too many classes"
+          })
+        else:
+          conflictLogs[student["Pupil #"]] = [{
+            "Pupil #": student["Pupil #"],
+            "Email": "",
+            "Type": "Critical",
+            "Code": "C-MC",
+            "Conflict": "Missing too many classes"
+          }]
         metSelfRequirements = True
 
       else:
         print(f"Fatal error ({getLineNumber()}): Impossible error")
         continue
 
+  criticals = []
+  acceptables = []
+  for student in conflictLogs:
+    for conflict in conflictLogs[student]:
+      if conflict["Type"] == "Critical": criticals.append(conflict)
+      elif conflict["Type"] == "Acceptable": acceptables.append(conflict)
+
   finalConflictLogs = {
-    "Critical": [conflict for conflict in conflictLogs if conflict["Type"] == "Critical"],
-    "Acceptable": [conflict for conflict in conflictLogs if conflict["Type"] == "Acceptable"]
+    "All": conflictLogs,
+    "Critical": criticals,
+    "Acceptable": acceptables
   }
 
   # Update Student records

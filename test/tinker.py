@@ -20,15 +20,31 @@ def errorOutput(students) -> Tuple[PrettyTable, dict, dict]:
   conflicts = json.load(f)
   f.close()
 
+  critical, acceptable = 0, 0
+  for student in conflicts["All"]:
+    studentHasCritical, studentHasAcceptable = False, False
+    read = False
+    for conflict in conflicts["All"][student]:
+      if read: break
+      if conflict["Type"] == "Critical":
+        critical += 1
+        studentHasCritical = True
+        if studentHasAcceptable: read = True
+      elif conflict["Type"] == "Acceptable":
+        acceptable += 1
+        studentHasAcceptable = True
+        if studentHasCritical: read = True
+    continue
+
   t = PrettyTable(['Type', 'Error %', 'Success %', 'Error Ratio'])
   
-  errorsC = round(len(conflicts["Critical"]) / len(students) * 100, 2)
+  errorsC = round(critical / len(students) * 100, 2)
   successC = round(100 - errorsC, 2)
-  errorsA = round(len(conflicts["Acceptable"]) / len(students) * 100, 2)
+  errorsA = round(acceptable / len(students) * 100, 2)
   successA = round(100 - errorsA, 2)
   
-  t.add_row(['Critical', f"{errorsC} %", f"{successC} %", f"{len(conflicts['Critical'])}/{len(students)}"])
-  t.add_row(['Acceptable', f"{errorsA} %", f"{successA} %", f"{len(conflicts['Acceptable'])}/{len(students)}"])
+  t.add_row(['Critical', f"{errorsC} %", f"{successC} %", f"{critical}/{len(students)}"])
+  t.add_row(['Acceptable', f"{errorsA} %", f"{successA} %", f"{acceptable}/{len(students)}"])
   
   return t, conflicts["Critical"], conflicts["Acceptable"]
 
@@ -69,8 +85,10 @@ if __name__ == '__main__':
     print(errors)
 
   elif sys.argv[1].upper() == "ERRORS":
-    sampleStudents = getSampleStudents("./sample_data/course_selection_data.csv", True)
-    errors, critical, acceptable = errorOutput(sampleStudents)
+    f = open('./output/students.json')
+    studentData = json.load(f)
+    f.close()
+    errors, critical, acceptable = errorOutput(studentData)
     print()
     print(errors)
 
@@ -78,11 +96,11 @@ if __name__ == '__main__':
     c1, c2, co = 0, 0, 0
     for error in critical:
       if error["Code"] == "C-MC": c1 +=1
-      elif error["Code"] == "C-CSS": c2 += 1
+      elif error["Code"] == "C-CR": c2 += 1
       else: co += 1
 
-    print(f"x{c1} C-MC Errors: Critical - Missing Classes")
-    print(f"x{c2} C-CSS Errors: Critical - Couldn't Solve Schedule")
+    print(f"x{c1} C-MC Errors:   Critical - Missing too many Classes")
+    print(f"x{c2} C-CR Errors:   Critical - Couldn't Resolve")
     print(f"x{co} Other/Undefined Critical Errors")
 
     print(f"\n{len(acceptable)} acceptable errors")

@@ -43,6 +43,21 @@ from util.generateCourses import getSampleCourses
 
 def getLineNumber(): return currentframe().f_back.f_lineno
 
+def newConflict(pupilNum, email, type, code, description, logs):
+  if pupilNum in logs: logs[pupilNum].append({
+    "Pupil #": pupilNum,
+    "Email": email,
+    "Type": type,
+    "Code": code,
+    "Conflict": description
+  })
+  else: logs[pupilNum] = [{
+    "Pupil #": pupilNum,
+    "Email": email,
+    "Type": type,
+    "Code": code,
+    "Conflict": description
+  }]
 
 minReq, median, classCap = 18, 24, 30
 mockStudents = []
@@ -350,6 +365,8 @@ def generateScheduleV3(
 
   # Step 6 - Evaluate, move students to fix conflicts
   conflictLogs = {}
+  criticalCount, acceptableCount = 0, 0
+  c_mc_count, c_cr_count, a_mc_count = 0, 0, 0
 
   for student in students:
     initialBlocks = [student["schedule"][block] for block in student["schedule"]]
@@ -358,8 +375,8 @@ def generateScheduleV3(
 
     # If there is no conflicts
     # and classes inserted to is equal to expectedClasses
-    # or classes the student is inserted do is missing
-    # no more than two:
+    # or classes the student is inserted to is missing
+    # no more than two classes:
     # continue to next student
     if (
       not hasConflicts and (
@@ -489,29 +506,16 @@ def generateScheduleV3(
               if classOutIndex < len(blocks[clashIndex]) - 1: classOutIndex += 1
               elif classOutIndex == len(blocks[clashIndex]) - 1:
                 if len(student["remainingAlts"]) > 0:
+                  # pass
                   exceptions.append(clashIndex)
-                  print("Attempt to use alt")
                   attemptResolve = False
                   # Attempt to use alt
                 elif len(student["remainingAlts"]) == 0:
                   exceptions.append(clashIndex)
-                  if student["Pupil #"] in conflictLogs:
-                    conflictLogs[student["Pupil #"]].append({
-                      "Pupil #": student["Pupil #"],
-                      "Email": "",
-                      "Type": "Critical",
-                      "Code": "C-CR",
-                      "Conflict": "Couldn't Resolve"
-                    })
-                  else:
-                    conflictLogs[student["Pupil #"]] = [{
-                        "Pupil #": student["Pupil #"],
-                        "Email": "",
-                        "Type": "Critical",
-                        "Code": "C-CR",
-                        "Conflict": "Couldn't Resolve"
-                      }]
-
+                  criticalCount += 1
+                  c_cr_count += 1
+                  newConflict(student["Pupil #"], "", "Critical", "C-CR", "Couldn't Resolve", conflictLogs)
+                  
                   attemptResolve = False
               else: print("Impossible - Thanos")
             elif foundSolution:
@@ -525,44 +529,20 @@ def generateScheduleV3(
     while not metSelfRequirements:
       
       if (student["expectedClasses"] - 2) <= student["classes"] < student["expectedClasses"]:
-        if student["Pupil #"] in conflictLogs:
-          conflictLogs[student["Pupil #"]].append({
-            "Pupil #": student["Pupil #"],
-            "Email": "",
-            "Type": "Acceptable",
-            "Code": "A-MC",
-            "Conflict": "Missing 1-2 classes"
-          })
-        else:
-          conflictLogs[student["Pupil #"]] = [{
-            "Pupil #": student["Pupil #"],
-            "Email": "",
-            "Type": "Acceptable",
-            "Code": "A-MC",
-            "Conflict": "Missing 1-2 classes"
-          }]
-        metSelfRequirements = True
+        a_mc_count += 1
+        acceptableCount += 1
+        newConflict(student["Pupil #"], "", "Acceptable", "A-MC", "Missing 1-2 Classses", conflictLogs)
+        break
 
       elif student["classes"] < (student["expectedClasses"] - 2):
         # Difference between classes inserted to and
         # expected classes is too great, attempt to fix
         if student["Pupil #"] in conflictLogs:
-          conflictLogs[student["Pupil #"]].append({
-            "Pupil #": student["Pupil #"],
-            "Email": "",
-            "Type": "Critical",
-            "Code": "C-MC",
-            "Conflict": "Missing too many classes"
-          })
-        else:
-          conflictLogs[student["Pupil #"]] = [{
-            "Pupil #": student["Pupil #"],
-            "Email": "",
-            "Type": "Critical",
-            "Code": "C-MC",
-            "Conflict": "Missing too many classes"
-          }]
-        metSelfRequirements = True
+          c_mc_count += 1
+          criticalCount += 1
+          newConflict(student["Pupil #"], "", "Critical", "C-MC", "Missing too many Classses", conflictLogs)
+
+        break
 
       else:
         print(f"Fatal error ({getLineNumber()}): Impossible error")
@@ -576,9 +556,27 @@ def generateScheduleV3(
       elif conflict["Type"] == "Acceptable": acceptables.append(conflict)
 
   finalConflictLogs = {
-    "All": conflictLogs,
-    "Critical": criticals,
-    "Acceptable": acceptables
+    "Conflicts": conflictLogs,
+    "Critical": {
+      "Total": criticalCount,
+      "Errors": [{
+        "Total": c_mc_count,
+        "Description": "Missing too many Classes",
+        "Code": "C-MC"
+      }, {
+        "Total": c_cr_count,
+        "Description": "Couldn't Resolve",
+        "Code": "C-CR"
+      }]
+    },
+    "Acceptable": {
+      "Total": acceptableCount,
+      "Errors": [{
+        "Total": a_mc_count,
+        "Description": "Missing 1-2 Classes",
+        "Code": "A-MC"
+      }]
+    }
   }
 
   # Update Student records

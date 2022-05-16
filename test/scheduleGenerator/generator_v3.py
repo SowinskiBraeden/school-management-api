@@ -43,21 +43,24 @@ from util.generateCourses import getSampleCourses
 
 def getLineNumber(): return currentframe().f_back.f_lineno
 
-def newConflict(pupilNum, email, type, code, description, logs):
-  if pupilNum in logs: logs[pupilNum].append({
-    "Pupil #": pupilNum,
-    "Email": email,
-    "Type": type,
-    "Code": code,
-    "Conflict": description
-  })
-  else: logs[pupilNum] = [{
-    "Pupil #": pupilNum,
-    "Email": email,
-    "Type": type,
-    "Code": code,
-    "Conflict": description
-  }]
+def newConflict(pupilNum: str, email: str, type: str, code: str, description: str, logs: dict):
+  exists = True if pupilNum in logs else False
+  if exists: logs[pupilNum].append({
+      "Pupil #": pupilNum,
+      "Email": email,
+      "Type": type,
+      "Code": code,
+      "Conflict": description
+    })
+  else:
+    logs[pupilNum] = [{
+      "Pupil #": pupilNum,
+      "Email": email,
+      "Type": type,
+      "Code": code,
+      "Conflict": description
+    }]
+  return exists
 
 minReq, median, classCap = 18, 24, 30
 mockStudents = []
@@ -90,7 +93,7 @@ def generateScheduleV3(
   conflictsDir: str="../output/conflicts.json"
   ) -> dict[str, dict]:
   
-  def equal(l): # Used to equalize list of numbers
+  def equal(l: list) -> list: # Used to equalize list of numbers
     q,r = divmod(sum(l),len(l))
     return [q+1]*r + [q]*(len(l)-r)
 
@@ -367,6 +370,7 @@ def generateScheduleV3(
   conflictLogs = {}
   criticalCount, acceptableCount = 0, 0
   c_mc_count, c_cr_count, a_mc_count = 0, 0, 0
+  studentsCritical, studentsAcceptable = 0, 0
 
   for student in students:
     initialBlocks = [student["schedule"][block] for block in student["schedule"]]
@@ -514,7 +518,7 @@ def generateScheduleV3(
                   exceptions.append(clashIndex)
                   criticalCount += 1
                   c_cr_count += 1
-                  newConflict(student["Pupil #"], "", "Critical", "C-CR", "Couldn't Resolve", conflictLogs)
+                  if not newConflict(student["Pupil #"], "", "Critical", "C-CR", "Couldn't Resolve", conflictLogs): studentsCritical += 1
                   
                   attemptResolve = False
               else: print("Impossible - Thanos")
@@ -531,7 +535,7 @@ def generateScheduleV3(
       if (student["expectedClasses"] - 2) <= student["classes"] < student["expectedClasses"]:
         a_mc_count += 1
         acceptableCount += 1
-        newConflict(student["Pupil #"], "", "Acceptable", "A-MC", "Missing 1-2 Classses", conflictLogs)
+        if not newConflict(student["Pupil #"], "", "Acceptable", "A-MC", "Missing 1-2 Classses", conflictLogs): studentsAcceptable += 1
         break
 
       elif student["classes"] < (student["expectedClasses"] - 2):
@@ -540,7 +544,7 @@ def generateScheduleV3(
         if student["Pupil #"] in conflictLogs:
           c_mc_count += 1
           criticalCount += 1
-          newConflict(student["Pupil #"], "", "Critical", "C-MC", "Missing too many Classses", conflictLogs)
+          if not newConflict(student["Pupil #"], "", "Critical", "C-MC", "Missing too many Classses", conflictLogs): studentsCritical += 1
 
         break
 
@@ -559,6 +563,7 @@ def generateScheduleV3(
     "Conflicts": conflictLogs,
     "Critical": {
       "Total": criticalCount,
+      "Students": studentsCritical,
       "Errors": [{
         "Total": c_mc_count,
         "Description": "Missing too many Classes",
@@ -571,6 +576,7 @@ def generateScheduleV3(
     },
     "Acceptable": {
       "Total": acceptableCount,
+      "Students": studentsAcceptable,
       "Errors": [{
         "Total": a_mc_count,
         "Description": "Missing 1-2 Classes",

@@ -19,8 +19,8 @@ def errorOutput(students) -> Tuple[PrettyTable, dict, dict]:
   f = open('./output/conflicts.json')
   conflicts = json.load(f)
   f.close()
-  totalCritical = conflicts["Critical"]["Total"]
-  totalAcceptable = conflicts["Acceptable"]["Total"]
+  totalCritical = conflicts["Critical"]["Students"]
+  totalAcceptable = conflicts["Acceptable"]["Students"]
 
   t = PrettyTable(['Type', 'Error %', 'Success %', 'Error Ratio'])
   

@@ -43,7 +43,9 @@ from util.generateCourses import getSampleCourses
 
 def getLineNumber(): return currentframe().f_back.f_lineno
 
-def newConflict(pupilNum: str, email: str, type: str, code: str, description: str, logs: dict):
+# Takes in information to create or add a new conflict
+# Returns if the particular student has a previous error
+def newConflict(pupilNum: str, email: str, type: str, code: str, description: str, logs: dict) -> bool:
   exists = True if pupilNum in logs else False
   if exists: logs[pupilNum].append({
       "Pupil #": pupilNum,
@@ -63,7 +65,6 @@ def newConflict(pupilNum: str, email: str, type: str, code: str, description: st
   return exists
 
 minReq, median, classCap = 18, 24, 30
-mockStudents = []
 activeCourses = {}
 running = {
   "block1": {},
@@ -78,6 +79,8 @@ running = {
   "block10": {}
 }
 
+# These are the codes for Flex (spare) blocks
+# Semester 1 and 2
 flex = ["XAT--12A-S", "XAT--12B-S"]
 
 # V3 differs a lot by V1/2 as it does not focus on fitting the classes
@@ -88,8 +91,8 @@ flex = ["XAT--12A-S", "XAT--12B-S"]
 def generateScheduleV3(
   students: list, 
   courses: dict, 
-  blockClassLimit: int=40, 
-  studentsDir: str="../output/students.json", 
+  blockClassLimit: int=40,
+  studentsDir: str="../output/students.json",
   conflictsDir: str="../output/conflicts.json"
   ) -> dict[str, dict]:
   

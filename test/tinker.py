@@ -22,15 +22,15 @@ def errorOutput(students) -> Tuple[PrettyTable, dict, dict]:
   totalCritical = conflicts["Critical"]["Students"]
   totalAcceptable = conflicts["Acceptable"]["Students"]
 
-  t = PrettyTable(['Type', 'Error %', 'Success %', 'Error Ratio'])
+  t = PrettyTable(['Type', 'Error %', 'Success %', 'Student Error Ratio'])
   
   errorsC = round(totalCritical / len(students) * 100, 2)
   successC = round(100 - errorsC, 2)
   errorsA = round(totalAcceptable / len(students) * 100, 2)
   successA = round(100 - errorsA, 2)
   
-  t.add_row(['Critical', f"{errorsC} %", f"{successC} %", f"{totalCritical}/{len(students)}"])
-  t.add_row(['Acceptable', f"{errorsA} %", f"{successA} %", f"{totalAcceptable}/{len(students)}"])
+  t.add_row(['Critical', f"{errorsC} %", f"{successC} %", f"{totalCritical}/{len(students)} Students"])
+  t.add_row(['Acceptable', f"{errorsA} %", f"{successA} %", f"{totalAcceptable}/{len(students)} Students"])
   
   return t, conflicts["Critical"], conflicts["Acceptable"]
 

@@ -385,12 +385,12 @@ def generateScheduleV3(
     # or classes the student is inserted to is missing
     # no more than two classes:
     # continue to next student
-    if (
-      not hasConflicts and (
-        student["classes"] == student["expectedClasses"] or 
-        (student["expectedClasses"]-2) <= student["classes"] < student["expectedClasses"]
-      )
-    ): continue
+    if not hasConflicts and student["classes"] == student["expectedClasses"]: continue
+    elif not hasConflicts and (student["expectedClasses"]-2) <= student["classes"] < student["expectedClasses"]:
+      a_mc_count += 1
+      acceptableCount += 1
+      if not newConflict(student["Pupil #"], "", "Acceptable", "A-MC", "Missing 1-2 Classses", conflictLogs): studentsAcceptable += 1
+      continue
     
     studentData = {
       "Pupil #": student["Pupil #"],
@@ -408,7 +408,7 @@ def generateScheduleV3(
       # list to ginore them when looking for clashes, and not to
       # accidently overwrite while evaluating other classes
       if len(exceptions) > 0:
-        for i, block in enumerate(blocks):
+        for i in range(len(blocks)):
           if i in exceptions: blocks[i] = ['EXPT']
       conflicts = sum(1 for b in blocks if len(b)>1)
 
@@ -504,7 +504,11 @@ def generateScheduleV3(
                                 break
 
                         
-                      if not found_oBlockSolution: exceptions.append(clashIndex)
+                      if not found_oBlockSolution:
+                        exceptions.append(clashIndex)
+                        criticalCount += 1
+                        c_cr_count += 1
+                        if not newConflict(student["Pupil #"], "", "Critial", "C-CR", "Couldn't Resolve", conflictLogs): studentsCritical += 1 
 
                       foundSolution = True
                       break
@@ -513,8 +517,11 @@ def generateScheduleV3(
               if classOutIndex < len(blocks[clashIndex]) - 1: classOutIndex += 1
               elif classOutIndex == len(blocks[clashIndex]) - 1:
                 if len(student["remainingAlts"]) > 0:
-                  # pass
                   exceptions.append(clashIndex)
+                  criticalCount += 1
+                  c_cr_count += 1
+                  if not newConflict(student["Pupil #"], "", "Critical", "C-CR", "Couldn't Resolve", conflictLogs): studentsCritical += 1
+                  
                   attemptResolve = False
                   # Attempt to use alt
                 elif len(student["remainingAlts"]) == 0:
@@ -554,13 +561,6 @@ def generateScheduleV3(
       else:
         print(f"Fatal error ({getLineNumber()}): Impossible error")
         continue
-
-  criticals = []
-  acceptables = []
-  for student in conflictLogs:
-    for conflict in conflictLogs[student]:
-      if conflict["Type"] == "Critical": criticals.append(conflict)
-      elif conflict["Type"] == "Acceptable": acceptables.append(conflict)
 
   finalConflictLogs = {
     "Conflicts": conflictLogs,

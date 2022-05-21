@@ -308,7 +308,7 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	teacher.PersonalData.Province = data["province"].(string)
 	teacher.PersonalData.City = data["city"].(string)
 	teacher.PersonalData.Postal = data["postal"].(string)
-	teacher.PersonalData.DOB = data["postal"].(string)
+	teacher.PersonalData.DOB = data["dob"].(string)
 
 	var photo models.Photo
 	photo.Name = uuid.New().String()

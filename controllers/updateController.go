@@ -2133,6 +2133,16 @@ func RemoveStudent(c *fiber.Ctx) error {
 		})
 	}
 
+	_, deleteErr := idCollection.DeleteOne(ctx, bson.M{"cid": data["sid"]})
+	if deleteErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the identification number could not be deleted",
+			"error":   deleteErr,
+		})
+	}
+
 	result, deleteErr := studentCollection.DeleteOne(ctx, bson.M{"schooldata.sid": data["sid"]})
 	if deleteErr != nil {
 		cancel()
@@ -2179,6 +2189,16 @@ func RemoveTeacher(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "missing required fields",
+		})
+	}
+
+	_, deleteErr := idCollection.DeleteOne(ctx, bson.M{"cid": data["tid"]})
+	if deleteErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the identification number could not be deleted",
+			"error":   deleteErr,
 		})
 	}
 
@@ -2231,7 +2251,17 @@ func RemoveAdmin(c *fiber.Ctx) error {
 		})
 	}
 
-	result, deleteErr := adminCollection.DeleteOne(ctx, bson.M{"aid": data["said"]})
+	_, deleteErr := idCollection.DeleteOne(ctx, bson.M{"cid": data["aid"]})
+	if deleteErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the identification number could not be deleted",
+			"error":   deleteErr,
+		})
+	}
+
+	result, deleteErr := adminCollection.DeleteOne(ctx, bson.M{"aid": data["aid"]})
 	if deleteErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

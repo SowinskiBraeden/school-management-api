@@ -75,6 +75,7 @@ func NewSystem() {
 		}
 
 		fmt.Println("Successfully created system admin")
+		fmt.Println("Your admin ID is ", aid)
 	}
 }
 

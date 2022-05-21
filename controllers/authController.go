@@ -1,12 +1,16 @@
 package controllers
 
 import (
+	"bufio"
 	"context"
+	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/SowinskiBraeden/school-management-api/database"
 	"github.com/SowinskiBraeden/school-management-api/models"
+	"github.com/howeyc/gopass"
 
 	"net/smtp"
 
@@ -22,6 +26,57 @@ var teacherCollection *mongo.Collection = database.OpenCollection(database.Clien
 var studentCollection *mongo.Collection = database.OpenCollection(database.Client, "students")
 var contactCollection *mongo.Collection = database.OpenCollection(database.Client, "contacts")
 var adminCollection *mongo.Collection = database.OpenCollection(database.Client, "admins")
+
+func NewSystem() {
+	count, err := adminCollection.CountDocuments(context.Background(), bson.D{})
+	if err != nil {
+		fmt.Println("Unable to detect new system")
+	}
+
+	if count == 0 {
+		fmt.Println("Admin account setup...")
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("First Name: ")
+		firstname, _ := reader.ReadString('\n')
+		fmt.Print("Last Name: ")
+		lastname, _ := reader.ReadString('\n')
+		fmt.Print("Email: ")
+		email, _ := reader.ReadString('\n')
+		fmt.Print("Password: ")
+		password, _ := gopass.GetPasswd()
+
+		var admin models.Admin
+		admin.FirstName = strings.TrimSuffix(firstname, "\n")
+		admin.LastName = strings.TrimSuffix(lastname, "\n")
+		admin.Email = strings.TrimSuffix(email, "\n")
+
+		admin.SchoolEmail = admin.GenerateSchoolEmail()
+
+		pass := strings.TrimSuffix(string(password), "\n")
+		admin.Password = admin.HashPassword(pass)
+		admin.TempPassword = false
+
+		var aid string
+		for {
+			aid = GenerateID(6)
+			if ValidateID(aid) == true {
+				break
+			}
+		}
+		admin.AID = aid
+
+		admin.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		admin.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		admin.ID = primitive.NewObjectID()
+
+		_, insertErr := adminCollection.InsertOne(context.Background(), admin)
+		if insertErr != nil {
+			fmt.Print("Failed to create admin")
+		}
+
+		fmt.Println("Successfully created system admin")
+	}
+}
 
 var SecretKey = os.Getenv("secret")
 

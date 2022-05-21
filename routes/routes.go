@@ -7,8 +7,10 @@ import (
 )
 
 func Setup(app *fiber.App) {
-	// API Handling
+	// Detect if system is new and needs default admin
+	controllers.NewSystem()
 
+	// API Handling
 	var routerPrefix string = "/api/v1"
 
 	// Student Authentication Handler

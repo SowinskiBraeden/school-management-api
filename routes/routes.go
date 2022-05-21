@@ -13,6 +13,14 @@ func Setup(app *fiber.App) {
 	// API Handling
 	var routerPrefix string = "/api/v1"
 
+	// API check
+	app.Get(routerPrefix+"/status", func(c *fiber.Ctx) error {
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"success": true,
+			"message": "the API is active",
+		})
+	})
+
 	// Student Authentication Handler
 	app.Get(routerPrefix+"/student", controllers.Student)
 	app.Post(routerPrefix+"/student/enroll", controllers.Enroll)

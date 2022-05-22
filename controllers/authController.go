@@ -134,7 +134,7 @@ func Enroll(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(&data); err != nil {
 		cancel()
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Failed to parse body",
 			"error":   err,
@@ -263,7 +263,7 @@ func Enroll(c *fiber.Ctx) error {
 	}
 	defer cancel()
 
-	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully inserted student",
 	})
@@ -501,7 +501,7 @@ func StudentLogin(c *fiber.Ctx) error {
 
 	if err != nil {
 		cancel()
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"success": false,
 			"message": "student not found",
 			"error":   err,
@@ -537,7 +537,7 @@ func StudentLogin(c *fiber.Ctx) error {
 
 	if localAccountDisabled || student.AccountData.AccountDisabled {
 		cancel()
-		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
 			"message": "Account is Disabled, contact an Admin",
 		})
@@ -566,7 +566,7 @@ func StudentLogin(c *fiber.Ctx) error {
 				"error":   updateErr,
 			})
 		}
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
 			"message": "incorrect password",
 		})
@@ -627,9 +627,9 @@ func TeacherLogin(c *fiber.Ctx) error {
 
 	if err != nil {
 		cancel()
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"success": false,
-			"message": "student not found",
+			"message": "teacher not found",
 			"error":   err,
 		})
 	}
@@ -637,7 +637,7 @@ func TeacherLogin(c *fiber.Ctx) error {
 
 	var verified bool = teacher.ComparePasswords(data["password"])
 	if verified == false {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
 			"message": "incorrect password",
 		})
@@ -697,7 +697,7 @@ func AdminLogin(c *fiber.Ctx) error {
 
 	if err != nil {
 		cancel()
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"success": false,
 			"message": "admin not found",
 			"error":   err,
@@ -707,7 +707,7 @@ func AdminLogin(c *fiber.Ctx) error {
 
 	var verified bool = admin.ComparePasswords(data["password"])
 	if verified == false {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
 			"message": "incorrect password",
 		})
@@ -787,7 +787,7 @@ func Student(c *fiber.Ctx) error {
 	var student models.Student
 	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": sid}).Decode(&student)
 	if findErr != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "student not found",
 		})
@@ -834,7 +834,7 @@ func Teacher(c *fiber.Ctx) error {
 		return []byte(SecretKey), nil
 	})
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
 			"message": "not authorized",
 		})
@@ -845,13 +845,13 @@ func Teacher(c *fiber.Ctx) error {
 	var teacher models.Teacher
 	findErr := teacherCollection.FindOne(context.TODO(), bson.M{"schooldata.tid": claims.Issuer}).Decode(&teacher)
 	if findErr != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "teacher not found",
 		})
 	}
 
-	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully logged into teacher",
 		"result":  teacher,
@@ -876,13 +876,13 @@ func Admin(c *fiber.Ctx) error {
 	var admin models.Admin
 	findErr := adminCollection.FindOne(context.TODO(), bson.M{"aid": claims.Issuer}).Decode(&admin)
 	if findErr != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "admin not found",
 		})
 	}
 
-	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully logged into admin",
 		"result":  admin,
@@ -1024,7 +1024,7 @@ func DeleteContact(c *fiber.Ctx) error {
 	_, err := contactCollection.DeleteOne(ctx, bson.M{"_id": data["id"]})
 	if err != nil {
 		cancel()
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Failed to delete object",
 			"error":   err,
@@ -1032,7 +1032,7 @@ func DeleteContact(c *fiber.Ctx) error {
 	}
 	defer cancel()
 
-	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "Successfully deleted contact",
 	})

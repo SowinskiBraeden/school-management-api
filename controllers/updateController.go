@@ -273,7 +273,7 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 	findErr := studentCollection.FindOne(ctx, bson.M{"schooldata.sid": claims.Issuer}).Decode(&student)
 	if findErr != nil {
 		cancel()
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "student not found",
 		})
@@ -292,7 +292,7 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
-			"message": "Your current password is incorrect",
+			"message": "Your password is incorrect",
 		})
 	}
 
@@ -373,7 +373,7 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": data["sid"]}).Decode(&student)
 	if findErr != nil {
 		cancel()
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "student not found",
 		})
@@ -468,7 +468,7 @@ func UpdateStudentLocker(c *fiber.Ctx) error {
 	err := lockerCollection.FindOne(ctx, bson.M{"lockernumber": data["lockernumber"]}).Decode(&locker)
 	if err != nil {
 		cancel()
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "locker not found",
 			"error":   err,
@@ -569,7 +569,7 @@ func UpdateStudentAddress(c *fiber.Ctx) error {
 	})
 }
 
-// In the case a student gets help back a grade, we need to update their YOG (Year of Graduation)
+// In the case a student gets held back a grade, we need to update their YOG (Year of Graduation)
 func UpdateStudentYOG(c *fiber.Ctx) error {
 	var data map[string]string
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -605,7 +605,7 @@ func UpdateStudentYOG(c *fiber.Ctx) error {
 	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": data["sid"]}).Decode(&student)
 	if findErr != nil {
 		cancel()
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "student not found",
 		})
@@ -676,7 +676,7 @@ func RemoveStudentContact(c *fiber.Ctx) error {
 	err := contactCollection.FindOne(ctx, bson.M{"_id": data["contactid"]}).Decode(&contact)
 	if err != nil {
 		cancel()
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "contact not found",
 			"error":   err,
@@ -750,7 +750,7 @@ func AddStudentContact(c *fiber.Ctx) error {
 	err := contactCollection.FindOne(ctx, bson.M{"_id": data["contactid"]}).Decode(&contact)
 	if err != nil {
 		cancel()
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "contact not found",
 			"error":   err,
@@ -815,7 +815,7 @@ func UpdateStudentPhoto(c *fiber.Ctx) error {
 	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": sid}).Decode(&student)
 	if findErr != nil {
 		cancel()
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "the student could not be found",
 			"error":   findErr,
@@ -1026,7 +1026,7 @@ func RemoveStudentsDisabled(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
-		"message": "successfully re-enabled student account",
+		"message": "successfully enabled student account",
 		"result":  result,
 	})
 }
@@ -1080,7 +1080,7 @@ func RemoveTeachersDisabled(c *fiber.Ctx) error {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
-			"message": "the student account could not be re-enabled",
+			"message": "the teacher account could not be enabled",
 			"error":   updateErr,
 		})
 	}
@@ -1088,7 +1088,7 @@ func RemoveTeachersDisabled(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
-		"message": "successfully re-enabled teacher account",
+		"message": "successfully enabled teacher account",
 		"result":  result,
 	})
 }
@@ -1197,7 +1197,7 @@ func UpdateTeacherPassword(c *fiber.Ctx) error {
 	findErr := studentCollection.FindOne(ctx, bson.M{"schooldata.tid": claims.Issuer}).Decode(&teacher)
 	if findErr != nil {
 		cancel()
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "teacher not found",
 		})
@@ -1216,7 +1216,7 @@ func UpdateTeacherPassword(c *fiber.Ctx) error {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
-			"message": "Your current password is incorrect",
+			"message": "Your password is incorrect",
 		})
 	}
 
@@ -1224,7 +1224,7 @@ func UpdateTeacherPassword(c *fiber.Ctx) error {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
-			"message": "Your new password must match",
+			"message": "Your new passwords must match",
 		})
 	}
 
@@ -1296,7 +1296,7 @@ func ResetTeacherPassword(c *fiber.Ctx) error {
 	findErr := teacherCollection.FindOne(context.TODO(), bson.M{"schooldata.tid": data["tid"]}).Decode(&teacher)
 	if findErr != nil {
 		cancel()
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "teacher not found",
 		})
@@ -1446,9 +1446,9 @@ func UpdateTeacherPhoto(c *fiber.Ctx) error {
 	findErr := teacherCollection.FindOne(context.TODO(), bson.M{"schooldata.tid": tid}).Decode(&teacher)
 	if findErr != nil {
 		cancel()
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
-			"message": "the student could not be found",
+			"message": "the teacher could not be found",
 			"error":   findErr,
 		})
 	}
@@ -1632,7 +1632,7 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 	teacherObjectId, idErr := primitive.ObjectIDFromHex(data["_id"])
 	if idErr != nil {
 		cancel()
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "teacher not found",
 			"error":   idErr,

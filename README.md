@@ -20,7 +20,7 @@ I highly recommend looking at the testing for [schedule generation](/test/schedu
 
 After the majority completion of vital api functionalities such as the ability to update information, create new
 information, generate information, delete information, authentication etc. I plan on creating a new repository 
-for a new frontier of this project. I plan on making the [School Management Website](https://github.com/SowinskiBraeden/school-management-website).
+for a new frontier of this project. I plan on making the [School Management Website](https://github.com/SowinskiBraeden/school-management).
 
 This is most likely going to be written in another programming language or framework I am unfamiliar with. The 
 idea is to have a modern designed website capable of being used easily on any device or platform. I may use the

@@ -68,7 +68,7 @@ The systems is easy to start and your local machine. Eliminating any long unforg
 ```
 
 * The first time the API is run, you will be promted to enter in the systems defualt administrator account detials.
- This is required as in order to use majority of the API you'll need to be in an authenticated admin account.
+ This is required, in order to use majority of the API you'll need to be in an authenticated admin account.
 
 <br>
 

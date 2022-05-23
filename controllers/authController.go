@@ -566,7 +566,7 @@ func StudentLogin(c *fiber.Ctx) error {
 				"error":   updateErr,
 			})
 		}
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"success": false,
 			"message": "incorrect password",
 		})
@@ -637,7 +637,7 @@ func TeacherLogin(c *fiber.Ctx) error {
 
 	var verified bool = teacher.ComparePasswords(data["password"])
 	if verified == false {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"success": false,
 			"message": "incorrect password",
 		})
@@ -707,7 +707,7 @@ func AdminLogin(c *fiber.Ctx) error {
 
 	var verified bool = admin.ComparePasswords(data["password"])
 	if verified == false {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"success": false,
 			"message": "incorrect password",
 		})

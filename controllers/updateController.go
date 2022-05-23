@@ -290,7 +290,7 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 
 	if !student.ComparePasswords(data["password"]) {
 		cancel()
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"success": false,
 			"message": "Your password is incorrect",
 		})
@@ -381,7 +381,7 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 
 	if student.PersonalData.Email != data["email"] {
 		cancel()
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"success": false,
 			"message": "Your personal email is incorrect",
 		})
@@ -1214,7 +1214,7 @@ func UpdateTeacherPassword(c *fiber.Ctx) error {
 
 	if !teacher.ComparePasswords(data["password"]) {
 		cancel()
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"success": false,
 			"message": "Your password is incorrect",
 		})
@@ -1304,7 +1304,7 @@ func ResetTeacherPassword(c *fiber.Ctx) error {
 
 	if teacher.PersonalData.Email != data["email"] {
 		cancel()
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"success": false,
 			"message": "Your personal email is incorrect",
 		})

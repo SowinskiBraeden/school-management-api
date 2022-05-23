@@ -16,15 +16,14 @@ along the way.
 
 I highly recommend looking at the testing for [schedule generation](/test/scheduleGenerator), [version 3](/test/scheduleGenerator/generator_v3.py)
 
-## Future Plans
+## Related Work
 
 After the majority completion of vital api functionalities such as the ability to update information, create new
-information, generate information, delete information, authentication etc. I plan on creating a new repository 
-for a new frontier of this project. I plan on making the [School Management Website](https://github.com/SowinskiBraeden/school-management).
+information, generate information, delete information, authentication etc. I have created a new repository 
+for the next frontier of this project. I am now concurrently working on the [School Management Website](https://github.com/SowinskiBraeden/school-management).
 
-This is most likely going to be written in another programming language or framework I am unfamiliar with. The 
-idea is to have a modern designed website capable of being used easily on any device or platform. I may use the
-[React.js](https://reactjs.org/) or [Vue.js](https://vuejs.org/) frameworks to build the front end design.
+The School Management Website. is going to be written using the [Vue.js](https://vuejs.org/) framework. Vue.js is a popular framwork for working on frontend UI  
+programs. I am currently unfamiliar with the framework but plan on learning the framework to use it more in the future.
 <br>
 
 ### Built With
@@ -45,20 +44,34 @@ The systems is easy to start and your local machine. Eliminating any long unforg
     $ cd school-management-api
 ```
 
-2. Rename `.env.example` to `.env` 
+<br>
+
+2. Rename `.env.example` to `.env`
+
+<br>
+
 3. Enter desired values into `.env`
-   ```
+```
     mongoURI='your mongo URI'
     dbo=school
-    secret='your secret'
+    secret='your 256 bit secret'
     PORT='your desired port'
     SYSTEM_EMAIL='your system email'
     SYSTEM_PASSWORD='your system email password'
-   ```
+```
+
+<br>
+
 4. Run the system in your console
 ```
   go run main.go
 ```
+
+* The first time the API is run, you will be promted to enter in the systems defualt administrator account detials.
+ This is required as in order to use majority of the API you'll need to be in an authenticated admin account.
+
+<br>
+
 5. Build and compile the system into an executable
 ```
   go build

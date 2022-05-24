@@ -778,11 +778,11 @@ func Student(c *fiber.Ctx) error {
 		sid = claims.Issuer
 	}
 
-	responceData := make(map[string]interface{})
-	responceData["student"] = nil
-	responceData["locker"] = nil
-	responceData["contacts"] = nil
-	responceData["photo"] = nil
+	responseData := make(map[string]interface{})
+	responseData["student"] = nil
+	responseData["locker"] = nil
+	responseData["contacts"] = nil
+	responseData["photo"] = nil
 
 	var student models.Student
 	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": sid}).Decode(&student)
@@ -793,12 +793,12 @@ func Student(c *fiber.Ctx) error {
 		})
 	}
 
-	responceData["student"] = student
+	responseData["student"] = student
 
 	var locker models.Locker
 	if student.SchoolData.Locker != "" {
 		lockerCollection.FindOne(context.TODO(), bson.M{"ID": student.SchoolData.Locker}).Decode(&locker)
-		responceData["locker"] = locker
+		responseData["locker"] = locker
 	}
 
 	var contacts []models.Contact
@@ -806,24 +806,24 @@ func Student(c *fiber.Ctx) error {
 	for i := range student.PersonalData.Contacts {
 		findErr := contactCollection.FindOne(context.TODO(), bson.M{"_id": student.PersonalData.Contacts[i]}).Decode(&contact)
 		if findErr != nil {
-			responceData["error"] = "Error! There was an error finding some contacts"
+			responseData["error"] = "Error! There was an error finding some contacts"
 		}
 		contacts = append(contacts, contact)
 	}
 	if len(contacts) > 0 {
-		responceData["contacts"] = contacts
+		responseData["contacts"] = contacts
 	}
 
 	var photo models.Photo
 	findErr = imageCollection.FindOne(context.TODO(), bson.M{"name": student.SchoolData.PhotoName}).Decode(&photo)
 	if findErr != nil {
-		responceData["error"] = "Error! There was an error finding the student photo"
+		responseData["error"] = "Error! There was an error finding the student photo"
 	}
-	responceData["photo"] = photo
+	responseData["photo"] = photo
 
 	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
 		"success":  true,
-		"responce": responceData,
+		"response": responseData,
 	})
 }
 

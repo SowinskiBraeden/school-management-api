@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -69,11 +70,11 @@ func NewSystem() {
 
 		_, insertErr := adminCollection.InsertOne(context.Background(), admin)
 		if insertErr != nil {
-			fmt.Print("Failed to create admin")
+			log.Printf("Failed to create an admin\n")
 		}
 
-		fmt.Println("Successfully created system admin")
-		fmt.Println("Your admin ID is ", aid)
+		log.Printf("Successfully created default admin")
+		log.Printf("Your default admin ID is %s", aid)
 	}
 }
 

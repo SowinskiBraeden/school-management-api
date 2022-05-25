@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
-	"net/smtp"
 	"os"
 	"strings"
 	"time"
@@ -339,6 +338,12 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 	}
 	defer cancel()
 
+	// Alert email the password has changed
+	subject := "Password Changed"
+	receiver := student.PersonalData.Email
+	r := NewRequest([]string{receiver}, subject)
+	r.Send("./templates/selfPasswordChanged.html", map[string]string{"username": student.PersonalData.FirstName})
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated student password",
@@ -413,12 +418,11 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 	defer cancel()
 
 	// Send student personal email temp password
-	message := []byte("Your temporary password is " + tempPass)
-	auth := smtp.PlainAuth("", systemEmail, systemPassword, "smtp.gmail.com")
+	subject := "Password Changed"
+	receiver := student.PersonalData.Email
+	r := NewRequest([]string{receiver}, subject)
 
-	err := smtp.SendMail("smtp.gmail.com:587", auth, systemEmail, []string{student.PersonalData.Email}, message)
-	if err != nil {
-		cancel()
+	if err := r.Send("./templates/passwordChanged.html", map[string]string{"username": student.PersonalData.FirstName, "password": tempPass}); err {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Could not send password to students email",
@@ -1263,6 +1267,18 @@ func UpdateTeacherPassword(c *fiber.Ctx) error {
 	}
 	defer cancel()
 
+	subject := "Password Changed"
+	receiver := teacher.PersonalData.Email
+	r := NewRequest([]string{receiver}, subject)
+
+	if err := r.Send("./templates/selfPasswordChanged.html", map[string]string{"username": teacher.PersonalData.FirstName}); err {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Could not send password to teachers email",
+			"error":   err,
+		})
+	}
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated teacher password",
@@ -1335,13 +1351,12 @@ func ResetTeacherPassword(c *fiber.Ctx) error {
 	}
 	defer cancel()
 
-	// Send student personal email temp password
-	message := []byte("Your temporary password is " + tempPass)
-	auth := smtp.PlainAuth("", systemEmail, systemPassword, "smtp.gmail.com")
+	// Send teacher personal email temp password
+	subject := "Password Changed"
+	receiver := teacher.PersonalData.Email
+	r := NewRequest([]string{receiver}, subject)
 
-	err := smtp.SendMail("smtp.gmail.com:587", auth, systemEmail, []string{teacher.PersonalData.Email}, message)
-	if err != nil {
-		cancel()
+	if err := r.Send("./templates/passwordChanged.html", map[string]string{"username": teacher.PersonalData.FirstName, "password": tempPass}); err {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Could not send password to teachers email",

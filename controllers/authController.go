@@ -12,8 +12,6 @@ import (
 	"github.com/SowinskiBraeden/school-management-api/models"
 	"github.com/howeyc/gopass"
 
-	"net/smtp"
-
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -207,11 +205,11 @@ func Enroll(c *fiber.Ctx) error {
 	student.AccountData.TempPassword = true
 
 	// Send student personal email temp password
-	message := []byte("Your temporary password is " + tempPass)
-	auth := smtp.PlainAuth("", systemEmail, systemPassword, "smtp.gmail.com")
+	subject := "Password Changed"
+	receiver := student.PersonalData.Email
+	r := NewRequest([]string{receiver}, subject)
 
-	err := smtp.SendMail("smtp.gmail.com:587", auth, systemEmail, []string{student.PersonalData.Email}, message)
-	if err != nil {
+	if err := r.Send("./templates/passwordChanged.html", map[string]string{"username": student.PersonalData.FirstName, "password": tempPass}); err {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
@@ -342,15 +340,15 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	teacher.AccountData.TempPassword = true
 
 	// Send teacher personal email temp password
-	message := []byte("Your temporary password is " + tempPass)
-	auth := smtp.PlainAuth("", systemEmail, systemPassword, "smtp.gmail.com")
+	subject := "Password Changed"
+	receiver := teacher.PersonalData.Email
+	r := NewRequest([]string{receiver}, subject)
 
-	err := smtp.SendMail("smtp.gmail.com:587", auth, systemEmail, []string{teacher.PersonalData.Email}, message)
-	if err != nil {
+	if err := r.Send("./templates/passwordChanged.html", map[string]string{"username": teacher.PersonalData.FirstName, "password": tempPass}); err {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
-			"message": "Could not send password to teacners email",
+			"message": "Could not send password to teachers email",
 			"error":   err,
 		})
 	}
@@ -430,15 +428,15 @@ func CreateAdmin(c *fiber.Ctx) error {
 	admin.TempPassword = true
 
 	// Send admin personal email temp password
-	message := []byte("Your temporary password is " + tempPass)
-	auth := smtp.PlainAuth("", systemEmail, systemPassword, "smtp.gmail.com")
+	subject := "Password Changed"
+	receiver := admin.Email
+	r := NewRequest([]string{receiver}, subject)
 
-	err := smtp.SendMail("smtp.gmail.com:587", auth, systemEmail, []string{admin.Email}, message)
-	if err != nil {
+	if err := r.Send("./templates/passwordChanged.html", map[string]string{"username": admin.FirstName, "password": tempPass}); err {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
-			"message": "Could not send password to admins email",
+			"message": "Could not send password to students email",
 			"error":   err,
 		})
 	}
@@ -537,6 +535,21 @@ func StudentLogin(c *fiber.Ctx) error {
 
 	if localAccountDisabled || student.AccountData.AccountDisabled {
 		cancel()
+
+		// Send student email warning of disabled account
+		subject := "Account Disabled"
+		receiver := student.PersonalData.Email
+		r := NewRequest([]string{receiver}, subject)
+
+		if err := r.Send("./templates/accountDisabled.html", map[string]string{"username": student.PersonalData.FirstName}); err {
+			cancel()
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"success": false,
+				"message": "Could not send password to students email",
+				"error":   err,
+			})
+		}
+
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
 			"message": "Account is Disabled, contact an Admin",

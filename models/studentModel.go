@@ -48,6 +48,7 @@ type Student struct {
 		SchoolEmail     string   `json:"schoolemail"`
 		Password        string   `json:"-" validate:"min=10,max=32"`
 		AccountDisabled bool     `bson:"accountdisabled"`
+		Alerted         bool     `bson:"alerted"`
 		TempPassword    bool     `json:"temppassword"`
 		Attempts        int      `json:"attempts"` // login attempts max 5
 		HashHistory     []string `json:"-"`        // List of old hashed passwords (not including auto generated passwords)

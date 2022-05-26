@@ -342,7 +342,13 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 	subject := "Password Changed"
 	receiver := student.PersonalData.Email
 	r := NewRequest([]string{receiver}, subject)
-	r.Send("./templates/selfPasswordChanged.html", map[string]string{"username": student.PersonalData.FirstName})
+
+	if sent := r.Send("./templates/selfPasswordChanged.html", map[string]string{"username": student.PersonalData.FirstName}); !sent {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "failed to send email to student",
+		})
+	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
@@ -422,11 +428,10 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 	receiver := student.PersonalData.Email
 	r := NewRequest([]string{receiver}, subject)
 
-	if err := r.Send("./templates/passwordChanged.html", map[string]string{"username": student.PersonalData.FirstName, "password": tempPass}); err {
+	if sent := r.Send("./templates/passwordChanged.html", map[string]string{"username": student.PersonalData.FirstName, "password": tempPass}); !sent {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Could not send password to students email",
-			"error":   err,
 		})
 	}
 
@@ -1008,6 +1013,7 @@ func RemoveStudentsDisabled(c *fiber.Ctx) error {
 	update := bson.M{
 		"$set": bson.M{
 			"accountdata.accountdisabled": false,
+			"accountdata.alerted":         false,
 			"accountdata.attempts":        0,
 			"updated_at":                  update_time,
 		},
@@ -1022,7 +1028,7 @@ func RemoveStudentsDisabled(c *fiber.Ctx) error {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
-			"message": "the student account could not be re-enabled",
+			"message": "the student account could not be enabled",
 			"error":   updateErr,
 		})
 	}
@@ -1271,11 +1277,10 @@ func UpdateTeacherPassword(c *fiber.Ctx) error {
 	receiver := teacher.PersonalData.Email
 	r := NewRequest([]string{receiver}, subject)
 
-	if err := r.Send("./templates/selfPasswordChanged.html", map[string]string{"username": teacher.PersonalData.FirstName}); err {
+	if sent := r.Send("./templates/selfPasswordChanged.html", map[string]string{"username": teacher.PersonalData.FirstName}); !sent {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Could not send password to teachers email",
-			"error":   err,
 		})
 	}
 
@@ -1356,11 +1361,10 @@ func ResetTeacherPassword(c *fiber.Ctx) error {
 	receiver := teacher.PersonalData.Email
 	r := NewRequest([]string{receiver}, subject)
 
-	if err := r.Send("./templates/passwordChanged.html", map[string]string{"username": teacher.PersonalData.FirstName, "password": tempPass}); err {
+	if sent := r.Send("./templates/passwordChanged.html", map[string]string{"username": teacher.PersonalData.FirstName, "password": tempPass}); !sent {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Could not send password to teachers email",
-			"error":   err,
 		})
 	}
 

@@ -74,8 +74,8 @@ func Setup(app *fiber.App) {
 
 	// General Command Handling
 	app.Post(routerPrefix+"/admin/updateLockerCombo", controllers.UpdateLockerCombo)
-	app.Post(routerPrefix+"/admin/renableStudent", controllers.RemoveStudentsDisabled)
-	app.Post(routerPrefix+"/admin/renableTeacher", controllers.RemoveTeachersDisabled)
+	app.Post(routerPrefix+"/admin/enableStudent", controllers.RemoveStudentsDisabled)
+	app.Post(routerPrefix+"/admin/enableTeacher", controllers.RemoveTeachersDisabled)
 
 	// Delete Handler
 	app.Post(routerPrefix+"/remove/student", controllers.RemoveStudent)

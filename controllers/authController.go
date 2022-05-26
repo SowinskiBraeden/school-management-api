@@ -198,6 +198,7 @@ func Enroll(c *fiber.Ctx) error {
 
 	// Disable login block
 	student.AccountData.AccountDisabled = false
+	student.AccountData.Alerted = false
 	student.AccountData.Attempts = 0
 
 	// Generate temporary password
@@ -210,12 +211,11 @@ func Enroll(c *fiber.Ctx) error {
 	receiver := student.PersonalData.Email
 	r := NewRequest([]string{receiver}, subject)
 
-	if err := r.Send("./templates/passwordChanged.html", map[string]string{"username": student.PersonalData.FirstName, "password": tempPass}); err {
+	if sent := r.Send("./templates/passwordChanged.html", map[string]string{"username": student.PersonalData.FirstName, "password": tempPass}); !sent {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Could not send password to students email",
-			"error":   err,
 		})
 	}
 
@@ -345,12 +345,11 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	receiver := teacher.PersonalData.Email
 	r := NewRequest([]string{receiver}, subject)
 
-	if err := r.Send("./templates/passwordChanged.html", map[string]string{"username": teacher.PersonalData.FirstName, "password": tempPass}); err {
+	if sent := r.Send("./templates/passwordChanged.html", map[string]string{"username": teacher.PersonalData.FirstName, "password": tempPass}); !sent {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Could not send password to teachers email",
-			"error":   err,
 		})
 	}
 
@@ -433,12 +432,11 @@ func CreateAdmin(c *fiber.Ctx) error {
 	receiver := admin.Email
 	r := NewRequest([]string{receiver}, subject)
 
-	if err := r.Send("./templates/passwordChanged.html", map[string]string{"username": admin.FirstName, "password": tempPass}); err {
+	if sent := r.Send("./templates/passwordChanged.html", map[string]string{"username": admin.FirstName, "password": tempPass}); !sent {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Could not send password to students email",
-			"error":   err,
 		})
 	}
 
@@ -496,7 +494,6 @@ func StudentLogin(c *fiber.Ctx) error {
 
 	var student models.Student
 	err := studentCollection.FindOne(ctx, bson.M{"schooldata.sid": data["sid"]}).Decode(&student)
-	defer cancel()
 
 	if err != nil {
 		cancel()
@@ -507,21 +504,29 @@ func StudentLogin(c *fiber.Ctx) error {
 		})
 	}
 
-	var localAccountDisabled = false
-	if student.AccountData.Attempts >= 5 {
+	var verified bool = student.ComparePasswords(data["password"])
+	var localAccountDisabled bool = false
+	var localAttempts int = student.AccountData.Attempts
+
+	if !verified {
+		localAttempts += 1
+	}
+
+	if student.AccountData.Attempts >= 5 || localAttempts >= 5 {
 		localAccountDisabled = true // Catches newly disbaled account before student obj is updated
 		update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		update := bson.M{
 			"$set": bson.M{
-				"AccountData.accountdisabled": true,
-				"AccountData.attempts":        0,
+				"accountdata.accountdisabled": true,
+				"accountdata.alerted":         true,
+				"accountdata.attempts":        0,
 				"updated_at":                  update_time,
 			},
 		}
 
 		_, updateErr := studentCollection.UpdateOne(
 			ctx,
-			bson.M{"sid": data["sid"]},
+			bson.M{"schooldata.sid": data["sid"]},
 			update,
 		)
 		if updateErr != nil {
@@ -535,41 +540,42 @@ func StudentLogin(c *fiber.Ctx) error {
 	}
 
 	if localAccountDisabled || student.AccountData.AccountDisabled {
+
+		if !student.AccountData.Alerted {
+			// Send student email warning of disabled account
+			subject := "Account Disabled"
+			receiver := student.PersonalData.Email
+			r := NewRequest([]string{receiver}, subject)
+
+			if sent := r.Send("./templates/accountDisabled.html", map[string]string{"username": student.PersonalData.FirstName}); !sent {
+				cancel()
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"success": false,
+					"message": "Could not send password to students email",
+					"error":   err,
+				})
+			}
+		}
 		cancel()
 
-		// Send student email warning of disabled account
-		subject := "Account Disabled"
-		receiver := student.PersonalData.Email
-		r := NewRequest([]string{receiver}, subject)
-
-		if err := r.Send("./templates/accountDisabled.html", map[string]string{"username": student.PersonalData.FirstName}); err {
-			cancel()
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"success": false,
-				"message": "Could not send password to students email",
-				"error":   err,
-			})
-		}
-
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"success": false,
 			"message": "Account is Disabled, contact an Admin",
 		})
 	}
 
-	var verified bool = student.ComparePasswords(data["password"])
-	if verified == false {
+	if !verified {
 		update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		update := bson.M{
 			"$set": bson.M{
-				"AccountData.attempts": student.AccountData.Attempts + 1,
+				"accountdata.attempts": (student.AccountData.Attempts + 1),
 				"updated_at":           update_time,
 			},
 		}
 
 		_, updateErr := studentCollection.UpdateOne(
 			ctx,
-			bson.M{"sid": data["sid"]},
+			bson.M{"schooldata.sid": data["sid"]},
 			update,
 		)
 		cancel()
@@ -580,10 +586,33 @@ func StudentLogin(c *fiber.Ctx) error {
 				"error":   updateErr,
 			})
 		}
+
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"success": false,
 			"message": "incorrect password",
 		})
+	} else {
+		update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		update := bson.M{
+			"$set": bson.M{
+				"accountdata.attempts": 0,
+				"updated_at":           update_time,
+			},
+		}
+
+		_, updateErr := studentCollection.UpdateOne(
+			ctx,
+			bson.M{"schooldata.sid": data["sid"]},
+			update,
+		)
+		if updateErr != nil {
+			cancel()
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"success": false,
+				"message": "the student could not be updated",
+				"error":   updateErr,
+			})
+		}
 	}
 	defer cancel()
 

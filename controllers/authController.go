@@ -836,6 +836,13 @@ func Student(c *fiber.Ctx) error {
 		})
 	}
 
+	if student.AccountData.AccountDisabled {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "Student Accound Disabled, Contact and Admin",
+		})
+	}
+
 	responseData["student"] = student
 
 	var locker models.Locker

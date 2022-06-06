@@ -26,6 +26,62 @@ var studentCollection *mongo.Collection = database.OpenCollection(database.Clien
 var contactCollection *mongo.Collection = database.OpenCollection(database.Client, "contacts")
 var adminCollection *mongo.Collection = database.OpenCollection(database.Client, "admins")
 
+func confirm(s string) bool {
+	r := bufio.NewReader(os.Stdin)
+
+	fmt.Printf("%s [y/n]: ", s)
+	res, err := r.ReadString('\n')
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return strings.ToLower(strings.TrimSpace(res))[0] == 'y'
+}
+
+func CreateDefaultAdmin() models.Admin {
+	fmt.Println()
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("First Name: ")
+	firstname, _ := reader.ReadString('\n')
+	fmt.Print("Last Name: ")
+	lastname, _ := reader.ReadString('\n')
+	fmt.Print("Email: ")
+	email, _ := reader.ReadString('\n')
+	fmt.Print("Password: ")
+	password, _ := gopass.GetPasswd()
+
+	// Clear values of new lines
+	firstname = strings.ReplaceAll(firstname, "\n", "")
+	lastname = strings.ReplaceAll(lastname, "\n", "")
+	email = strings.ReplaceAll(email, "\n", "")
+
+	var admin models.Admin
+	admin.FirstName = strings.TrimSuffix(firstname, "\n")
+	admin.LastName = strings.TrimSuffix(lastname, "\n")
+	admin.Email = strings.TrimSuffix(email, "\n")
+
+	admin.SchoolEmail = admin.GenerateSchoolEmail()
+
+	pass := strings.TrimSuffix(string(password), "\n")
+	admin.Password = admin.HashPassword(pass)
+	admin.TempPassword = false
+
+	var aid string
+	for {
+		aid = GenerateID(6)
+		if ValidateID(aid) == true {
+			break
+		}
+	}
+	admin.AID = aid
+
+	admin.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	admin.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	admin.ID = primitive.NewObjectID()
+
+	return admin
+}
+
 func NewSystem() {
 	count, err := adminCollection.CountDocuments(context.Background(), bson.D{})
 	if err != nil {
@@ -34,52 +90,21 @@ func NewSystem() {
 
 	if count == 0 {
 		fmt.Println("Admin account setup...")
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print("First Name: ")
-		firstname, _ := reader.ReadString('\n')
-		fmt.Print("Last Name: ")
-		lastname, _ := reader.ReadString('\n')
-		fmt.Print("Email: ")
-		email, _ := reader.ReadString('\n')
-		fmt.Print("Password: ")
-		password, _ := gopass.GetPasswd()
 
-		// Clear values of new lines
-		firstname = strings.ReplaceAll(firstname, "\n", "")
-		lastname = strings.ReplaceAll(lastname, "\n", "")
-		email = strings.ReplaceAll(email, "\n", "")
-
-		var admin models.Admin
-		admin.FirstName = strings.TrimSuffix(firstname, "\n")
-		admin.LastName = strings.TrimSuffix(lastname, "\n")
-		admin.Email = strings.TrimSuffix(email, "\n")
-
-		admin.SchoolEmail = admin.GenerateSchoolEmail()
-
-		pass := strings.TrimSuffix(string(password), "\n")
-		admin.Password = admin.HashPassword(pass)
-		admin.TempPassword = false
-
-		var aid string
 		for {
-			aid = GenerateID(6)
-			if ValidateID(aid) == true {
+			defaultAdmin := CreateDefaultAdmin()
+
+			if confirm("Are the above credentials correct?") {
+				_, insertErr := adminCollection.InsertOne(context.Background(), defaultAdmin)
+				if insertErr != nil {
+					log.Printf("Failed to create an admin\n")
+				}
+
+				log.Printf("Successfully created default admin")
+				log.Printf("Your default admin ID is %s", defaultAdmin.AID)
 				break
 			}
 		}
-		admin.AID = aid
-
-		admin.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-		admin.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-		admin.ID = primitive.NewObjectID()
-
-		_, insertErr := adminCollection.InsertOne(context.Background(), admin)
-		if insertErr != nil {
-			log.Printf("Failed to create an admin\n")
-		}
-
-		log.Printf("Successfully created default admin")
-		log.Printf("Your default admin ID is %s", aid)
 	}
 }
 

@@ -3,8 +3,8 @@ module github.com/SowinskiBraeden/school-management-api
 go 1.16
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gofiber/fiber/v2 v2.26.0
+	github.com/golang-jwt/jwt v3.2.1+incompatible	
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/uuid v1.3.0
 	github.com/howeyc/gopass v0.0.0-20210920133722-c8aef6fb66ef

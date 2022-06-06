@@ -13,8 +13,8 @@ import (
 	"github.com/SowinskiBraeden/school-management-api/models"
 	"github.com/howeyc/gopass"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

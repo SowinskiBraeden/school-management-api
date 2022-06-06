@@ -44,6 +44,11 @@ func NewSystem() {
 		fmt.Print("Password: ")
 		password, _ := gopass.GetPasswd()
 
+		// Clear values of new lines
+		firstname = strings.ReplaceAll(firstname, "\n", "")
+		lastname = strings.ReplaceAll(lastname, "\n", "")
+		email = strings.ReplaceAll(email, "\n", "")
+
 		var admin models.Admin
 		admin.FirstName = strings.TrimSuffix(firstname, "\n")
 		admin.LastName = strings.TrimSuffix(lastname, "\n")

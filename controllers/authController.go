@@ -113,29 +113,11 @@ var SecretKey = os.Getenv("secret")
 var systemEmail string = os.Getenv("SYSTEM_EMAIL")
 var systemPassword string = os.Getenv("SYSTEM_PASSWORD")
 
-func AuthAdmin(c *fiber.Ctx) bool {
-	cookie := c.Cookies("jwt")
-
-	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(SecretKey), nil
-	})
-	if err != nil {
-		return false
+func AuthenticateUser(c *fiber.Ctx, userType int) (bool, string) {
+	if userType < 1 || userType > 3 {
+		log.Fatal("Invalid userType")
 	}
 
-	claims := token.Claims.(*jwt.StandardClaims)
-
-	// Though admin is not used, it's required to prevent findErr
-	var admin models.Admin
-	findErr := adminCollection.FindOne(context.TODO(), bson.M{"aid": claims.Issuer}).Decode(&admin)
-	if findErr != nil {
-		return false
-	}
-
-	return true
-}
-
-func AuthStudent(c *fiber.Ctx) (verified bool, sid string) {
 	cookie := c.Cookies("jwt")
 
 	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
@@ -147,14 +129,17 @@ func AuthStudent(c *fiber.Ctx) (verified bool, sid string) {
 
 	claims := token.Claims.(*jwt.StandardClaims)
 
-	// Though student is not used, it's required to prevent findErr
-	var student models.Student
-	findErr := studentCollection.FindOne(context.TODO(), bson.M{"sid": claims.Issuer}).Decode(&student)
+	var userID models.Id
+	findErr := idCollection.FindOne(context.TODO(), bson.M{"cid": claims.Issuer}).Decode(&userID)
 	if findErr != nil {
 		return false, ""
 	}
 
-	return true, claims.Issuer
+	if userID.ParentType != userType {
+		return false, ""
+	}
+
+	return true, userID.CID
 }
 
 func Enroll(c *fiber.Ctx) error {
@@ -171,7 +156,7 @@ func Enroll(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -312,7 +297,7 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -429,7 +414,7 @@ func CreateAdmin(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -814,7 +799,7 @@ func AdminLogin(c *fiber.Ctx) error {
 
 func Student(c *fiber.Ctx) error {
 	var sid string
-	if AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		var data map[string]string
 
 		if err := c.BodyParser(&data); err != nil {
@@ -999,7 +984,7 @@ func CreateContact(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -1084,7 +1069,7 @@ func DeleteContact(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,

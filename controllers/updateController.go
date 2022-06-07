@@ -41,7 +41,7 @@ func UpdateStudentName(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -121,7 +121,7 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authorized admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -193,7 +193,7 @@ func UpdateStudentHomeroom(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -456,7 +456,7 @@ func UpdateStudentLocker(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -528,7 +528,7 @@ func UpdateStudentAddress(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -593,7 +593,7 @@ func UpdateStudentYOG(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -664,7 +664,7 @@ func RemoveStudentContact(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -738,7 +738,7 @@ func AddStudentContact(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -802,7 +802,7 @@ func UpdateStudentPhoto(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
 	//Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -928,8 +928,8 @@ func UpdateStudentEmail(c *fiber.Ctx) error {
 		})
 	}
 
-	verifiedAdmin := AuthAdmin(c)
-	verifiedStudent, sid := AuthStudent(c)
+	verifiedAdmin, _ := AuthenticateUser(c, 3)
+	verifiedStudent, sid := AuthenticateUser(c, 1)
 	// Ensure Authenticated admin sent request
 	if !verifiedAdmin && !verifiedStudent {
 		cancel()
@@ -992,7 +992,7 @@ func RemoveStudentsDisabled(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authorized admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -1055,7 +1055,7 @@ func RemoveTeachersDisabled(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authorized admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -1128,7 +1128,7 @@ func UpdateTeacherHomeroom(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -1389,7 +1389,7 @@ func UpdateTeacherAddress(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -1443,7 +1443,7 @@ func UpdateTeacherPhoto(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
 	//Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -1570,7 +1570,7 @@ func UpdateTeacherEmail(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -1631,7 +1631,7 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -1703,7 +1703,7 @@ func UpdateContactName(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -1766,7 +1766,7 @@ func UpdateContactAddress(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -1830,7 +1830,7 @@ func UpdateContactHomePhone(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -1891,7 +1891,7 @@ func UpdateContactWorkPhone(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -1952,7 +1952,7 @@ func UpdateContactEmail(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -2013,7 +2013,7 @@ func UpdateContactPriority(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -2074,7 +2074,7 @@ func UpdateLockerCombo(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -2135,7 +2135,7 @@ func RemoveStudent(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -2194,7 +2194,7 @@ func RemoveTeacher(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -2253,7 +2253,7 @@ func RemoveAdmin(c *fiber.Ctx) error {
 	}
 
 	// Ensure Authenticated admin sent request
-	if !AuthAdmin(c) {
+	if verified, _ := AuthenticateUser(c, 3); !verified {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,

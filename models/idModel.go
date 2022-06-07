@@ -15,6 +15,7 @@ import (
 */
 
 type Id struct {
-	ID  primitive.ObjectID `bson:"_id"`
-	CID string             `bson:"cid"` // custom id for admin, teahcer or student
+	ID         primitive.ObjectID `bson:"_id"`
+	CID        string             `json:"cid"`        // custom id for admin, teahcer or student
+	ParentType int                `json:"parenttype"` // A number representing the user (1: student, 2: teacher, 3: admin)
 }

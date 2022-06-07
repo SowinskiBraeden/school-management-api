@@ -16,7 +16,6 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -1460,7 +1459,7 @@ func UpdateTeacherPhoto(c *fiber.Ctx) error {
 		})
 	}
 
-	// Get student
+	// Get teacher
 	var teacher models.Teacher
 	findErr := teacherCollection.FindOne(context.TODO(), bson.M{"schooldata.tid": tid}).Decode(&teacher)
 	if findErr != nil {
@@ -1640,7 +1639,7 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 	}
 
 	// Check id and names are included
-	if data["_id"] == "" || data["firstname"] == "" || data["middlename"] == "" || data["lastname"] == "" {
+	if data["tid"] == "" || data["firstname"] == "" || data["middlename"] == "" || data["lastname"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -1648,15 +1647,18 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 		})
 	}
 
-	teacherObjectId, idErr := primitive.ObjectIDFromHex(data["_id"])
-	if idErr != nil {
+	// Get teacher
+	var teacher models.Teacher
+	findErr := teacherCollection.FindOne(context.TODO(), bson.M{"schooldata.tid": data["tid"]}).Decode(&teacher)
+	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
-			"message": "teacher not found",
-			"error":   idErr,
+			"message": "the teacher could not be found",
+			"error":   findErr,
 		})
 	}
+
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
@@ -1669,7 +1671,7 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 
 	result, updateErr := teacherCollection.UpdateOne(
 		ctx,
-		bson.M{"_id": teacherObjectId},
+		bson.M{"schooldata.tid": data["tid"]},
 		update,
 	)
 	if updateErr != nil {

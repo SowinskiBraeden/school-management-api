@@ -69,7 +69,7 @@ func CreateDefaultAdmin() models.Admin {
 	var aid string
 	for {
 		aid = GenerateID(6)
-		if ValidateID(aid) == true {
+		if ValidateID(aid, 3) == true {
 			break
 		}
 	}
@@ -237,7 +237,7 @@ func Enroll(c *fiber.Ctx) error {
 	var sid string
 	for {
 		sid = GenerateID(6)
-		if ValidateID(sid) == true {
+		if ValidateID(sid, 1) == true {
 			break
 		}
 	}
@@ -372,7 +372,7 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	// For the unlikely event that an ID is already in use this will simply try again till it gets a id not in use
 	for {
 		tid = GenerateID(6)
-		isValid := ValidateID(tid)
+		isValid := ValidateID(tid, 2)
 		if isValid == true {
 			break
 		}
@@ -458,7 +458,7 @@ func CreateAdmin(c *fiber.Ctx) error {
 	var aid string
 	for {
 		aid = GenerateID(6)
-		if ValidateID(aid) == true {
+		if ValidateID(aid, 3) == true {
 			break
 		}
 	}

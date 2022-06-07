@@ -1639,7 +1639,7 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 	}
 
 	// Check id and names are included
-	if data["tid"] == "" || data["firstname"] == "" || data["middlename"] == "" || data["lastname"] == "" {
+	if data["tid"] == "" || data["firstname"] == "" || data["lastname"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,

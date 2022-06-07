@@ -1649,7 +1649,7 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 
 	// Get teacher
 	var teacher models.Teacher
-	findErr := teacherCollection.FindOne(context.TODO(), bson.M{"schooldata.tid": data["tid"]}).Decode(&teacher)
+	findErr := teacherCollection.FindOne(ctx, bson.M{"schooldata.tid": data["tid"]}).Decode(&teacher)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{

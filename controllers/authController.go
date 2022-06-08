@@ -799,7 +799,7 @@ func AdminLogin(c *fiber.Ctx) error {
 
 func Student(c *fiber.Ctx) error {
 	var sid string
-	if verified, _ := AuthenticateUser(c, 3); !verified {
+	if verified, _ := AuthenticateUser(c, 3); verified {
 		var data map[string]string
 
 		if err := c.BodyParser(&data); err != nil {

@@ -50,17 +50,22 @@ func CreateDefaultAdmin() models.Admin {
 	fmt.Print("Password: ")
 	password, _ := gopass.GetPasswd()
 
-	// Clear values of new lines
+	// Clear values of new lines and enter characters
 	firstname = strings.ReplaceAll(firstname, "\n", "")
 	lastname = strings.ReplaceAll(lastname, "\n", "")
 	email = strings.ReplaceAll(email, "\n", "")
+	firstname = strings.ReplaceAll(firstname, "\r", "")
+	lastname = strings.ReplaceAll(lastname, "\r", "")
+	email = strings.ReplaceAll(email, "\r", "")
 
 	var admin models.Admin
-	admin.FirstName = strings.TrimSuffix(firstname, "\n")
-	admin.LastName = strings.TrimSuffix(lastname, "\n")
-	admin.Email = strings.TrimSuffix(email, "\n")
+	admin.FirstName = firstname
+	admin.LastName = lastname
+	admin.Email = email
 
-	admin.SchoolEmail = admin.GenerateSchoolEmail()
+	temp := admin.GenerateSchoolEmail()
+	fmt.Println(temp)
+	admin.SchoolEmail = temp
 
 	pass := strings.TrimSuffix(string(password), "\n")
 	admin.Password = admin.HashPassword(pass)

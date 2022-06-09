@@ -82,6 +82,8 @@ The systems is easy to start and your local machine. Eliminating any long unforg
 
 The usage for this API is in the name, school management, it's not an easy task in the areas I live near. Overcrowded schools are far too common and the need for a better school management system is there. The current systems issued by the government work but are poor and outdated.
 
+To see a full list of features and how to use the system, read the [documentation](DOCUMENTATION.md)
+
 
 <!-- CONTRIBUTING -->
 ## Contributing

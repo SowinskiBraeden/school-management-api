@@ -2,7 +2,12 @@
 
 The backend API for a school management system accessible by staff and students.
 
-<a href="https://github.com/SowinskiBraeden/school-management-api"><strong>Explore the docs »</strong></a>
+***Explore the docs »***
+* [Getting Started](#getting-started)
+* [Usage/Documenation](#usage)
+* [Contributing](#contributing)
+* [License](#license)
+* [Contact](#contact)
 <br>
 <br>
 

@@ -44,6 +44,15 @@ The School Management API Documentation, defining all functions and their purpos
 	* [Password](#update-admin-password) - **(Coming Soon)**
 	* [Email](#update-admin-email) - **(Coming Soon)**
 	* [Photo](#update-admin-photo) - **(Coming Soon)**
+* [Managing Contacts](#managing-contacts) - **(Not Documented)**
+	* [Create Contact](#create-contact) - **(Not Documented)**
+	* [Update Contact Name](#update-contact-name) - **(Not Documented)**
+	* [Update Contact Address](#update-contact-address) - **(Not Documented)**
+	* [Update Contact Home Phone](#update-contact-home-phone) - **(Not Documented)**
+	* [Update Contact Work Phone](#update-contact-work-phone) - **(Not Documented)**
+	* [Update Contact Email](#update-contact-email) - **(Not Documented)**
+	* [Update Contact Priority](#update-contact-priority) - **(Not Documented)**
+	* [Delete Contact](#delete-contact) - **(Not Documented)**
 
 <br>
 
@@ -131,7 +140,7 @@ There are several account that can be registered into the system. As you may gue
 
     **Method:** `POST`
     ```
-    <API_URL>/admin/create
+    <API_URL>/api/v1/admin/create
     ```
     
     **Required:**
@@ -163,7 +172,7 @@ There are several account that can be registered into the system. As you may gue
 
     **Method:** `POST`
     ```
-    <API_URL>/teacher/register
+    <API_URL>/api/v1/teacher/register
     ```
     
     **Required:**
@@ -194,7 +203,7 @@ There are several account that can be registered into the system. As you may gue
 
     **Method:** `POST`
     ```
-    <API_URL>/student/enroll
+    <API_URL>/api/v1/student/enroll
     ```
     
     **Required:**
@@ -247,7 +256,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Logging into Admin
 	**Method:** `POST`
 	```
-	<API_URL>/admin/login
+	<API_URL>/api/v1/admin/login
 	```
 
 	**Required:**
@@ -274,7 +283,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Logging into Teacher
 	**Method:** `POST`
 	```
-	<API_URL>/teacher/login
+	<API_URL>/api/v1/teacher/login
 	```
 
 	**Required:**
@@ -301,7 +310,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Logging into Student
 	**Method:** `POST`
 	```
-	<API_URL>/student/login
+	<API_URL>/api/v1/student/login
 	```
 
 	**Required:**
@@ -330,7 +339,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Get Admin Account
 	**Method:** `GET`
 	```
-	<API_URL>/admin
+	<API_URL>/api/v1/admin
 	```
 
 	**Required:**
@@ -352,7 +361,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Get Teacher Account
 	**Method:** `GET`
 	```
-	<API_URL>/teacher
+	<API_URL>/api/v1/teacher
 	```
 
 	**Required:**
@@ -374,7 +383,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Get Student Account
 	 **Method:** `GET`
 	```
-	<API_URL>/student
+	<API_URL>/api/v1/student
 	```
 
 	**Required:**
@@ -398,7 +407,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Student Name
     **Method:** `POST`
 	```
-	<API_URL>/student/updateName
+	<API_URL>/api/v1/student/updateName
 	```
 
 	**Required:**
@@ -428,7 +437,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Student Grade Level
     **Method:** `POST`
 	```
-	<API_URL>/student/updateGradeLevel
+	<API_URL>/api/v1/student/updateGradeLevel
 	```
 
 	**Required:**
@@ -456,7 +465,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Student Homeroom
     **Method:** `POST`
 	```
-	<API_URL>/student/updateHomeroom
+	<API_URL>/api/v1/student/updateHomeroom
 	```
 
 	**Required:**
@@ -484,7 +493,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Student Locker
     **Method:** `POST`
 	```
-	<API_URL>/student/updateLocker
+	<API_URL>/api/v1/student/updateLocker
 	```
 
 	**Required:**
@@ -512,7 +521,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Student Year of Graduation
     **Method:** `POST`
 	```
-	<API_URL>/student/updateYOG
+	<API_URL>/api/v1/student/updateYOG
 	```
 
 	**Required:**
@@ -540,7 +549,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Student Password
     **Method:** `POST`
 	```
-	<API_URL>/student/updatePassword
+	<API_URL>/api/v1/student/updatePassword
 	```
 
 	**Required:**
@@ -570,7 +579,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Student Email
     **Method:** `POST`
 	```
-	<API_URL>/student/updateEmail
+	<API_URL>/api/v1/student/updateEmail
 	```
 
 	**Required:**
@@ -600,7 +609,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Student Address
     **Method:** `POST`
 	```
-	<API_URL>/student/updateAddress
+	<API_URL>/api/v1/student/updateAddress
 	```
 
 	**Required:**
@@ -631,7 +640,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Student Photo
     **Method:** `POST`
 	```
-	<API_URL>/student/updatePhoto
+	<API_URL>/api/v1/student/updatePhoto
 	```
 
 	**Required:**
@@ -657,7 +666,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Teacher Name
     **Method:** `POST`
 	```
-	<API_URL>/teacher/updateName
+	<API_URL>/api/v1/teacher/updateName
 	```
 
 	**Required:**
@@ -687,7 +696,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Teacher Homeroom
     **Method:** `POST`
 	```
-	<API_URL>/teacher/updateHomeroom
+	<API_URL>/api/v1/teacher/updateHomeroom
 	```
 
 	**Required:**
@@ -715,7 +724,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Teacher Password
     **Method:** `POST`
 	```
-	<API_URL>/teacher/updatePassword
+	<API_URL>/api/v1/teacher/updatePassword
 	```
 
 	**Required:**
@@ -745,7 +754,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Teacher Email
     **Method:** `POST`
 	```
-	<API_URL>/teacher/updateEmail
+	<API_URL>/api/v1/teacher/updateEmail
 	```
 
 	**Required:**
@@ -775,7 +784,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Teacher Address
     **Method:** `POST`
 	```
-	<API_URL>/teacher/updateAddress
+	<API_URL>/api/v1/teacher/updateAddress
 	```
 
 	**Required:**
@@ -806,7 +815,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Teacher Photo
     **Method:** `POST`
     ```
-    <API_URL>/teacher/updatePhoto
+    <API_URL>/api/v1/teacher/updatePhoto
     ```
 
     **Required:**
@@ -847,4 +856,85 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Admin Photo
     **Coming Soon...**
 
+<br></br>
+
+## Managing Conacts
+**To be Documented...**
+
++ ### Creating Contact
+	**To be Documented...**
+
+<br></br>
+
++ ### Update Contact Name
+	**To be Documented...**
+
+<br></br>
+
++ ### Update Contact Address
+	**To be Documented...**
+
+<br></br>
+
++ ### Update Contact Home Phone
+	**To be Documented...**
+
+<br></br>
+
++ ### Update Contact Work Phone
+	**To be Documented...**
+
+<br></br>
+
++ ### Update Contact Email
+	**To be Documented...**
+
+<br></br>
+
++ ### Update Contact Priority
+	**To be Documented...**
+
+<br></br>
+
++ ### Delete Conotact
+	**To be Documented...**
+
+<br></br>
+
+## Remove Users
+**To be Documented...**
+
++ ### Remove Admin
+	**To be Documented...**
+
+<br></br>
+
++ ### Remove Teacher
+	**To be Documented...**
+
+<br></br>
+
++ ### Remove Student
+	**To be Documented...**
+
+<br></br>
+
+### Admin Commands
+Administrators play a very important role in managing a school, they do much work behind the scenes to make sure that everything is correctly organized and working.
+
++ ### Update Locker Combination
+	**To be Documented...**
+
+<br></br>
+
++ ### Enable Student Account
+    In the case a students acount has been disabled, an admin would require to enable the account.
+
+	**To be Documented...**
+<br></br>
+
++ ### Enable Teacher Account
+    In the case a teachers acount has been disabled, an admin would require to enable the account.
+
+	**To be Documented...**
 <br></br>

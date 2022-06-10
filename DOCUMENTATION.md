@@ -27,7 +27,7 @@ The School Management API Documentation, defining all functions and their purpos
 	* [Locker](#update-student-locker)
 	* [YOG](#update-student-year-of-graduation)
 	* [Password](#update-student-password)
-	* [Email](#update-student-email) - **(Not Documented)**
+	* [Email](#update-student-email)
 	* [Address](#update-student-address) - **(Not Documented)**
 	* [Photo](#update-student-photo) - **(Not Documented)**
     <br></br>
@@ -600,11 +600,21 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Student Address
     **Method:** `POST`
 	```
-	<API_URL>/student/
+	<API_URL>/student/updateAddress
 	```
 
 	**Required:**
 	* Logged into an admin account
+	* JSON:
+	    ```jsonc
+	   {
+	       "sid": "123456",
+	       "address": "742 Evergreen Terrace",
+	       "city": "Springfield",
+	       "province": "...",
+	       "postal": "..."
+	   }
+	    ```
 	
 	**Returns:**
 	* Status 200: `OK`
@@ -612,7 +622,7 @@ There are several account that can be registered into the system. As you may gue
 		```jsonc
 		{
 			"success": true,
-			"message": "successfully updated"
+			"message": "successfully updated student"
 		}
 		```
 
@@ -621,19 +631,24 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Student Photo
     **Method:** `POST`
 	```
-	<API_URL>/student/
+	<API_URL>/student/updatePhoto
 	```
 
 	**Required:**
 	* Logged into an admin account
-	
+    * Form Submission:
+        ```
+            sid: "123456"
+            image: newStudentPhoto.png
+        ```
+
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
 		```jsonc
 		{
 			"success": true,
-			"message": "successfully updated"
+			"message": "successfully updated student photo"
 		}
 		```
 
@@ -642,19 +657,28 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Teacher Name
     **Method:** `POST`
 	```
-	<API_URL>/teacher/
+	<API_URL>/teacher/updateName
 	```
 
 	**Required:**
 	* Logged into an admin account
-	
+    * JSON:
+        ```jsonc
+        {
+            "tid": "123456",
+            "firstname": "Marjorie",
+            "middlename": "Jacqueline", // (Optional)
+            "lastname": "Simpson"
+        }
+        ```
+
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
 		```jsonc
 		{
 			"success": true,
-			"message": "successfully updated"
+			"message": "successfully updated teacher"
 		}
 		```
 
@@ -663,11 +687,18 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Teacher Homeroom
     **Method:** `POST`
 	```
-	<API_URL>/teacher/
+	<API_URL>/teacher/updateHomeroom
 	```
 
 	**Required:**
 	* Logged into an admin account
+	* JSON:
+	    ```
+	    {
+	        "tid": "123456",
+	        "homeroom": "A123"
+	    }
+	    ```
 	
 	**Returns:**
 	* Status 200: `OK`
@@ -675,7 +706,7 @@ There are several account that can be registered into the system. As you may gue
 		```jsonc
 		{
 			"success": true,
-			"message": "successfully updated"
+			"message": "successfully updated teacher"
 		}
 		```
 
@@ -684,11 +715,19 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Teacher Password
     **Method:** `POST`
 	```
-	<API_URL>/teacher/
+	<API_URL>/teacher/updatePassword
 	```
 
 	**Required:**
-	* Logged into an admin account
+	* Logged into teacher account
+	* JSON:
+	    ```jsonc
+	        {
+	            "password": "myOldPassword",
+	            "newpassword1": "myNewPassword",
+	            "newpassword2": "myNewPassword"
+	        }
+	    ```
 	
 	**Returns:**
 	* Status 200: `OK`
@@ -696,20 +735,30 @@ There are several account that can be registered into the system. As you may gue
 		```jsonc
 		{
 			"success": true,
-			"message": "successfully updated"
+			"message": "successfully updated teacher password"
 		}
 		```
+	* Emails teacher an alert of password change
 
 <br></br>
 
 + ### Update Teacher Email
     **Method:** `POST`
 	```
-	<API_URL>/teacher/
+	<API_URL>/teacher/updateEmail
 	```
 
 	**Required:**
 	* Logged into an admin account
+	**or**
+    * Logged into teachers account
+    * JSON:
+        ```jsonc
+        {
+            "tid": "123456", // (Only required if igned in as admin)
+            "email": "MargeSimpson@example.com"
+        }
+        ```
 	
 	**Returns:**
 	* Status 200: `OK`
@@ -717,7 +766,7 @@ There are several account that can be registered into the system. As you may gue
 		```jsonc
 		{
 			"success": true,
-			"message": "successfully updated"
+			"message": "successfully updated teacher"
 		}
 		```
 
@@ -726,11 +775,21 @@ There are several account that can be registered into the system. As you may gue
 + ### Update Teacher Address
     **Method:** `POST`
 	```
-	<API_URL>/teacher/
+	<API_URL>/teacher/updateAddress
 	```
 
 	**Required:**
 	* Logged into an admin account
+	* JSON:
+	    ```jsonc
+	    {
+	        "tid": "123456",
+	        "address": "742 Evergreen Terrace",
+	        "city": "Springfield",
+	        "province": "...",
+	        "postal": "..."
+	    }
+	    ```
 	
 	**Returns:**
 	* Status 200: `OK`
@@ -738,14 +797,35 @@ There are several account that can be registered into the system. As you may gue
 		```jsonc
 		{
 			"success": true,
-			"message": "successfully updated"
+			"message": "successfully updated teacher"
 		}
 		```
 
 <br></br>
 
 + ### Update Teacher Photo
-    **Coming Soon...**
+    **Method:** `POST`
+    ```
+    <API_URL>/teacher/updatePhoto
+    ```
+
+    **Required:**
+    * Logged into an admin
+    * Form Submission:
+        ```
+            tid: "123456"
+            image: newTeacherPhoto.png
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": true,
+            "message": "successfully updated teacher photo"
+        }
+        ```
 
 <br></br>
 

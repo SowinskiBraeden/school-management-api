@@ -63,9 +63,7 @@ func CreateDefaultAdmin() models.Admin {
 	admin.LastName = lastname
 	admin.Email = email
 
-	temp := admin.GenerateSchoolEmail()
-	fmt.Println(temp)
-	admin.SchoolEmail = temp
+	admin.SchoolEmail = admin.GenerateSchoolEmail()
 
 	pass := strings.TrimSuffix(string(password), "\n")
 	admin.Password = admin.HashPassword(pass)

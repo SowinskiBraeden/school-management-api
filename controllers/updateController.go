@@ -145,7 +145,7 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 		},
 	}
 
-	result, updateErr := studentCollection.UpdateOne(
+	_, updateErr := studentCollection.UpdateOne(
 		ctx,
 		bson.M{"schooldata.sid": data["sid"].(string)},
 		update,
@@ -162,8 +162,7 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
-		"message": "successfully updated student",
-		"result":  result,
+		"message": "successfully updated student"
 	})
 }
 
@@ -217,7 +216,7 @@ func UpdateStudentHomeroom(c *fiber.Ctx) error {
 		},
 	}
 
-	result, updateErr := studentCollection.UpdateOne(
+	_, updateErr := studentCollection.UpdateOne(
 		ctx,
 		bson.M{"schooldata.sid": data["sid"]},
 		update,
@@ -235,7 +234,6 @@ func UpdateStudentHomeroom(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated student",
-		"result":  result,
 	})
 }
 
@@ -491,7 +489,7 @@ func UpdateStudentLocker(c *fiber.Ctx) error {
 		},
 	}
 
-	result, updateErr := studentCollection.UpdateOne(
+	_, updateErr := studentCollection.UpdateOne(
 		ctx,
 		bson.M{"schooldata.sid": data["sid"]},
 		update,
@@ -509,7 +507,6 @@ func UpdateStudentLocker(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated student",
-		"result":  result,
 	})
 }
 

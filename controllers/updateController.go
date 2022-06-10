@@ -162,7 +162,7 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
-		"message": "successfully updated student"
+		"message": "successfully updated student",
 	})
 }
 

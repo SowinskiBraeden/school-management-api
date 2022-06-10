@@ -19,7 +19,7 @@ The School Management API Documentation, defining all functions and their purpos
 	* [Get Admin Account](#get-admin-account)
 	* [Get Teacher Account](#get-teacher-account)
 	* [Get Student Account](#get-student-account)
-* [Updating Account information](#updating-accounts) - **(Not Documented)**
+* [Updating Account information](#updating-accounts)
 	* **Update Student...**
 	* [Name](#update-student-name)
 	* [Grade Level](#update-student-grade-level)
@@ -28,16 +28,16 @@ The School Management API Documentation, defining all functions and their purpos
 	* [YOG](#update-student-year-of-graduation)
 	* [Password](#update-student-password)
 	* [Email](#update-student-email)
-	* [Address](#update-student-address) - **(Not Documented)**
-	* [Photo](#update-student-photo) - **(Not Documented)**
+	* [Address](#update-student-address)
+	* [Photo](#update-student-photo)
     <br></br>
 	* **Update Teacher...**
-	* [Name](#update-teacher-name) - **(Not Documented)**
-	* [Homeroom](#update-teacher-homeroom) - **(Not Documented)**
-	* [Password](#update-teacher-password) - **(Not Documented)**
-	* [Email](#update-teacher-email) - **(Not Documented)**
-	* [Address](#update-teacher-address) - **(Not Documented)**
-	* [Photo](#update-teacher-photo) - **(Not Documented)**
+	* [Name](#update-teacher-name)
+	* [Homeroom](#update-teacher-homeroom)
+	* [Password](#update-teacher-password)
+	* [Email](#update-teacher-email)
+	* [Address](#update-teacher-address)
+	* [Photo](#update-teacher-photo)
 	<br></br>
 	* **Update Admin...**
 	* [Name](#update-admin-name) - **(Coming Soon)**

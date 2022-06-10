@@ -555,7 +555,7 @@ func UpdateStudentAddress(c *fiber.Ctx) error {
 		},
 	}
 
-	result, updateErr := studentCollection.UpdateOne(
+	_, updateErr := studentCollection.UpdateOne(
 		ctx,
 		bson.M{"sid": data["sid"]},
 		update,
@@ -573,7 +573,6 @@ func UpdateStudentAddress(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated student",
-		"result":  result,
 	})
 }
 
@@ -889,7 +888,7 @@ func UpdateStudentPhoto(c *fiber.Ctx) error {
 			"updated_at": update_time,
 		},
 	}
-	result, updateErr := imageCollection.UpdateOne(
+	_, updateErr := imageCollection.UpdateOne(
 		ctx,
 		bson.M{"_id": photo.ID},
 		update,
@@ -910,7 +909,6 @@ func UpdateStudentPhoto(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated student photo",
-		"result":  result,
 	})
 }
 
@@ -1152,7 +1150,7 @@ func UpdateTeacherHomeroom(c *fiber.Ctx) error {
 		},
 	}
 
-	result, updateErr := teacherCollection.UpdateOne(
+	_, updateErr := teacherCollection.UpdateOne(
 		ctx,
 		bson.M{"schooldata.tid": data["tid"]},
 		update,
@@ -1170,7 +1168,6 @@ func UpdateTeacherHomeroom(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated teacher",
-		"result":  result,
 	})
 }
 
@@ -1257,7 +1254,7 @@ func UpdateTeacherPassword(c *fiber.Ctx) error {
 		},
 	}
 
-	result, updateErr := teacherCollection.UpdateOne(
+	_, updateErr := teacherCollection.UpdateOne(
 		ctx,
 		bson.M{"schooldata.tid": claims.Issuer},
 		update,
@@ -1286,7 +1283,6 @@ func UpdateTeacherPassword(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated teacher password",
-		"result":  result,
 	})
 }
 
@@ -1416,7 +1412,7 @@ func UpdateTeacherAddress(c *fiber.Ctx) error {
 		},
 	}
 
-	result, updateErr := teacherCollection.UpdateOne(
+	_, updateErr := teacherCollection.UpdateOne(
 		ctx,
 		bson.M{"schooldata.tid": data["tid"]},
 		update,
@@ -1434,7 +1430,6 @@ func UpdateTeacherAddress(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated teacher",
-		"result":  result,
 	})
 }
 
@@ -1530,7 +1525,7 @@ func UpdateTeacherPhoto(c *fiber.Ctx) error {
 			"updated_at": update_time,
 		},
 	}
-	result, updateErr := imageCollection.UpdateOne(
+	_, updateErr := imageCollection.UpdateOne(
 		ctx,
 		bson.M{"_id": photo.ID},
 		update,
@@ -1551,7 +1546,6 @@ func UpdateTeacherPhoto(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated teacher photo",
-		"result":  result,
 	})
 }
 
@@ -1594,7 +1588,7 @@ func UpdateTeacherEmail(c *fiber.Ctx) error {
 		},
 	}
 
-	result, updateErr := teacherCollection.UpdateOne(
+	_, updateErr := teacherCollection.UpdateOne(
 		ctx,
 		bson.M{"schooldata.tid": data["tid"]},
 		update,
@@ -1612,7 +1606,6 @@ func UpdateTeacherEmail(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated teacher",
-		"result":  result,
 	})
 }
 
@@ -1659,17 +1652,23 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 		})
 	}
 
+	var middlename string = ""
+
+	if data["middlename"] != "" {
+		middlename = data["middlename"]
+	}
+
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
 			"personaldata.firstname":  data["firstname"],
-			"personaldata.middlename": data["middlename"],
+			"personaldata.middlename": middlename,
 			"personaldata.lastname":   data["lastname"],
 			"updated_at":              update_time,
 		},
 	}
 
-	result, updateErr := teacherCollection.UpdateOne(
+	_, updateErr := teacherCollection.UpdateOne(
 		ctx,
 		bson.M{"schooldata.tid": data["tid"]},
 		update,
@@ -1687,7 +1686,6 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated teacher",
-		"result":  result,
 	})
 }
 
@@ -1732,7 +1730,7 @@ func UpdateContactName(c *fiber.Ctx) error {
 		},
 	}
 
-	result, updateErr := contactCollection.UpdateOne(
+	_, updateErr := contactCollection.UpdateOne(
 		ctx,
 		bson.M{"_id": data["_id"]},
 		update,
@@ -1750,7 +1748,6 @@ func UpdateContactName(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated contact",
-		"result":  result,
 	})
 }
 
@@ -1796,7 +1793,7 @@ func UpdateContactAddress(c *fiber.Ctx) error {
 		},
 	}
 
-	result, updateErr := contactCollection.UpdateOne(
+	_, updateErr := contactCollection.UpdateOne(
 		ctx,
 		bson.M{"_id": data["_id"]},
 		update,
@@ -1814,7 +1811,6 @@ func UpdateContactAddress(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated contact",
-		"result":  result,
 	})
 }
 
@@ -1857,7 +1853,7 @@ func UpdateContactHomePhone(c *fiber.Ctx) error {
 		},
 	}
 
-	result, updateErr := contactCollection.UpdateOne(
+	_, updateErr := contactCollection.UpdateOne(
 		ctx,
 		bson.M{"_id": data["_id"]},
 		update,
@@ -1875,7 +1871,6 @@ func UpdateContactHomePhone(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated contact",
-		"result":  result,
 	})
 }
 
@@ -1918,7 +1913,7 @@ func UpdateContactWorkPhone(c *fiber.Ctx) error {
 		},
 	}
 
-	result, updateErr := contactCollection.UpdateOne(
+	_, updateErr := contactCollection.UpdateOne(
 		ctx,
 		bson.M{"_id": data["_id"]},
 		update,
@@ -1936,7 +1931,6 @@ func UpdateContactWorkPhone(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated contact",
-		"result":  result,
 	})
 }
 
@@ -1979,7 +1973,7 @@ func UpdateContactEmail(c *fiber.Ctx) error {
 		},
 	}
 
-	result, updateErr := contactCollection.UpdateOne(
+	_, updateErr := contactCollection.UpdateOne(
 		ctx,
 		bson.M{"_id": data["_id"]},
 		update,
@@ -1997,7 +1991,6 @@ func UpdateContactEmail(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated contact",
-		"result":  result,
 	})
 }
 
@@ -2040,7 +2033,7 @@ func UpdateContactPriority(c *fiber.Ctx) error {
 		},
 	}
 
-	result, updateErr := contactCollection.UpdateOne(
+	_, updateErr := contactCollection.UpdateOne(
 		ctx,
 		bson.M{"_id": data["_id"]},
 		update,
@@ -2058,7 +2051,6 @@ func UpdateContactPriority(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated contact",
-		"result":  result,
 	})
 }
 
@@ -2101,7 +2093,7 @@ func UpdateLockerCombo(c *fiber.Ctx) error {
 		},
 	}
 
-	result, updateErr := lockerCollection.UpdateOne(
+	_, updateErr := lockerCollection.UpdateOne(
 		ctx,
 		bson.M{"lockernumber": data["lockernumber"]},
 		update,
@@ -2119,7 +2111,6 @@ func UpdateLockerCombo(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated locker",
-		"result":  result,
 	})
 }
 
@@ -2164,7 +2155,7 @@ func RemoveStudent(c *fiber.Ctx) error {
 		})
 	}
 
-	result, deleteErr := studentCollection.DeleteOne(ctx, bson.M{"schooldata.sid": data["sid"]})
+	_, deleteErr = studentCollection.DeleteOne(ctx, bson.M{"schooldata.sid": data["sid"]})
 	if deleteErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -2178,7 +2169,6 @@ func RemoveStudent(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully deleted student",
-		"result":  result,
 	})
 }
 
@@ -2223,7 +2213,7 @@ func RemoveTeacher(c *fiber.Ctx) error {
 		})
 	}
 
-	result, deleteErr := teacherCollection.DeleteOne(ctx, bson.M{"schooldata.tid": data["tid"]})
+	_, deleteErr = teacherCollection.DeleteOne(ctx, bson.M{"schooldata.tid": data["tid"]})
 	if deleteErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -2237,7 +2227,6 @@ func RemoveTeacher(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully deleted teacher",
-		"result":  result,
 	})
 }
 
@@ -2282,7 +2271,7 @@ func RemoveAdmin(c *fiber.Ctx) error {
 		})
 	}
 
-	result, deleteErr := adminCollection.DeleteOne(ctx, bson.M{"aid": data["aid"]})
+	_, deleteErr = adminCollection.DeleteOne(ctx, bson.M{"aid": data["aid"]})
 	if deleteErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -2296,6 +2285,5 @@ func RemoveAdmin(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully deleted admin",
-		"result":  result,
 	})
 }

@@ -21,26 +21,26 @@ The School Management API Documentation, defining all functions and their purpos
 	* [Get Admin Account](#get-admin-account)
 	* [Get Teacher Account](#get-teacher-account)
 	* [Get Student Account](#get-student-account)
-* [Updating Account information](#updating-accounts)
+* [Updating Account information](#updating-accounts) - **(Not Documented)**
 	* **Update Student...**
-	* [Name](#update-student-name)
-	* [Grade Level](#update-student-grade-level)
-	* [Homeroom](#update-student-homeroom)
-	* [Locker](#update-student-locker)
-	* [YOG](#update-student-year-of-graduation)
-	* [Password](#update-student-password)
-	* [Email](#update-student-email)
-	* [Address](#update-student-address)
-	* [Photo](#update-student-photo)
-	<br>
+	* [Name](#update-student-name) - **(Not Documented)**
+	* [Grade Level](#update-student-grade-level) - **(Not Documented)**
+	* [Homeroom](#update-student-homeroom) - **(Not Documented)**
+	* [Locker](#update-student-locker) - **(Not Documented)**
+	* [YOG](#update-student-year-of-graduation) - **(Not Documented)**
+	* [Password](#update-student-password) - **(Not Documented)**
+	* [Email](#update-student-email) - **(Not Documented)**
+	* [Address](#update-student-address) - **(Not Documented)**
+	* [Photo](#update-student-photo) - **(Not Documented)**
+    <br></br>
 	* **Update Teacher...**
-	* [Name](#update-teacher-name)
-	* [Homeroom](#update-teacher-homeroom)
-	* [Password](#update-teacher-password)
-	* [Address](#update-teacher-address)
-	* [Photo](#update-teacher-photo)
-	* [Email](#update-teacher-email)
-	<br>
+	* [Name](#update-teacher-name) - **(Not Documented)**
+	* [Homeroom](#update-teacher-homeroom) - **(Not Documented)**
+	* [Password](#update-teacher-password) - **(Not Documented)**
+	* [Address](#update-teacher-address) - **(Not Documented)**
+	* [Photo](#update-teacher-photo) - **(Not Documented)**
+	* [Email](#update-teacher-email) - **(Not Documented)**
+	<br></br>
 	* **Update Admin...**
 	* [Name](#update-admin-name) - **(Coming Soon)**
 	* [Password](#update-admin-password) - **(Coming Soon)**
@@ -351,7 +351,7 @@ There are several account that can be registered into the system. As you may gue
 
 <br>
 
-+ ### Getting Teacher Account
++ ### Get Teacher Account
 	**Method:** `GET`
 	```
 	<API_URL>/teacher
@@ -373,7 +373,7 @@ There are several account that can be registered into the system. As you may gue
 
 <br>
 
-+ ### Getting Student Account
++ ### Get Student Account
 	 **Method:** `GET`
 	```
 	<API_URL>/student

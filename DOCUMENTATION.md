@@ -1,5 +1,3 @@
-
-
 # School Management API Documentation
 
 The School Management API Documentation, defining all functions and their purpose. As well as how to use the API, how to properly call functions and provide the necessary fields. 
@@ -23,12 +21,12 @@ The School Management API Documentation, defining all functions and their purpos
 	* [Get Student Account](#get-student-account)
 * [Updating Account information](#updating-accounts) - **(Not Documented)**
 	* **Update Student...**
-	* [Name](#update-student-name) - **(Not Documented)**
-	* [Grade Level](#update-student-grade-level) - **(Not Documented)**
-	* [Homeroom](#update-student-homeroom) - **(Not Documented)**
-	* [Locker](#update-student-locker) - **(Not Documented)**
-	* [YOG](#update-student-year-of-graduation) - **(Not Documented)**
-	* [Password](#update-student-password) - **(Not Documented)**
+	* [Name](#update-student-name)
+	* [Grade Level](#update-student-grade-level)
+	* [Homeroom](#update-student-homeroom)
+	* [Locker](#update-student-locker)
+	* [YOG](#update-student-year-of-graduation)
+	* [Password](#update-student-password)
 	* [Email](#update-student-email) - **(Not Documented)**
 	* [Address](#update-student-address) - **(Not Documented)**
 	* [Photo](#update-student-photo) - **(Not Documented)**
@@ -55,7 +53,7 @@ The School Management API Documentation, defining all functions and their purpos
     The API is an all in one package and is simple and easy to deploy. Eliminating any long unforgiving configurations you may face in other software.
 
     1. Clone the repo
-        ```
+        ```bash
         $ git clone https://github.com/SowinskiBraeden/school-management-api
         $ cd school-management-api
         ```
@@ -63,7 +61,7 @@ The School Management API Documentation, defining all functions and their purpos
     2. Rename `.env.example` to `.env`
     
     3. Enter desired values into `.env`
-        ```
+        ```bash
         mongoURI='your mongo URI'
         dbo='school'
         secret='your 256 bit secret'
@@ -78,14 +76,14 @@ The School Management API Documentation, defining all functions and their purpos
         ```
     
     4. Run the system in your terminal
-        ```
+        ```bash
         $ go run main.go
         ```
     
     Or...
     
     5. Build and compile the system into an executable
-        ```
+        ```bash
         $ go build
         ```
 
@@ -113,7 +111,7 @@ The School Management API Documentation, defining all functions and their purpos
     **Returns:**
     * Status 200: `OK`
     * JSON: 
-        ```
+        ```jsonc
         {
             "success": true,
             "message": "the API is active"
@@ -139,7 +137,7 @@ There are several account that can be registered into the system. As you may gue
     **Required:**
     + Logged into an existing Admin account
     + JSON:
-        ```
+        ```jsonc
         {
             "firstname": "John",
             "lastname": "Doe",
@@ -151,7 +149,7 @@ There are several account that can be registered into the system. As you may gue
     **Returns:**
     + Status 200: `OK`
     + JSON:
-        ```
+        ```jsonc
         {
             "success": true,
             "message": "successfully inserted admin"
@@ -171,7 +169,7 @@ There are several account that can be registered into the system. As you may gue
     **Required:**
     + Logged into an existing Admin account
     + JSON:
-        ```
+        ```jsonc
         {
             "firstname": "Homer",
             "middlename": "Jay",
@@ -184,7 +182,7 @@ There are several account that can be registered into the system. As you may gue
     **Returns:**
     + Status 200: `OK`
     + JSON:
-        ```
+        ```jsonc
         {
             "success": true,
             "message": "successfully inserted teacher"
@@ -202,7 +200,7 @@ There are several account that can be registered into the system. As you may gue
     **Required:**
     + Logged into an existing Admin account
     + JSON:
-        ```
+        ```jsonc
         {
             "firstname": "Bart",
             "middlename": "JoJo",
@@ -220,7 +218,7 @@ There are several account that can be registered into the system. As you may gue
     **Returns:**
     + Status 200: `OK`
     + JSON:
-        ```
+        ```jsonc
         {
             "success": true,
             "successfully inserted student"
@@ -254,7 +252,7 @@ There are several account that can be registered into the system. As you may gue
 
 	**Required:**
 	* JSON:
-		```
+		```jsonc
 		{
 			"tid": "123456",
 			"password": "myawesomepassword123"
@@ -281,7 +279,7 @@ There are several account that can be registered into the system. As you may gue
 
 	**Required:**
 	* JSON:
-		```
+		```jsonc
 		{
 			"tid": "123456",
 			"password": "myawesomepassword123"
@@ -291,7 +289,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "correct password"
@@ -308,7 +306,7 @@ There are several account that can be registered into the system. As you may gue
 
 	**Required:**
 	* JSON:
-		```
+		```jsonc
 		{
 			"sid": "123456",
 			"password": "myawesomepassword123"
@@ -318,7 +316,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "correct password"
@@ -341,7 +339,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully logged into admin",
@@ -363,7 +361,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully logged into teacher",
@@ -385,7 +383,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully logged into teacher",
@@ -406,7 +404,7 @@ There are several account that can be registered into the system. As you may gue
 	**Required:**
 	* Logged into an admin account
     * JSON:
-        ```
+        ```jsonc
         {
             "sid": "123456",
             "firstname": "Lisa",
@@ -418,7 +416,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully updated student"
@@ -436,7 +434,7 @@ There are several account that can be registered into the system. As you may gue
 	**Required:**
 	* Logged into an admin account
 	* JSON":
-	    ```
+	    ```jsonc
 	    {
 	        "sid": "123456",
 	        "gradelevel": 11
@@ -446,7 +444,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully updated student"
@@ -464,7 +462,7 @@ There are several account that can be registered into the system. As you may gue
 	**Required:**
 	* Logged into an admin account
     * JSON:
-        ```
+        ```jsonc
         {
             "sid": "123456",
             "homeroom": "A123"
@@ -474,7 +472,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully updated student"
@@ -492,7 +490,7 @@ There are several account that can be registered into the system. As you may gue
 	**Required:**
 	* Logged into an admin account
 	* JSON:
-	    ```
+	    ```jsonc
 	    {
 	        "sid": "123456",
 	        "lockernumber": "B123"
@@ -502,7 +500,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully updated student"
@@ -520,7 +518,7 @@ There are several account that can be registered into the system. As you may gue
 	**Required:**
 	* Logged into an admin account
 	* JSON:
-	    ```
+	    ```jsonc
 	    {
 	        "sid": "123456",
 	        "yog": 2020
@@ -530,7 +528,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully updated student"
@@ -546,33 +544,51 @@ There are several account that can be registered into the system. As you may gue
 	```
 
 	**Required:**
-	* Logged into an admin account
+	* Logged into students account
+	* JSON:
+		```jsonc
+		{
+			"password": "myOldPassword",
+			"newpassword1": "myNewPassword",
+			"newpassword2": "myNewPassword"
+		}
+		```
 	
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
-			"message": "successfully updated"
+			"message": "successfully updated student password"
 		}
 		```
+	* Emails student an alert of password change
 
 <br></br>
 
 + ### Update Student Email
     **Method:** `POST`
 	```
-	<API_URL>/student/
+	<API_URL>/student/updateEmail
 	```
 
 	**Required:**
 	* Logged into an admin account
+	__or__
+	* Logged into students account
+	* JSON:
+		```jsonc
+		{
+			"sid": "123456", // (Only required if signed in as admin)
+			"email": "BartSimpsonsCoolEmail@example.com"
+		}
+		```
 	
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully updated"
@@ -593,7 +609,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully updated"
@@ -614,7 +630,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully updated"
@@ -635,7 +651,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully updated"
@@ -656,7 +672,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully updated"
@@ -677,7 +693,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully updated"
@@ -698,7 +714,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully updated"
@@ -719,7 +735,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully updated"

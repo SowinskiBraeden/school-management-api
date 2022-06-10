@@ -37,9 +37,9 @@ The School Management API Documentation, defining all functions and their purpos
 	* [Name](#update-teacher-name) - **(Not Documented)**
 	* [Homeroom](#update-teacher-homeroom) - **(Not Documented)**
 	* [Password](#update-teacher-password) - **(Not Documented)**
+	* [Email](#update-teacher-email) - **(Not Documented)**
 	* [Address](#update-teacher-address) - **(Not Documented)**
 	* [Photo](#update-teacher-photo) - **(Not Documented)**
-	* [Email](#update-teacher-email) - **(Not Documented)**
 	<br></br>
 	* **Update Admin...**
 	* [Name](#update-admin-name) - **(Coming Soon)**
@@ -367,7 +367,7 @@ There are several account that can be registered into the system. As you may gue
 		{
 			"success": true,
 			"message": "successfully logged into teacher",
-			"admin:" <teacher object>
+			"teacher:" <teacher object>
 		}
 		```
 
@@ -389,9 +389,366 @@ There are several account that can be registered into the system. As you may gue
 		{
 			"success": true,
 			"message": "successfully logged into teacher",
-			"admin:" <student object>
+			"student:" <student object>
 		}
 		```
 
 <br>
 
+## Updating Account Information
+
++ ### Update Student Name
+    **Method:** `POST`
+	```
+	<API_URL>/student/updateName
+	```
+
+	**Required:**
+	* Logged into an admin account
+    * JSON:
+        ```
+        {
+            "sid": "123456",
+            "firstname": "Lisa",
+            "middlename": "Marie", // (OPTIONAL)
+            "lastname": "Simpson"
+        }
+        ```
+
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "successfully updated student"
+		}
+		```
+
+<br></br>
+
++ ### Update Student Grade Level
+    **Method:** `POST`
+	```
+	<API_URL>/student/updateGradeLevel
+	```
+
+	**Required:**
+	* Logged into an admin account
+	* JSON":
+	    ```
+	    {
+	        "sid": "123456",
+	        "gradelevel": 11
+	    }
+	    ```
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "successfully updated student"
+		}
+		```
+
+<br></br>
+
++ ### Update Student Homeroom
+    **Method:** `POST`
+	```
+	<API_URL>/student/updateHomeroom
+	```
+
+	**Required:**
+	* Logged into an admin account
+    * JSON:
+        ```
+        {
+            "sid": "123456",
+            "homeroom": "A123"
+        }
+        ```
+
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "successfully updated student"
+		}
+		```
+
+<br></br>
+
++ ### Update Student Locker
+    **Method:** `POST`
+	```
+	<API_URL>/student/updateLocker
+	```
+
+	**Required:**
+	* Logged into an admin account
+	* JSON:
+	    ```
+	    {
+	        "sid": "123456",
+	        "lockernumber": "B123"
+	    }
+	    ```
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "successfully updated student"
+		}
+		```
+
+<br></br>
+
++ ### Update Student Year of Graduation
+    **Method:** `POST`
+	```
+	<API_URL>/student/updateYOG
+	```
+
+	**Required:**
+	* Logged into an admin account
+	* JSON:
+	    ```
+	    {
+	        "sid": "123456",
+	        "yog": 2020
+	    }
+	    ```
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "successfully updated student"
+		}
+		```
+
+<br></br>
+
++ ### Update Student Password
+    **Method:** `POST`
+	```
+	<API_URL>/student/updatePassword
+	```
+
+	**Required:**
+	* Logged into an admin account
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "successfully updated"
+		}
+		```
+
+<br></br>
+
++ ### Update Student Email
+    **Method:** `POST`
+	```
+	<API_URL>/student/
+	```
+
+	**Required:**
+	* Logged into an admin account
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "successfully updated"
+		}
+		```
+
+<br></br>
+
++ ### Update Student Address
+    **Method:** `POST`
+	```
+	<API_URL>/student/
+	```
+
+	**Required:**
+	* Logged into an admin account
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "successfully updated"
+		}
+		```
+
+<br></br>
+
++ ### Update Student Photo
+    **Method:** `POST`
+	```
+	<API_URL>/student/
+	```
+
+	**Required:**
+	* Logged into an admin account
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "successfully updated"
+		}
+		```
+
+<br></br>
+
++ ### Update Teacher Name
+    **Method:** `POST`
+	```
+	<API_URL>/teacher/
+	```
+
+	**Required:**
+	* Logged into an admin account
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "successfully updated"
+		}
+		```
+
+<br></br>
+
++ ### Update Teacher Homeroom
+    **Method:** `POST`
+	```
+	<API_URL>/teacher/
+	```
+
+	**Required:**
+	* Logged into an admin account
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "successfully updated"
+		}
+		```
+
+<br></br>
+
++ ### Update Teacher Password
+    **Method:** `POST`
+	```
+	<API_URL>/teacher/
+	```
+
+	**Required:**
+	* Logged into an admin account
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "successfully updated"
+		}
+		```
+
+<br></br>
+
++ ### Update Teacher Email
+    **Method:** `POST`
+	```
+	<API_URL>/teacher/
+	```
+
+	**Required:**
+	* Logged into an admin account
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "successfully updated"
+		}
+		```
+
+<br></br>
+
++ ### Update Teacher Address
+    **Method:** `POST`
+	```
+	<API_URL>/teacher/
+	```
+
+	**Required:**
+	* Logged into an admin account
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "successfully updated"
+		}
+		```
+
+<br></br>
+
++ ### Update Teacher Photo
+    **Coming Soon...**
+
+<br></br>
+
++ ### Update Admin Name
+    **Coming Soon...**
+
+<br></br>
+
++ ### Update Admin Password
+    **Coming Soon...**
+
+<br></br>
+
++ ### Update Admin Email
+    **Coming Soon...**
+
+<br></br>
+
++ ### Update Admin Photo
+    **Coming Soon...**
+
+<br></br>

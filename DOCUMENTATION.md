@@ -1,5 +1,3 @@
-
-
 # School Management API Documentation
 
 The School Management API Documentation, defining all functions and their purpose. As well as how to use the API, how to properly call functions and provide the necessary fields. 
@@ -21,31 +19,40 @@ The School Management API Documentation, defining all functions and their purpos
 	* [Get Admin Account](#get-admin-account)
 	* [Get Teacher Account](#get-teacher-account)
 	* [Get Student Account](#get-student-account)
-* [Updating Account information](#updating-accounts) - **(Not Documented)**
+* [Updating Account information](#updating-accounts)
 	* **Update Student...**
-	* [Name](#update-student-name) - **(Not Documented)**
-	* [Grade Level](#update-student-grade-level) - **(Not Documented)**
-	* [Homeroom](#update-student-homeroom) - **(Not Documented)**
-	* [Locker](#update-student-locker) - **(Not Documented)**
-	* [YOG](#update-student-year-of-graduation) - **(Not Documented)**
-	* [Password](#update-student-password) - **(Not Documented)**
-	* [Email](#update-student-email) - **(Not Documented)**
-	* [Address](#update-student-address) - **(Not Documented)**
-	* [Photo](#update-student-photo) - **(Not Documented)**
+	* [Name](#update-student-name)
+	* [Grade Level](#update-student-grade-level)
+	* [Homeroom](#update-student-homeroom)
+	* [Locker](#update-student-locker)
+	* [YOG](#update-student-year-of-graduation)
+	* [Password](#update-student-password)
+	* [Email](#update-student-email)
+	* [Address](#update-student-address)
+	* [Photo](#update-student-photo)
     <br></br>
 	* **Update Teacher...**
-	* [Name](#update-teacher-name) - **(Not Documented)**
-	* [Homeroom](#update-teacher-homeroom) - **(Not Documented)**
-	* [Password](#update-teacher-password) - **(Not Documented)**
-	* [Address](#update-teacher-address) - **(Not Documented)**
-	* [Photo](#update-teacher-photo) - **(Not Documented)**
-	* [Email](#update-teacher-email) - **(Not Documented)**
+	* [Name](#update-teacher-name)
+	* [Homeroom](#update-teacher-homeroom)
+	* [Password](#update-teacher-password)
+	* [Email](#update-teacher-email)
+	* [Address](#update-teacher-address)
+	* [Photo](#update-teacher-photo)
 	<br></br>
 	* **Update Admin...**
 	* [Name](#update-admin-name) - **(Coming Soon)**
 	* [Password](#update-admin-password) - **(Coming Soon)**
 	* [Email](#update-admin-email) - **(Coming Soon)**
 	* [Photo](#update-admin-photo) - **(Coming Soon)**
+* [Managing Contacts](#managing-contacts) - **(Not Documented)**
+	* [Create Contact](#create-contact) - **(Not Documented)**
+	* [Update Contact Name](#update-contact-name) - **(Not Documented)**
+	* [Update Contact Address](#update-contact-address) - **(Not Documented)**
+	* [Update Contact Home Phone](#update-contact-home-phone) - **(Not Documented)**
+	* [Update Contact Work Phone](#update-contact-work-phone) - **(Not Documented)**
+	* [Update Contact Email](#update-contact-email) - **(Not Documented)**
+	* [Update Contact Priority](#update-contact-priority) - **(Not Documented)**
+	* [Delete Contact](#delete-contact) - **(Not Documented)**
 
 <br>
 
@@ -55,7 +62,7 @@ The School Management API Documentation, defining all functions and their purpos
     The API is an all in one package and is simple and easy to deploy. Eliminating any long unforgiving configurations you may face in other software.
 
     1. Clone the repo
-        ```
+        ```bash
         $ git clone https://github.com/SowinskiBraeden/school-management-api
         $ cd school-management-api
         ```
@@ -63,7 +70,7 @@ The School Management API Documentation, defining all functions and their purpos
     2. Rename `.env.example` to `.env`
     
     3. Enter desired values into `.env`
-        ```
+        ```bash
         mongoURI='your mongo URI'
         dbo='school'
         secret='your 256 bit secret'
@@ -78,14 +85,14 @@ The School Management API Documentation, defining all functions and their purpos
         ```
     
     4. Run the system in your terminal
-        ```
+        ```bash
         $ go run main.go
         ```
     
     Or...
     
     5. Build and compile the system into an executable
-        ```
+        ```bash
         $ go build
         ```
 
@@ -113,7 +120,7 @@ The School Management API Documentation, defining all functions and their purpos
     **Returns:**
     * Status 200: `OK`
     * JSON: 
-        ```
+        ```jsonc
         {
             "success": true,
             "message": "the API is active"
@@ -133,13 +140,13 @@ There are several account that can be registered into the system. As you may gue
 
     **Method:** `POST`
     ```
-    <API_URL>/admin/create
+    <API_URL>/api/v1/admin/create
     ```
     
     **Required:**
     + Logged into an existing Admin account
     + JSON:
-        ```
+        ```jsonc
         {
             "firstname": "John",
             "lastname": "Doe",
@@ -151,7 +158,7 @@ There are several account that can be registered into the system. As you may gue
     **Returns:**
     + Status 200: `OK`
     + JSON:
-        ```
+        ```jsonc
         {
             "success": true,
             "message": "successfully inserted admin"
@@ -165,13 +172,13 @@ There are several account that can be registered into the system. As you may gue
 
     **Method:** `POST`
     ```
-    <API_URL>/teacher/register
+    <API_URL>/api/v1/teacher/register
     ```
     
     **Required:**
     + Logged into an existing Admin account
     + JSON:
-        ```
+        ```jsonc
         {
             "firstname": "Homer",
             "middlename": "Jay",
@@ -184,7 +191,7 @@ There are several account that can be registered into the system. As you may gue
     **Returns:**
     + Status 200: `OK`
     + JSON:
-        ```
+        ```jsonc
         {
             "success": true,
             "message": "successfully inserted teacher"
@@ -196,13 +203,13 @@ There are several account that can be registered into the system. As you may gue
 
     **Method:** `POST`
     ```
-    <API_URL>/student/enroll
+    <API_URL>/api/v1/student/enroll
     ```
     
     **Required:**
     + Logged into an existing Admin account
     + JSON:
-        ```
+        ```jsonc
         {
             "firstname": "Bart",
             "middlename": "JoJo",
@@ -220,7 +227,7 @@ There are several account that can be registered into the system. As you may gue
     **Returns:**
     + Status 200: `OK`
     + JSON:
-        ```
+        ```jsonc
         {
             "success": true,
             "successfully inserted student"
@@ -249,12 +256,12 @@ There are several account that can be registered into the system. As you may gue
 + ### Logging into Admin
 	**Method:** `POST`
 	```
-	<API_URL>/admin/login
+	<API_URL>/api/v1/admin/login
 	```
 
 	**Required:**
 	* JSON:
-		```
+		```jsonc
 		{
 			"tid": "123456",
 			"password": "myawesomepassword123"
@@ -276,12 +283,12 @@ There are several account that can be registered into the system. As you may gue
 + ### Logging into Teacher
 	**Method:** `POST`
 	```
-	<API_URL>/teacher/login
+	<API_URL>/api/v1/teacher/login
 	```
 
 	**Required:**
 	* JSON:
-		```
+		```jsonc
 		{
 			"tid": "123456",
 			"password": "myawesomepassword123"
@@ -291,7 +298,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "correct password"
@@ -303,12 +310,12 @@ There are several account that can be registered into the system. As you may gue
 + ### Logging into Student
 	**Method:** `POST`
 	```
-	<API_URL>/student/login
+	<API_URL>/api/v1/student/login
 	```
 
 	**Required:**
 	* JSON:
-		```
+		```jsonc
 		{
 			"sid": "123456",
 			"password": "myawesomepassword123"
@@ -318,7 +325,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "correct password"
@@ -332,7 +339,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Get Admin Account
 	**Method:** `GET`
 	```
-	<API_URL>/admin
+	<API_URL>/api/v1/admin
 	```
 
 	**Required:**
@@ -341,7 +348,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully logged into admin",
@@ -354,7 +361,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Get Teacher Account
 	**Method:** `GET`
 	```
-	<API_URL>/teacher
+	<API_URL>/api/v1/teacher
 	```
 
 	**Required:**
@@ -363,11 +370,11 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully logged into teacher",
-			"admin:" <teacher object>
+			"teacher:" <teacher object>
 		}
 		```
 
@@ -376,7 +383,7 @@ There are several account that can be registered into the system. As you may gue
 + ### Get Student Account
 	 **Method:** `GET`
 	```
-	<API_URL>/student
+	<API_URL>/api/v1/student
 	```
 
 	**Required:**
@@ -385,13 +392,549 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "successfully logged into teacher",
-			"admin:" <student object>
+			"student:" <student object>
 		}
 		```
 
 <br>
 
+## Updating Account Information
+
++ ### Update Student Name
+    **Method:** `POST`
+	```
+	<API_URL>/api/v1/student/updateName
+	```
+
+	**Required:**
+	* Logged into an admin account
+    * JSON:
+        ```jsonc
+        {
+            "sid": "123456",
+            "firstname": "Lisa",
+            "middlename": "Marie", // (OPTIONAL)
+            "lastname": "Simpson"
+        }
+        ```
+
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```jsonc
+		{
+			"success": true,
+			"message": "successfully updated student"
+		}
+		```
+
+<br></br>
+
++ ### Update Student Grade Level
+    **Method:** `POST`
+	```
+	<API_URL>/api/v1/student/updateGradeLevel
+	```
+
+	**Required:**
+	* Logged into an admin account
+	* JSON":
+	    ```jsonc
+	    {
+	        "sid": "123456",
+	        "gradelevel": 11
+	    }
+	    ```
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```jsonc
+		{
+			"success": true,
+			"message": "successfully updated student"
+		}
+		```
+
+<br></br>
+
++ ### Update Student Homeroom
+    **Method:** `POST`
+	```
+	<API_URL>/api/v1/student/updateHomeroom
+	```
+
+	**Required:**
+	* Logged into an admin account
+    * JSON:
+        ```jsonc
+        {
+            "sid": "123456",
+            "homeroom": "A123"
+        }
+        ```
+
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```jsonc
+		{
+			"success": true,
+			"message": "successfully updated student"
+		}
+		```
+
+<br></br>
+
++ ### Update Student Locker
+    **Method:** `POST`
+	```
+	<API_URL>/api/v1/student/updateLocker
+	```
+
+	**Required:**
+	* Logged into an admin account
+	* JSON:
+	    ```jsonc
+	    {
+	        "sid": "123456",
+	        "lockernumber": "B123"
+	    }
+	    ```
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```jsonc
+		{
+			"success": true,
+			"message": "successfully updated student"
+		}
+		```
+
+<br></br>
+
++ ### Update Student Year of Graduation
+    **Method:** `POST`
+	```
+	<API_URL>/api/v1/student/updateYOG
+	```
+
+	**Required:**
+	* Logged into an admin account
+	* JSON:
+	    ```jsonc
+	    {
+	        "sid": "123456",
+	        "yog": 2020
+	    }
+	    ```
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```jsonc
+		{
+			"success": true,
+			"message": "successfully updated student"
+		}
+		```
+
+<br></br>
+
++ ### Update Student Password
+    **Method:** `POST`
+	```
+	<API_URL>/api/v1/student/updatePassword
+	```
+
+	**Required:**
+	* Logged into students account
+	* JSON:
+		```jsonc
+		{
+			"password": "myOldPassword",
+			"newpassword1": "myNewPassword",
+			"newpassword2": "myNewPassword"
+		}
+		```
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```jsonc
+		{
+			"success": true,
+			"message": "successfully updated student password"
+		}
+		```
+	* Emails student an alert of password change
+
+<br></br>
+
++ ### Update Student Email
+    **Method:** `POST`
+	```
+	<API_URL>/api/v1/student/updateEmail
+	```
+
+	**Required:**
+	* Logged into an admin account
+	__or__
+	* Logged into students account
+	* JSON:
+		```jsonc
+		{
+			"sid": "123456", // (Only required if signed in as admin)
+			"email": "BartSimpsonsCoolEmail@example.com"
+		}
+		```
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```jsonc
+		{
+			"success": true,
+			"message": "successfully updated"
+		}
+		```
+
+<br></br>
+
++ ### Update Student Address
+    **Method:** `POST`
+	```
+	<API_URL>/api/v1/student/updateAddress
+	```
+
+	**Required:**
+	* Logged into an admin account
+	* JSON:
+	    ```jsonc
+	   {
+	       "sid": "123456",
+	       "address": "742 Evergreen Terrace",
+	       "city": "Springfield",
+	       "province": "...",
+	       "postal": "..."
+	   }
+	    ```
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```jsonc
+		{
+			"success": true,
+			"message": "successfully updated student"
+		}
+		```
+
+<br></br>
+
++ ### Update Student Photo
+    **Method:** `POST`
+	```
+	<API_URL>/api/v1/student/updatePhoto
+	```
+
+	**Required:**
+	* Logged into an admin account
+    * Form Submission:
+        ```
+            sid: "123456"
+            image: newStudentPhoto.png
+        ```
+
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```jsonc
+		{
+			"success": true,
+			"message": "successfully updated student photo"
+		}
+		```
+
+<br></br>
+
++ ### Update Teacher Name
+    **Method:** `POST`
+	```
+	<API_URL>/api/v1/teacher/updateName
+	```
+
+	**Required:**
+	* Logged into an admin account
+    * JSON:
+        ```jsonc
+        {
+            "tid": "123456",
+            "firstname": "Marjorie",
+            "middlename": "Jacqueline", // (Optional)
+            "lastname": "Simpson"
+        }
+        ```
+
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```jsonc
+		{
+			"success": true,
+			"message": "successfully updated teacher"
+		}
+		```
+
+<br></br>
+
++ ### Update Teacher Homeroom
+    **Method:** `POST`
+	```
+	<API_URL>/api/v1/teacher/updateHomeroom
+	```
+
+	**Required:**
+	* Logged into an admin account
+	* JSON:
+	    ```
+	    {
+	        "tid": "123456",
+	        "homeroom": "A123"
+	    }
+	    ```
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```jsonc
+		{
+			"success": true,
+			"message": "successfully updated teacher"
+		}
+		```
+
+<br></br>
+
++ ### Update Teacher Password
+    **Method:** `POST`
+	```
+	<API_URL>/api/v1/teacher/updatePassword
+	```
+
+	**Required:**
+	* Logged into teacher account
+	* JSON:
+	    ```jsonc
+	        {
+	            "password": "myOldPassword",
+	            "newpassword1": "myNewPassword",
+	            "newpassword2": "myNewPassword"
+	        }
+	    ```
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```jsonc
+		{
+			"success": true,
+			"message": "successfully updated teacher password"
+		}
+		```
+	* Emails teacher an alert of password change
+
+<br></br>
+
++ ### Update Teacher Email
+    **Method:** `POST`
+	```
+	<API_URL>/api/v1/teacher/updateEmail
+	```
+
+	**Required:**
+	* Logged into an admin account
+	**or**
+    * Logged into teachers account
+    * JSON:
+        ```jsonc
+        {
+            "tid": "123456", // (Only required if igned in as admin)
+            "email": "MargeSimpson@example.com"
+        }
+        ```
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```jsonc
+		{
+			"success": true,
+			"message": "successfully updated teacher"
+		}
+		```
+
+<br></br>
+
++ ### Update Teacher Address
+    **Method:** `POST`
+	```
+	<API_URL>/api/v1/teacher/updateAddress
+	```
+
+	**Required:**
+	* Logged into an admin account
+	* JSON:
+	    ```jsonc
+	    {
+	        "tid": "123456",
+	        "address": "742 Evergreen Terrace",
+	        "city": "Springfield",
+	        "province": "...",
+	        "postal": "..."
+	    }
+	    ```
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```jsonc
+		{
+			"success": true,
+			"message": "successfully updated teacher"
+		}
+		```
+
+<br></br>
+
++ ### Update Teacher Photo
+    **Method:** `POST`
+    ```
+    <API_URL>/api/v1/teacher/updatePhoto
+    ```
+
+    **Required:**
+    * Logged into an admin
+    * Form Submission:
+        ```
+            tid: "123456"
+            image: newTeacherPhoto.png
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": true,
+            "message": "successfully updated teacher photo"
+        }
+        ```
+
+<br></br>
+
++ ### Update Admin Name
+    **Coming Soon...**
+
+<br></br>
+
++ ### Update Admin Password
+    **Coming Soon...**
+
+<br></br>
+
++ ### Update Admin Email
+    **Coming Soon...**
+
+<br></br>
+
++ ### Update Admin Photo
+    **Coming Soon...**
+
+<br></br>
+
+## Managing Conacts
+**To be Documented...**
+
++ ### Creating Contact
+	**To be Documented...**
+
+<br></br>
+
++ ### Update Contact Name
+	**To be Documented...**
+
+<br></br>
+
++ ### Update Contact Address
+	**To be Documented...**
+
+<br></br>
+
++ ### Update Contact Home Phone
+	**To be Documented...**
+
+<br></br>
+
++ ### Update Contact Work Phone
+	**To be Documented...**
+
+<br></br>
+
++ ### Update Contact Email
+	**To be Documented...**
+
+<br></br>
+
++ ### Update Contact Priority
+	**To be Documented...**
+
+<br></br>
+
++ ### Delete Conotact
+	**To be Documented...**
+
+<br></br>
+
+## Remove Users
+**To be Documented...**
+
++ ### Remove Admin
+	**To be Documented...**
+
+<br></br>
+
++ ### Remove Teacher
+	**To be Documented...**
+
+<br></br>
+
++ ### Remove Student
+	**To be Documented...**
+
+<br></br>
+
+### Admin Commands
+Administrators play a very important role in managing a school, they do much work behind the scenes to make sure that everything is correctly organized and working.
+
++ ### Update Locker Combination
+	**To be Documented...**
+
+<br></br>
+
++ ### Enable Student Account
+    In the case a students acount has been disabled, an admin would require to enable the account.
+
+	**To be Documented...**
+<br></br>
+
++ ### Enable Teacher Account
+    In the case a teachers acount has been disabled, an admin would require to enable the account.
+
+	**To be Documented...**
+<br></br>

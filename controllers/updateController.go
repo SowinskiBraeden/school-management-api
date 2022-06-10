@@ -320,7 +320,7 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 		},
 	}
 
-	result, updateErr := studentCollection.UpdateOne(
+	_, updateErr := studentCollection.UpdateOne(
 		ctx,
 		bson.M{"schooldata.sid": claims.Issuer},
 		update,
@@ -350,7 +350,6 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully updated student password",
-		"result":  result,
 	})
 }
 
@@ -932,6 +931,14 @@ func UpdateStudentEmail(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
 			"message": "Unauthorized: only an admin or teacher can perform this action",
+		})
+	}
+
+	if verifiedAdmin && data["sid"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
 		})
 	}
 

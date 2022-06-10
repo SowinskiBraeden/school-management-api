@@ -1,3 +1,5 @@
+
+
 # School Management API Documentation
 
 The School Management API Documentation, defining all functions and their purpose. As well as how to use the API, how to properly call functions and provide the necessary fields. 
@@ -7,15 +9,50 @@ The School Management API Documentation, defining all functions and their purpos
 * [Getting Started](#getting-started)
 * [General Functions](#general-functions)
 * [Creating Accounts](#creating-accounts)
+    * [Creating Administrators](#creating-administrators)
+    * [Registering a Teacher](#registering-a-teacher)
+    * [Enrolling a Student](#enrolling-a-student)
+    * [Additional Info](#additional-information-after-creating-an-account)
 * [Log into Accounts](#log-into-accounts)
+	* [Logging Into Admin](#logging-into-admin)
+	* [Logging Into Teacher](#logging-into-teacher)
+	* [Logging Into Student](#logging-into-student)
+* [Get Account](#get-account)
+	* [Get Admin Account](#get-admin-account)
+	* [Get Teacher Account](#get-teacher-account)
+	* [Get Student Account](#get-student-account)
 * [Updating Account information](#updating-accounts)
+	* **Update Student...**
+	* [Name](#update-student-name)
+	* [Grade Level](#update-student-grade-level)
+	* [Homeroom](#update-student-homeroom)
+	* [Locker](#update-student-locker)
+	* [YOG](#update-student-year-of-graduation)
+	* [Password](#update-student-password)
+	* [Email](#update-student-email)
+	* [Address](#update-student-address)
+	* [Photo](#update-student-photo)
+	<br>
+	* **Update Teacher...**
+	* [Name](#update-teacher-name)
+	* [Homeroom](#update-teacher-homeroom)
+	* [Password](#update-teacher-password)
+	* [Address](#update-teacher-address)
+	* [Photo](#update-teacher-photo)
+	* [Email](#update-teacher-email)
+	<br>
+	* **Update Admin...**
+	* [Name](#update-admin-name) - **(Coming Soon)**
+	* [Password](#update-admin-password) - **(Coming Soon)**
+	* [Email](#update-admin-email) - **(Coming Soon)**
+	* [Photo](#update-admin-photo) - **(Coming Soon)**
 
 <br>
 
 ## Getting Started 
 
 * ### Installation & Deployment
-    The API is an all in one package and is simple and easy to deploy. Eliminating any long unforgiving          configurations you may face in other software.
+    The API is an all in one package and is simple and easy to deploy. Eliminating any long unforgiving configurations you may face in other software.
 
     1. Clone the repo
         ```
@@ -92,7 +129,7 @@ There are several account that can be registered into the system. As you may gue
 <br>
 
 + ### Creating Administrators
-    You can create Administratos who will have permissions to perform majority of the actions in the API. It is common that there are more than one Administrator to help manage the system.
+    You can create Administrates- who will have permissions to perform majority of the actions in the API. It is common that there are more than one Administrator to help manage the system.
 
     **Method:** `POST`
     ```
@@ -124,7 +161,7 @@ There are several account that can be registered into the system. As you may gue
     <br>
     
 + ### Registering a Teacher
-    Obviosuly a school management system will require teachers to manage and teach students. Teachers have an important role for the system.
+    Obviously a school management system will require teachers to manage and teach students. Teachers have an important role for the system.
 
     **Method:** `POST`
     ```
@@ -155,7 +192,7 @@ There are several account that can be registered into the system. As you may gue
         ```
         
 + ### Enrolling a Student
-    What is a school withouth students? A professional day, but not the point. Students when their application to the school has been accepted by an admin can be enrolled into the school.
+    What is a school without students? A professional day, but not the point. Students when their application to the school has been accepted by an admin can be enrolled into the school.
 
     **Method:** `POST`
     ```
@@ -189,15 +226,172 @@ There are several account that can be registered into the system. As you may gue
             "successfully inserted student"
         }
         ```
+        
 + ### Additional Information After creating an account
-    1. After successfully creating an account for another admin, teacher or student. A school email will be generated for them using their first and last name, each formated differently based on the type of account.
+    1. After successfully creating an account for another admin, teacher or student. A school email will be generated for them using their first and last name, each formatted differently based on the type of account.
 
     2. All users are given a random ID used to sign into the system. Each ID is a random 6 digit number.
     
     3. Students are given a random PEN (Personal Education Number). A random 12 digit number.
     
-    4. Accounts are given a defaul profile image. This can be updated in the future.
+    4. Accounts are given a default profile image. This can be updated in the future.
     
-    5. All new users, once have verified their email, will recieve and email containing their ID.
+    **(Coming Soon)**
+    5. All new users, once have verified their email, will receive and email containing their ID.
     
-    6. All new users, once have verified their email, will recieve and email containing their temporary password.
+    **(Currently No verified email required)**
+    6. All new users, once have verified their email, will receive and email containing their temporary password.
+
+<br>
+
+## Log Into Accounts
+
++ ### Logging into Admin
+	**Method:** `POST`
+	```
+	<API_URL>/admin/login
+	```
+
+	**Required:**
+	* JSON:
+		```
+		{
+			"tid": "123456",
+			"password": "myawesomepassword123"
+		}
+		```
+		
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "correct password"
+		}
+		```
+
+<br>
+
++ ### Logging into Teacher
+	**Method:** `POST`
+	```
+	<API_URL>/teacher/login
+	```
+
+	**Required:**
+	* JSON:
+		```
+		{
+			"tid": "123456",
+			"password": "myawesomepassword123"
+		}
+		```
+		
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "correct password"
+		}
+		```
+
+<br>
+
++ ### Logging into Student
+	**Method:** `POST`
+	```
+	<API_URL>/student/login
+	```
+
+	**Required:**
+	* JSON:
+		```
+		{
+			"sid": "123456",
+			"password": "myawesomepassword123"
+		}
+		```
+		
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "correct password"
+		}
+		```
+
+<br>
+
+## Get Account
+
++ ### Get Admin Account
+	**Method:** `GET`
+	```
+	<API_URL>/admin
+	```
+
+	**Required:**
+	* Logged into an admin account
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "successfully logged into admin",
+			"admin:" <admin object>
+		}
+		```
+
+<br>
+
++ ### Getting Teacher Account
+	**Method:** `GET`
+	```
+	<API_URL>/teacher
+	```
+
+	**Required:**
+	* Logged into an teacher account
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "successfully logged into teacher",
+			"admin:" <teacher object>
+		}
+		```
+
+<br>
+
++ ### Getting Student Account
+	 **Method:** `GET`
+	```
+	<API_URL>/student
+	```
+
+	**Required:**
+	* Logged into an admin account
+	
+	**Returns:**
+	* Status 200: `OK`
+	* JSON:
+		```
+		{
+			"success": true,
+			"message": "successfully logged into teacher",
+			"admin:" <student object>
+		}
+		```
+
+<br>
+

@@ -1204,7 +1204,7 @@ func UpdateTeacherPassword(c *fiber.Ctx) error {
 	claims := token.Claims.(*jwt.StandardClaims)
 
 	var teacher models.Teacher
-	findErr := studentCollection.FindOne(ctx, bson.M{"schooldata.tid": claims.Issuer}).Decode(&teacher)
+	findErr := teacherCollection.FindOne(ctx, bson.M{"schooldata.tid": claims.Issuer}).Decode(&teacher)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -2289,5 +2289,262 @@ func RemoveAdmin(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "successfully deleted admin",
+	})
+}
+
+func UpdateAdminName(c *fiber.Ctx) error {
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	cookie := c.Cookies("jwt")
+
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(SecretKey), nil
+	})
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "not authorized",
+		})
+	}
+
+	claims := token.Claims.(*jwt.StandardClaims)
+
+	var admin models.Admin
+	findErr := adminCollection.FindOne(ctx, bson.M{"aid": claims.Issuer}).Decode(&admin)
+	if findErr != nil {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "admin not found",
+		})
+	}
+
+	// Check required fields are included
+	if data["firstname"] == "" || data["lastname"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	update := bson.M{
+		"$set": bson.M{
+			"firstname":  data["firstname"],
+			"lastname":   data["lastname"],
+			"updated_at": update_time,
+		},
+	}
+
+	_, updateErr := teacherCollection.UpdateOne(
+		ctx,
+		bson.M{"aid": claims.Issuer},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the admin password could not be updated",
+			"error":   updateErr,
+		})
+	}
+	defer cancel()
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully updated admin",
+	})
+}
+
+func UpdateAdminEmail(c *fiber.Ctx) error {
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	cookie := c.Cookies("jwt")
+
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(SecretKey), nil
+	})
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "not authorized",
+		})
+	}
+
+	claims := token.Claims.(*jwt.StandardClaims)
+
+	var admin models.Admin
+	findErr := adminCollection.FindOne(ctx, bson.M{"aid": claims.Issuer}).Decode(&admin)
+	if findErr != nil {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "admin not found",
+		})
+	}
+
+	// Check required fields are included
+	if data["email"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	update := bson.M{
+		"$set": bson.M{
+			"email":      data["email"],
+			"updated_at": update_time,
+		},
+	}
+
+	_, updateErr := teacherCollection.UpdateOne(
+		ctx,
+		bson.M{"aid": claims.Issuer},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the admin password could not be updated",
+			"error":   updateErr,
+		})
+	}
+	defer cancel()
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully updated admin",
+	})
+}
+
+func UpdateAdminPassword(c *fiber.Ctx) error {
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	cookie := c.Cookies("jwt")
+
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(SecretKey), nil
+	})
+	if err != nil {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "not authorized",
+		})
+	}
+
+	claims := token.Claims.(*jwt.StandardClaims)
+
+	var admin models.Admin
+	findErr := adminCollection.FindOne(ctx, bson.M{"aid": claims.Issuer}).Decode(&admin)
+	if findErr != nil {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "admin not found",
+		})
+	}
+
+	// Check required fields are included
+	if data["password"] == "" || data["newpassword1"] == "" || data["newpassword2"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	if !admin.ComparePasswords(data["password"]) {
+		cancel()
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"success": false,
+			"message": "Your password is incorrect",
+		})
+	}
+
+	if data["newpassword1"] != data["newpassword2"] {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "Your new passwords must match",
+		})
+	}
+
+	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	update := bson.M{
+		"$set": bson.M{
+			"password":     admin.HashPassword(data["newpassword1"]),
+			"temppassword": false, // If it were a temp password, its not now
+			"updated_at":   update_time,
+		},
+	}
+
+	_, updateErr := teacherCollection.UpdateOne(
+		ctx,
+		bson.M{"aid": claims.Issuer},
+		update,
+	)
+	if updateErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the admin password could not be updated",
+			"error":   updateErr,
+		})
+	}
+	defer cancel()
+
+	subject := "Password Changed"
+	receiver := admin.Email
+	r := NewRequest([]string{receiver}, subject)
+
+	if sent := r.Send("./templates/selfPasswordChanged.html", map[string]string{"username": admin.FirstName}); !sent {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Could not send password to admins email",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully updated admin password",
 	})
 }

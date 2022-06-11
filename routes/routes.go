@@ -72,6 +72,11 @@ func Setup(app *fiber.App) {
 	app.Post(routerPrefix+"/admin/create", controllers.CreateAdmin)
 	app.Post(routerPrefix+"/admin/login", controllers.AdminLogin)
 
+	// Admin Update Handler
+	app.Post(routerPrefix+"/admin/updateName", controllers.UpdateAdminName)
+	app.Post(routerPrefix+"/admin/updateEmail", controllers.UpdateAdminEmail)
+	app.Post(routerPrefix+"/admin/updatePassword", controllers.UpdateAdminPassword)
+
 	// General Command Handling
 	app.Post(routerPrefix+"/admin/updateLockerCombo", controllers.UpdateLockerCombo)
 	app.Post(routerPrefix+"/admin/enableStudent", controllers.RemoveStudentsDisabled)

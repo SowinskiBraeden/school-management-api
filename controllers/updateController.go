@@ -574,7 +574,7 @@ func UpdateStudentAddress(c *fiber.Ctx) error {
 
 // In the case a student gets held back a grade, we need to update their YOG (Year of Graduation)
 func UpdateStudentYOG(c *fiber.Ctx) error {
-	var data map[string]string
+	var data map[string]interface{}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
 	if err := c.BodyParser(&data); err != nil {
@@ -596,7 +596,7 @@ func UpdateStudentYOG(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["sid"] == "" {
+	if data["sid"] == "" || data["yog"] == nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -605,7 +605,7 @@ func UpdateStudentYOG(c *fiber.Ctx) error {
 	}
 
 	var student models.Student
-	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": data["sid"]}).Decode(&student)
+	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": data["sid"].(string)}).Decode(&student)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -617,14 +617,14 @@ func UpdateStudentYOG(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"schooldata.yog": student.SchoolData.YOG + 1,
+			"schooldata.yog": data["yog"].(int),
 			"updated_at":     update_time,
 		},
 	}
 
 	result, updateErr := studentCollection.UpdateOne(
 		ctx,
-		bson.M{"schooldata.sid": data["sid"]},
+		bson.M{"schooldata.sid": data["sid"].(string)},
 		update,
 	)
 	if updateErr != nil {

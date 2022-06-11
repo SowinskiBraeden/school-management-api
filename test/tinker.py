@@ -5,14 +5,11 @@ import json
 import sys
 
 # Import required utilities
-from util.mockStudents import generateMockStudents, getSampleStudents
+from util.mockStudents import getSampleStudents
 from util.generateCourses import getSampleCourses
-from util.courses import mockCourses
 
-# Import Algorithms
-from scheduleGenerator.generator_v1 import generateScheduleV1
-from scheduleGenerator.generator_v2 import generateScheduleV2
-from scheduleGenerator.generator_v3 import generateScheduleV3
+# Import Algorithm
+from scheduleGenerator.generator import generateScheduleV3
 
 def errorOutput(students) -> Tuple[PrettyTable, dict, dict]:
   # Error Table calulation / output  

@@ -4,8 +4,6 @@ import math
 import random
 from inspect import currentframe
 
-from click import pass_context
-
 # Import from custom utilities
 from util.mockStudents import getSampleStudents
 from util.generateCourses import getSampleCourses

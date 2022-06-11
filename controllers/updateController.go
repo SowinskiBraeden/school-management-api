@@ -921,8 +921,10 @@ func UpdateStudentEmail(c *fiber.Ctx) error {
 		})
 	}
 
+	var sid string
+	var verifiedStudent bool
 	verifiedAdmin, _ := AuthenticateUser(c, 3)
-	verifiedStudent, sid := AuthenticateUser(c, 1)
+	verifiedStudent, sid = AuthenticateUser(c, 1)
 	// Ensure Authenticated admin sent request
 	if !verifiedAdmin && !verifiedStudent {
 		cancel()
@@ -938,6 +940,8 @@ func UpdateStudentEmail(c *fiber.Ctx) error {
 			"success": false,
 			"message": "missing required fields",
 		})
+	} else if verifiedAdmin {
+		sid = data["sid"]
 	}
 
 	// Check required fields are included
@@ -1566,8 +1570,13 @@ func UpdateTeacherEmail(c *fiber.Ctx) error {
 		})
 	}
 
+	var tid string
+	var verifiedTeacher bool
+
+	verifiedAdmin, _ := AuthenticateUser(c, 3)
+	verifiedTeacher, tid = AuthenticateUser(c, 2)
 	// Ensure Authenticated admin sent request
-	if verified, _ := AuthenticateUser(c, 3); !verified {
+	if !verifiedAdmin && !verifiedTeacher {
 		cancel()
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -1575,8 +1584,18 @@ func UpdateTeacherEmail(c *fiber.Ctx) error {
 		})
 	}
 
+	if verifiedAdmin && data["tid"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	} else if verifiedAdmin {
+		tid = data["tid"]
+	}
+
 	// Check required fields are included
-	if data["tid"] == "" || data["email"] == "" {
+	if data["email"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -1594,7 +1613,7 @@ func UpdateTeacherEmail(c *fiber.Ctx) error {
 
 	_, updateErr := teacherCollection.UpdateOne(
 		ctx,
-		bson.M{"schooldata.tid": data["tid"]},
+		bson.M{"schooldata.tid": tid},
 		update,
 	)
 	if updateErr != nil {

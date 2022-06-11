@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"math/rand"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -79,15 +80,16 @@ func (t *Teacher) EmailExists(email string) bool {
 }
 
 func (t *Teacher) GenerateSchoolEmail(offset int, lastEmail string) string {
-	var email string = strings.ToLower(t.PersonalData.LastName) + "_" + strings.ToLower(string(t.PersonalData.FirstName[0])) + "@surreyschools.ca"
+	addr := os.Getenv("SYSTEM_EMAIL_ADDRESS")
+	var email string = strings.ToLower(t.PersonalData.LastName) + "_" + strings.ToLower(string(t.PersonalData.FirstName[0])) + addr
 	if offset > 0 && offset < len([]rune(t.PersonalData.FirstName))-1 {
-		email = lastEmail[:strings.Index(lastEmail, "_")+offset+1] + strings.ToLower(string(t.PersonalData.FirstName[offset])) + "@surreyschools.ca"
+		email = lastEmail[:strings.Index(lastEmail, "_")+offset+1] + strings.ToLower(string(t.PersonalData.FirstName[offset])) + addr
 	}
 	if offset == len([]rune(t.PersonalData.FirstName))-1 {
-		email = strings.ToLower(t.PersonalData.LastName) + "_" + strings.ToLower(t.PersonalData.FirstName) + "@surreyschools.ca"
+		email = strings.ToLower(t.PersonalData.LastName) + "_" + strings.ToLower(t.PersonalData.FirstName) + addr
 	}
 	if offset > len([]rune(t.PersonalData.FirstName))-1 {
-		email = strings.ToLower(t.PersonalData.LastName) + "_" + strings.ToLower(t.PersonalData.FirstName) + strconv.Itoa(offset-len([]rune(t.PersonalData.FirstName))) + "@surreyschools.ca"
+		email = strings.ToLower(t.PersonalData.LastName) + "_" + strings.ToLower(t.PersonalData.FirstName) + strconv.Itoa(offset-len([]rune(t.PersonalData.FirstName))) + addr
 	}
 	return email
 }

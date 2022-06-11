@@ -2,6 +2,7 @@ package models
 
 import (
 	"math/rand"
+	"os"
 	"strings"
 	"time"
 	"unicode"
@@ -25,7 +26,8 @@ type Admin struct {
 }
 
 func (a *Admin) GenerateSchoolEmail() string {
-	var email string = strings.ToLower(a.LastName) + "_" + strings.ToLower(string(a.FirstName[0])) + "@surreyschools.ca"
+	addr := os.Getenv("SYSTEM_EMAIL_ADDRESS")
+	var email string = strings.ToLower(a.LastName) + "_" + strings.ToLower(string(a.FirstName[0])) + addr
 	// Add check to see if email already exists
 	return email
 }

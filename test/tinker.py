@@ -34,28 +34,6 @@ def errorOutput(students) -> Tuple[PrettyTable, dict, dict]:
 if __name__ == '__main__':
   
   if len(sys.argv) == 1:
-    print("Missing argument")
-    exit()
-
-  if sys.argv[1].upper() == 'V1':
-    print("Processing...")
-
-    mockStudents = generateMockStudents(400)
-    timetable = {}
-    timetable["Version"] = 1
-    timetable["timetable"] = generateScheduleV1(mockStudents, mockCourses)
-  
-  elif sys.argv[1].upper() == 'V2':
-    print("Processing...")
-  
-    mockStudents = generateMockStudents(400)
-    timetable = {}
-    timetable["Version"] = 2
-    timetable["timetable"] = generateScheduleV2(mockStudents, mockCourses)
-  
-
-  elif sys.argv[1].upper() == 'V3':
-  
     print("Processing...\n")
   
     sampleStudents = getSampleStudents("./sample_data/course_selection_data.csv", True)

@@ -1735,7 +1735,7 @@ func UpdateContactName(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["_id"] == "" || data["firstname"] == "" || data["middlename"] == "" || data["lastname"] == "" {
+	if data["_id"] == "" || data["firstname"] == "" || data["lastname"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -1743,11 +1743,17 @@ func UpdateContactName(c *fiber.Ctx) error {
 		})
 	}
 
+	var middlename string = ""
+
+	if data["middlename"] != "" {
+		middlename = data["middlename"]
+	}
+
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
 			"firstname":  data["firstname"],
-			"middlename": data["middlename"],
+			"middlename": middlename,
 			"lastname":   data["lastname"],
 			"updated_at": update_time,
 		},
@@ -2018,7 +2024,7 @@ func UpdateContactEmail(c *fiber.Ctx) error {
 }
 
 func UpdateContactPriority(c *fiber.Ctx) error {
-	var data map[string]string
+	var data map[string]interface{}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
 	if err := c.BodyParser(&data); err != nil {
@@ -2040,7 +2046,7 @@ func UpdateContactPriority(c *fiber.Ctx) error {
 	}
 
 	// Check id of contact and new priority number is included
-	if data["_id"] == "" || data["priority"] == "" {
+	if data["_id"] == nil || data["priority"] == nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,

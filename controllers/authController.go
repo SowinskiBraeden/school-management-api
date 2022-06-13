@@ -1081,7 +1081,7 @@ func DeleteContact(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["id"] == "" {
+	if data["_id"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -1089,7 +1089,7 @@ func DeleteContact(c *fiber.Ctx) error {
 		})
 	}
 
-	_, err := contactCollection.DeleteOne(ctx, bson.M{"_id": data["id"]})
+	_, err := contactCollection.DeleteOne(ctx, bson.M{"_id": data["_id"]})
 	if err != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

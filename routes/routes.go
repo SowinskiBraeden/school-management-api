@@ -41,14 +41,14 @@ func Setup(app *fiber.App) {
 	app.Post(routerPrefix+"/student/updateEmail", controllers.UpdateStudentEmail)
 
 	// Student Contact Handler
-	app.Post(routerPrefix+"/student/createContact", controllers.CreateContact)
-	app.Post(routerPrefix+"/student/contact/updateName", controllers.UpdateContactName)
-	app.Post(routerPrefix+"/student/contact/updateAddress", controllers.UpdateContactAddress)
-	app.Post(routerPrefix+"/student/contact/updateHomePhone", controllers.UpdateContactHomePhone)
-	app.Post(routerPrefix+"/student/contact/updateWorkPhone", controllers.UpdateContactWorkPhone)
-	app.Post(routerPrefix+"/student/contact/updateEmail", controllers.UpdateContactEmail)
-	app.Post(routerPrefix+"/student/contact/updatePriority", controllers.UpdateContactPriority)
-	app.Post(routerPrefix+"/student/contact/deleteContact", controllers.DeleteContact)
+	app.Post(routerPrefix+"/contact/createContact", controllers.CreateContact)
+	app.Post(routerPrefix+"/contact/updateName", controllers.UpdateContactName)
+	app.Post(routerPrefix+"/contact/updateAddress", controllers.UpdateContactAddress)
+	app.Post(routerPrefix+"/contact/updateHomePhone", controllers.UpdateContactHomePhone)
+	app.Post(routerPrefix+"/contact/updateWorkPhone", controllers.UpdateContactWorkPhone)
+	app.Post(routerPrefix+"/contact/updateEmail", controllers.UpdateContactEmail)
+	app.Post(routerPrefix+"/contact/updatePriority", controllers.UpdateContactPriority)
+	app.Post(routerPrefix+"/contact/deleteContact", controllers.DeleteContact)
 
 	// Teacher Authentication Handler
 	app.Get(routerPrefix+"/teacher", controllers.Teacher)

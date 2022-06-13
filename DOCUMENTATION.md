@@ -40,19 +40,26 @@ The School Management API Documentation, defining all functions and their purpos
 	* [Photo](#update-teacher-photo)
 	<br></br>
 	* **Update Admin...**
-	* [Name](#update-admin-name) - **(Coming Soon)**
-	* [Password](#update-admin-password) - **(Coming Soon)**
-	* [Email](#update-admin-email) - **(Coming Soon)**
-	* [Photo](#update-admin-photo) - **(Coming Soon)**
-* [Managing Contacts](#managing-contacts) - **(Not Documented)**
-	* [Create Contact](#create-contact) - **(Not Documented)**
-	* [Update Contact Name](#update-contact-name) - **(Not Documented)**
-	* [Update Contact Address](#update-contact-address) - **(Not Documented)**
-	* [Update Contact Home Phone](#update-contact-home-phone) - **(Not Documented)**
-	* [Update Contact Work Phone](#update-contact-work-phone) - **(Not Documented)**
-	* [Update Contact Email](#update-contact-email) - **(Not Documented)**
-	* [Update Contact Priority](#update-contact-priority) - **(Not Documented)**
-	* [Delete Contact](#delete-contact) - **(Not Documented)**
+	* [Name](#update-admin-name)
+	* [Password](#update-admin-password)
+	* [Email](#update-admin-email)
+* [Managing Contacts](#managing-contacts)
+	* [Create Contact](#create-contact)
+	* [Update Contact Name](#update-contact-name)
+	* [Update Contact Address](#update-contact-address)
+	* [Update Contact Home Phone](#update-contact-home-phone)
+	* [Update Contact Work Phone](#update-contact-work-phone)
+	* [Update Contact Email](#update-contact-email)
+	* [Update Contact Priority](#update-contact-priority)
+	* [Delete Contact](#delete-contact)
+* [Remove Users](#remove-users)
+    * [Remove Admin](#remove-admin)
+    * [Remove Teacher](#remove-teacher)
+    * [Remove Student](#remove-student)
+* [Admin Commands](#admin-commands)
+    * [Update Locker Combination](#update-locker-combination)
+    * [Enable Student Account](#enable-student-account)
+    * [Enable Teacher Acccount](#enable-teacher-account)
 
 <br>
 
@@ -839,83 +846,414 @@ There are several account that can be registered into the system. As you may gue
 <br></br>
 
 + ### Update Admin Name
-    **Coming Soon...**
+    **Method:** `POST`
+    ```
+    <API_URL>/api/v1/admin/updateName
+    ```
+
+    **Required:**
+    * Logged into the admin
+    * JSON:
+        ```jsonc
+        {
+            "firstname": "Seymour",
+            "lastname": "Skinner"
+        }
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": "true",
+            "message": "successfully updated admin"
+        }
+        ```
 
 <br></br>
 
 + ### Update Admin Password
-    **Coming Soon...**
+    **Method:** `POST`
+    ```
+    <API_URL>/api/v1/admin/updateEmail
+    ```
+
+    **Required:**
+    * Logged into the admin
+    * JSON:
+        ```jsonc
+        {
+            "firstname": "seymour_skinner@example.com"
+        }
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": "true",
+            "message": "successfully updated admin"
+        }
+        ```
 
 <br></br>
 
 + ### Update Admin Email
-    **Coming Soon...**
+    **Method:** `POST`
+    ```
+    <API_URL>/api/v1/admin/updatePassword
+    ```
 
-<br></br>
-
-+ ### Update Admin Photo
-    **Coming Soon...**
+    **Required:**
+    * Logged into the admin
+    * JSON:
+        ```jsonc
+        {
+            "password": "myOldPassword",
+            "newpassword1": "myNewPassword",
+            "newpassword2": "myNewPassword"
+        }
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": "true",
+            "message": "successfully updated admin password"
+        }
+        ```
+    * Emails admin ab alert of password change
 
 <br></br>
 
 ## Managing Conacts
-**To be Documented...**
+In the case of an emergency for a specified student, a contact is required to be alerted during a situation. There can be multiple contacts with ranging priorities to ensure the correct person(s) are reached.
 
-+ ### Creating Contact
-	**To be Documented...**
++ ### Create Contact
+	**Method:** `POST`
+    ```
+    <API_URL>/api/v1/contact/createContact
+    ```
+
+    **Required:**
+    * Logged into the admin
+    * JSON:
+        ```jsonc
+        {
+            "sid": "123456",
+            "firstname": "Marge",
+            "middlename": "Jacqueline", // (optional)
+            "lastname": "Simpson",
+            "homephone": "123-456-7890",
+            "workphone": "098-765-4321"
+            "email": "therealmarge@example.com",
+            "priority": 1, // 1 is highest priority, 10 is least priority
+            "relation": "mother",
+            "province": "...",                  // (optional)
+            "city": "Springfield",              // (optional)
+            "address": "742 Evergreen Terrace", // (optional)
+            "postal": "                         // (optional)
+        }
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": "true",
+            "message": "successfully inserted contact to student"
+        }
+        ```
+    * Emails admin ab alert of password change
 
 <br></br>
 
 + ### Update Contact Name
-	**To be Documented...**
+	**Method:** `POST`
+    ```
+    <API_URL>/api/v1/contact/updateName
+    ```
+
+    **Required:**
+    * Logged into the admin
+    * JSON:
+        ```jsonc
+        {
+            "_id": "<contact object id>",
+            "firstname": "Marge",
+            "middlename": "" // (optional)
+            "lastname": "Simpson"
+        }
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": "true",
+            "message": "successfully updated contact"
+        }
+        ```
 
 <br></br>
 
 + ### Update Contact Address
-	**To be Documented...**
+	**Method:** `POST`
+    ```
+    <API_URL>/api/v1/contact/updateAddress
+    ```
+
+    **Required:**
+    * Logged into the admin
+    * JSON:
+        ```jsonc
+        {
+            "_id": "<contact object id>",
+            "address": "742 Evergreen Terrace",
+            "city": "Springfield",
+            "province": "...",
+            "postal": "..."
+        }
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": "true",
+            "message": "successfully updated contact"
+        }
+        ```
 
 <br></br>
 
 + ### Update Contact Home Phone
-	**To be Documented...**
+	**Method:** `POST`
+    ```
+    <API_URL>/api/v1/contact/updateHomePhone
+    ```
+
+    **Required:**
+    * Logged into the admin
+    * JSON:
+        ```jsonc
+        {
+            "_id": "<contact object id>",
+            "newnumber": "123-456-7890"
+        }
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": "true",
+            "message": "successfully updated contact"
+        }
+        ```
 
 <br></br>
 
 + ### Update Contact Work Phone
-	**To be Documented...**
+	**Method:** `POST`
+    ```
+    <API_URL>/api/v1/contact/updateWorkPhone
+    ```
+
+    **Required:**
+    * Logged into the admin
+    * JSON:
+        ```jsonc
+        {
+            "_id": "<contact object id>",
+            "newnumber": "123-456-7890"
+        }
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": "true",
+            "message": "successfully updated contact"
+        }
+        ```
 
 <br></br>
 
 + ### Update Contact Email
-	**To be Documented...**
+	**Method:** `POST`
+    ```
+    <API_URL>/api/v1/contact/updateEmail
+    ```
+
+    **Required:**
+    * Logged into the admin
+    * JSON:
+        ```jsonc
+        {
+            "_id": "<contact object id>",
+            "email": "marge_simpson@example.com"
+        }
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": "true",
+            "message": "successfully updated contact"
+        }
+        ```
 
 <br></br>
 
 + ### Update Contact Priority
-	**To be Documented...**
+	**Method:** `POST`
+    ```
+    <API_URL>/api/v1/contact/updatePriority
+    ```
+
+    **Required:**
+    * Logged into the admin
+    * JSON:
+        ```jsonc
+        {
+            "_id": "<contact object id>",
+            "priority": 1 // 1: highest priority, 10 lowest priority
+        }
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": "true",
+            "message": "successfully updated contact"
+        }
+        ```
 
 <br></br>
 
-+ ### Delete Conotact
-	**To be Documented...**
++ ### Delete Contact
+	**Method:** `POST`
+    ```
+    <API_URL>/api/v1/contact/deleteContact
+    ```
+
+    **Required:**
+    * Logged into the admin
+    * JSON:
+        ```jsonc
+        {
+            "_id": "<contact object id>"
+        }
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": "true",
+            "message": "successfully deleted contact"
+        }
+        ```
 
 <br></br>
 
 ## Remove Users
-**To be Documented...**
+Students and staff are bound to leave the school at some time, so there is a way to remove them from the sytem database permanetly for any case.
 
 + ### Remove Admin
-	**To be Documented...**
+    **Method:** `POST`
+    ```
+        <API_URL>/api/v1/remove/admin
+    ```
+    
+    **Required:**
+    * Logged into an admin
+    * JSON:
+        ```jsonc
+        {
+            "aid": "123456"
+        }
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": true,
+            "message": "successfully deleted admin"
+        }
+        ```
 
 <br></br>
 
 + ### Remove Teacher
-	**To be Documented...**
+	**Method:** `POST`
+    ```
+        <API_URL>/api/v1/remove/teacher
+    ```
+    
+    **Required:**
+    * Logged into an admin
+    * JSON:
+        ```jsonc
+        {
+            "tid": "123456"
+        }
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": true,
+            "message": "successfully deleted teacher"
+        }
+        ```
 
 <br></br>
 
 + ### Remove Student
-	**To be Documented...**
+	**Method:** `POST`
+    ```
+        <API_URL>/api/v1/remove/student
+    ```
+    
+    **Required:**
+    * Logged into an admin
+    * JSON:
+        ```jsonc
+        {
+            "sid": "123456"
+        }
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": true,
+            "message": "successfully deleted student"
+        }
+        ```
 
 <br></br>
 
@@ -923,18 +1261,87 @@ There are several account that can be registered into the system. As you may gue
 Administrators play a very important role in managing a school, they do much work behind the scenes to make sure that everything is correctly organized and working.
 
 + ### Update Locker Combination
-	**To be Documented...**
+	It is likely a school changes out their lockers, swapping the locks randomly. In the case a locker requires a combination change in the database, admins can update the locker database via this API endpoint.
+
+    **Method:** `POST`
+    ```
+        <API_URL>/api/v1/admin/updateLockerCombo
+    ```
+    
+    **Required:**
+    * Logged into an admin
+    * JSON:
+        ```jsonc
+        {
+            "lockernumber": "B461",
+            "newlockercombo": "51-21-49"
+        }
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": true,
+            "message": "successfully updated locker"
+        }
+        ```
 
 <br></br>
 
 + ### Enable Student Account
     In the case a students acount has been disabled, an admin would require to enable the account.
 
-	**To be Documented...**
+	**Method:** `POST`
+    ```
+        <API_URL>/api/v1/admin/enableStudent
+    ```
+    
+    **Required:**
+    * Logged into an admin
+    * JSON:
+        ```jsonc
+        {
+            "sid": "123456"
+        }
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": true,
+            "message": "successfully enabled student account"
+        }
+        ```
 <br></br>
 
 + ### Enable Teacher Account
     In the case a teachers acount has been disabled, an admin would require to enable the account.
 
-	**To be Documented...**
+	**Method:** `POST`
+    ```
+        <API_URL>/api/v1/admin/enableTeacher
+    ```
+    
+    **Required:**
+    * Logged into an admin
+    * JSON:
+        ```jsonc
+        {
+            "tid": "123456"
+        }
+        ```
+        
+    **Returns:**
+    * Status 200: `OK`
+    * JSON:
+        ```jsonc
+        {
+            "success": true,
+            "message": "successfully enabled teacher account"
+        }
+        ```
 <br></br>

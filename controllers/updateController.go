@@ -2376,7 +2376,7 @@ func UpdateAdminName(c *fiber.Ctx) error {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
-			"message": "the admin password could not be updated",
+			"message": "the admin could not be updated",
 			"error":   updateErr,
 		})
 	}
@@ -2452,7 +2452,7 @@ func UpdateAdminEmail(c *fiber.Ctx) error {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
-			"message": "the admin password could not be updated",
+			"message": "the admin could not be updated",
 			"error":   updateErr,
 		})
 	}

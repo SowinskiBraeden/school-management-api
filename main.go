@@ -11,7 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
-const version string = "\nv1.0.0-Beta"
+const version string = "\nv1.1.0-Beta"
 
 func main() {
 	fmt.Println(version)

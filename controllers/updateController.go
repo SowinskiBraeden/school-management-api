@@ -2054,10 +2054,20 @@ func UpdateContactPriority(c *fiber.Ctx) error {
 		})
 	}
 
+	var priority int = data["priority"].(int)
+
+	if priority > 10 || priority < 1 {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "invalid priority",
+		})
+	}
+
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"priority":   data["priority"],
+			"priority":   priority,
 			"updated_at": update_time,
 		},
 	}

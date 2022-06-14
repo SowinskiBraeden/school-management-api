@@ -250,7 +250,7 @@ There are several account that can be registered into the system. As you may gue
     
     4. Accounts are given a default profile image. This can be updated in the future.
     
-    **(Coming Soon)**
+    **(Currently No verified email required)**
     5. All new users, once have verified their email, will receive and email containing their ID.
     
     **(Currently No verified email required)**

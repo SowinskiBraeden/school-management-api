@@ -45,6 +45,7 @@ type Teacher struct {
 		PhotoName string `json:"photoname"` // name of photo in db
 	} `json:"schooldata"`
 	AccountData struct {
+		VerifiedEmail   bool     `json:"verifiedemail"`
 		SchoolEmail     string   `json:"schoolemail"`
 		Password        string   `json:"-" validate:"min=10,max=32"`
 		AccountDisabled bool     `bson:"accountdisabled"`

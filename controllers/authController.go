@@ -246,6 +246,18 @@ func Enroll(c *fiber.Ctx) error {
 	}
 	student.SchoolData.SID = sid
 
+	// Send student personal email student ID
+	subject = "Account Registered"
+	r = NewRequest([]string{receiver}, subject)
+
+	if sent := r.Send("./templates/accountRegisreded.html", map[string]string{"username": student.PersonalData.FirstName, "id": sid, "userType": "student"}); !sent {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Could not send ID to students email",
+		})
+	}
+
 	var pen string
 	for {
 		pen = GenerateID(9)
@@ -382,6 +394,18 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	}
 	teacher.SchoolData.TID = tid
 
+	// Send teacher personal email student ID
+	subject = "Account Registered"
+	r = NewRequest([]string{receiver}, subject)
+
+	if sent := r.Send("./templates/accountRegisreded.html", map[string]string{"username": teacher.PersonalData.FirstName, "id": tid, "userType": "teacher"}); !sent {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Could not send ID to teachers email",
+		})
+	}
+
 	teacher.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	teacher.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	teacher.ID = primitive.NewObjectID()
@@ -454,7 +478,7 @@ func CreateAdmin(c *fiber.Ctx) error {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
-			"message": "Could not send password to students email",
+			"message": "Could not send password to admins email",
 		})
 	}
 
@@ -466,6 +490,18 @@ func CreateAdmin(c *fiber.Ctx) error {
 		}
 	}
 	admin.AID = aid
+
+	// Send student personal email student ID
+	subject = "Account Registered"
+	r = NewRequest([]string{receiver}, subject)
+
+	if sent := r.Send("./templates/accountRegisreded.html", map[string]string{"username": admin.FirstName, "id": aid, "userType": "admin"}); !sent {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Could not send ID to admins email",
+		})
+	}
 
 	admin.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	admin.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))

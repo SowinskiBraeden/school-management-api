@@ -1,3 +1,4 @@
+#! python
 import json
 
 f = open('./output/students.json')

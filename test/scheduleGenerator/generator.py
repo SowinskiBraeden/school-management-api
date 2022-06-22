@@ -1,6 +1,5 @@
-#!/usr/bin/env python3
+#! python
 import json
-import math
 import random
 from inspect import currentframe
 
@@ -22,7 +21,6 @@ from util.generateCourses import getSampleCourses
     ...
   }
 
-
   running example:
   running: {
     "block1": {
@@ -43,23 +41,17 @@ def getLineNumber(): return currentframe().f_back.f_lineno
 
 # Takes in information to create or add a new conflict
 # Returns if the particular student has a previous error
-def newConflict(pupilNum: str, email: str, type: str, code: str, description: str, logs: dict) -> bool:
+def newConflict(pupilNum: str, email: str, conflictType: str, code: str, description: str, logs: dict) -> bool:
   exists = True if pupilNum in logs else False
-  if exists: logs[pupilNum].append({
-      "Pupil #": pupilNum,
-      "Email": email,
-      "Type": type,
-      "Code": code,
-      "Conflict": description
-    })
-  else:
-    logs[pupilNum] = [{
-      "Pupil #": pupilNum,
-      "Email": email,
-      "Type": type,
-      "Code": code,
-      "Conflict": description
-    }]
+  log = {
+    "Pupil #": pupilNum,
+    "Email": email,
+    "Type": conflictType,
+    "Code": code,
+    "Conflict": description
+  }
+  if exists: logs[pupilNum].append(log)
+  else: logs[pupilNum] = [log]
   return exists
 
 minReq, median, classCap = 18, 24, 30
@@ -79,7 +71,7 @@ running = {
 
 # These are the codes for Flex (spare) blocks
 # Semester 1 and 2
-flex = ["XAT--12A-S", "XAT--12B-S"]
+flex = ("XAT--12A-S", "XAT--12B-S")
 
 # V3 differs a lot by V1/2 as it does not focus on fitting the classes
 # into the time table first.
@@ -118,7 +110,7 @@ def generateScheduleV3(
   for i in range(len(activeCourses)):
     index = list(activeCourses)[i]
     if index not in emptyClasses: emptyClasses[index] = {}
-    classRunCount = math.floor(activeCourses[index]["Requests"] / median)
+    classRunCount = activeCourses[index]["Requests"] // median
     remaining = activeCourses[index]["Requests"] % median
 
     # Put # of classRunCount classes in emptyClasses
@@ -269,14 +261,10 @@ def generateScheduleV3(
   # Step 4 - Attempt to fit classes into timetable
   def stepIndex(offset: int, stepType: int) -> int:
     # stepType 0 is for stepping between first and second semester
-    if stepType == 0:
-      if offset == 0 or offset == -4: return 5
-      else: return -4
+    if stepType == 0: return 5 if offset == 0 or offset == -4 else -4
     
     # stepType 1 is for stepping between second and first semester
-    elif stepType == 1:
-      if offset == 0 or offset == 6: return -5
-      else: return 6
+    elif stepType == 1: return -5 if offset == 0 or offset == 6 else 6
 
     # Return Error if code is altered to cause error
     else: raise SystemExit(f"Invalid 'stepType' in func 'stepIndex' line {getLineNumber()}")
@@ -289,12 +277,13 @@ def generateScheduleV3(
     # Tally first and second semester
     sem1, sem2 = 0, 0
     sem1List, sem2List = {}, {}
-    for i in range(1, 6):
-      sem1 += len(running[f"block{i}"])
-      sem1List[f"block{i}"] = running[f"block{i}"]
-    for i in range(5, 11):
-      sem2 += len(running[f"block{i}"])
-      sem2List[f"block{i}"] = running[f"block{i}"]
+    for i in range(1, 11):
+      if i <= 5:
+        sem1 += len(running[f"block{i}"])
+        sem1List[f"block{i}"] = running[f"block{i}"]
+      elif i > 5:
+        sem2 += len(running[f"block{i}"])
+        sem2List[f"block{i}"] = running[f"block{i}"]
 
     # If there is more than one class Running
     if allClassRunCounts[index] > 1:
@@ -330,16 +319,15 @@ def generateScheduleV3(
       semBlocks = []
       offset = 1
 
-      # If sem1 is less than or equal to sem2, add to sem1
       if sem1 <= sem2:
         for block in sem1List:
           semBlocks.append(len(block))
 
+      # If sem1 is less than or equal to sem2, add to sem1
+      if sem1 <= sem2: [semBlocks.append(len(block)) for block in sem1List]
+
       # If sem2 is less than sem1, add to sem2
-      elif sem1 > sem2:
-        offset = 5
-        for block in sem2List:
-          semBlocks.append(len(block))
+      elif sem1 > sem2: [semBlocks.append(len(block)) for block in sem2List]
 
       # Get block with least classes
       leastBlock = semBlocks.index(min(semBlocks))
@@ -403,14 +391,14 @@ def generateScheduleV3(
       # Check if conflicts have been resolved
       blocks = [student["schedule"][block] for block in student["schedule"]]
       # If there is exceptions, make them look normal in blocks
-      # list to ginore them when looking for clashes, and not to
+      # list to ignore them when looking for clashes, and not to
       # accidently overwrite while evaluating other classes
       if len(exceptions) > 0:
         for i in range(len(blocks)):
           if i in exceptions: blocks[i] = ['EXPT']
       conflicts = sum(1 for b in blocks if len(b)>1)
 
-      if conflicts == 0: hasConflicts = False
+      if conflicts == 0: break
       
       elif conflicts > 0:
 
@@ -586,14 +574,20 @@ def generateScheduleV3(
     }
   }
 
-  # Update Student records
-  with open(studentsDir, "w") as outfile:
-      json.dump(students, outfile, indent=2)
-
   # Log Conflict to records
   with open(conflictsDir, "w") as outfile:
     json.dump(finalConflictLogs, outfile, indent=2)
 
+  for student in students:
+    for block in student["schedule"]:
+      if len(student["schedule"][block]) == 0:
+        if int(block[len(block)-1]) <= 5: student["schedule"][block].append(flex[0])
+        elif int(block[len(block)-1]) > 5: student["schedule"][block].append(flex[1])
+
+  # Update Student records
+  with open(studentsDir, "w") as outfile:
+      json.dump(students, outfile, indent=2)
+  
   return running
 
 if __name__ == '__main__':

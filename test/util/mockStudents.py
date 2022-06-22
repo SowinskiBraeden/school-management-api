@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#! python
 import json
 import csv
 
-flex= ["XAT--12A-S", "XAT--12B-S"]
+flex= ("XAT--12A-S", "XAT--12B-S")
 
 mockStudents: list[dict] = []
 

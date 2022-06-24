@@ -2,6 +2,7 @@
 import json
 import random
 from inspect import currentframe
+import pprint
 
 # Import from custom utilities
 from util.mockStudents import getSampleStudents
@@ -52,7 +53,7 @@ def newConflict(pupilNum: str, email: str, conflictType: str, code: str, descrip
   }
   if exists: logs[pupilNum].append(log)
   else: logs[pupilNum] = [log]
-  return exists
+  return exists if conflictType == "Critical" else False
 
 minReq, median, classCap = 18, 24, 30
 activeCourses = {}
@@ -489,7 +490,6 @@ def generateScheduleV3(
                                 found_oBlockSolution = True
                                 break
 
-                        
                       if not found_oBlockSolution:
                         exceptions.append(clashIndex)
                         criticalCount += 1
@@ -546,7 +546,7 @@ def generateScheduleV3(
 
       else:
         print(f"Fatal error ({getLineNumber()}): Impossible error")
-        continue
+        break
 
   finalConflictLogs = {
     "Conflicts": conflictLogs,
@@ -581,8 +581,7 @@ def generateScheduleV3(
   for student in students:
     for block in student["schedule"]:
       if len(student["schedule"][block]) == 0:
-        if int(block[len(block)-1]) <= 5: student["schedule"][block].append(flex[0])
-        elif int(block[len(block)-1]) > 5: student["schedule"][block].append(flex[1])
+        student["schedule"][block].append(flex[0]) if int(block[len(block)-1]) <= 5 else student["schedule"][block].append(flex[1])
 
   # Update Student records
   with open(studentsDir, "w") as outfile:

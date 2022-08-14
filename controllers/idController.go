@@ -14,21 +14,21 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var idCollection *mongo.Collection = database.OpenCollection(database.Client, "cids")
+var IdCollection *mongo.Collection = database.OpenCollection(database.Client, "cids")
 
 var table = [...]byte{'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'}
 
 func ValidateID(id string, userType int) bool { // true: valid id, false: id already in use
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	var foundID models.Id
-	err := idCollection.FindOne(ctx, bson.M{"cid": id}).Decode(&foundID)
+	err := IdCollection.FindOne(ctx, bson.M{"cid": id}).Decode(&foundID)
 	cancel()
 	if err != nil { // If there is no id found create new ID object to be stored and return true (unless insert error then try again)
 		var newID models.Id
 		newID.CID = id
 		newID.ParentType = userType
 		newID.ID = primitive.NewObjectID()
-		_, insertErr := idCollection.InsertOne(context.Background(), newID)
+		_, insertErr := IdCollection.InsertOne(context.Background(), newID)
 		return insertErr == nil
 	}
 	return false
@@ -37,7 +37,7 @@ func ValidateID(id string, userType int) bool { // true: valid id, false: id alr
 func ValidatePEN(pen string) bool { // true: valid pen, false: pen already in use
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	var foundID models.Id
-	err := studentCollection.FindOne(ctx, bson.M{"schooldata.pen": pen}).Decode(&foundID)
+	err := StudentCollection.FindOne(ctx, bson.M{"schooldata.pen": pen}).Decode(&foundID)
 	cancel()
 	return err != nil
 }

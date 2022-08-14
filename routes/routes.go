@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/SowinskiBraeden/school-management-api/controllers"
+	"github.com/SowinskiBraeden/school-management-api/controllers/update"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -27,27 +28,27 @@ func Setup(app *fiber.App) {
 	app.Post(routerPrefix+"/student/login", controllers.StudentLogin)
 
 	// Update Student Handler
-	app.Post(routerPrefix+"/student/updateName", controllers.UpdateStudentName)
-	app.Post(routerPrefix+"/student/updateGradeLevel", controllers.UpdateStudentGradeLevel)
-	app.Post(routerPrefix+"/student/updateHomeroom", controllers.UpdateStudentHomeroom)
-	app.Post(routerPrefix+"/student/updateLocker", controllers.UpdateStudentLocker)
-	app.Post(routerPrefix+"/studnet/updateYOG", controllers.UpdateStudentYOG)
-	app.Post(routerPrefix+"/studnet/addContact", controllers.AddStudentContact)
-	app.Post(routerPrefix+"/student/removeContact", controllers.RemoveStudentContact)
-	app.Post(routerPrefix+"/student/updatePassword", controllers.UpdateStudentPassword)
-	app.Post(routerPrefix+"/student/resetPassword", controllers.ResetStudentPassword)
-	app.Post(routerPrefix+"/student/updateAddress", controllers.UpdateStudentAddress)
-	app.Post(routerPrefix+"/student/updatePhoto", controllers.UpdateStudentPhoto)
-	app.Post(routerPrefix+"/student/updateEmail", controllers.UpdateStudentEmail)
+	app.Post(routerPrefix+"/student/updateName", update.UpdateStudentName)
+	app.Post(routerPrefix+"/student/updateGradeLevel", update.UpdateStudentGradeLevel)
+	app.Post(routerPrefix+"/student/updateHomeroom", update.UpdateStudentHomeroom)
+	app.Post(routerPrefix+"/student/updateLocker", update.UpdateStudentLocker)
+	app.Post(routerPrefix+"/studnet/updateYOG", update.UpdateStudentYOG)
+	app.Post(routerPrefix+"/studnet/addContact", update.AddStudentContact)
+	app.Post(routerPrefix+"/student/removeContact", update.RemoveStudentContact)
+	app.Post(routerPrefix+"/student/updatePassword", update.UpdateStudentPassword)
+	app.Post(routerPrefix+"/student/resetPassword", update.ResetStudentPassword)
+	app.Post(routerPrefix+"/student/updateAddress", update.UpdateStudentAddress)
+	app.Post(routerPrefix+"/student/updatePhoto", update.UpdateStudentPhoto)
+	app.Post(routerPrefix+"/student/updateEmail", update.UpdateStudentEmail)
 
 	// Student Contact Handler
 	app.Post(routerPrefix+"/contact/createContact", controllers.CreateContact)
-	app.Post(routerPrefix+"/contact/updateName", controllers.UpdateContactName)
-	app.Post(routerPrefix+"/contact/updateAddress", controllers.UpdateContactAddress)
-	app.Post(routerPrefix+"/contact/updateHomePhone", controllers.UpdateContactHomePhone)
-	app.Post(routerPrefix+"/contact/updateWorkPhone", controllers.UpdateContactWorkPhone)
-	app.Post(routerPrefix+"/contact/updateEmail", controllers.UpdateContactEmail)
-	app.Post(routerPrefix+"/contact/updatePriority", controllers.UpdateContactPriority)
+	app.Post(routerPrefix+"/contact/updateName", update.UpdateContactName)
+	app.Post(routerPrefix+"/contact/updateAddress", update.UpdateContactAddress)
+	app.Post(routerPrefix+"/contact/updateHomePhone", update.UpdateContactHomePhone)
+	app.Post(routerPrefix+"/contact/updateWorkPhone", update.UpdateContactWorkPhone)
+	app.Post(routerPrefix+"/contact/updateEmail", update.UpdateContactEmail)
+	app.Post(routerPrefix+"/contact/updatePriority", update.UpdateContactPriority)
 	app.Post(routerPrefix+"/contact/deleteContact", controllers.DeleteContact)
 
 	// Teacher Authentication Handler
@@ -56,13 +57,13 @@ func Setup(app *fiber.App) {
 	app.Post(routerPrefix+"/teacher/login", controllers.TeacherLogin)
 
 	// Teacher Update Handler
-	app.Post(routerPrefix+"/teacher/updatePassword", controllers.UpdateTeacherPassword)
-	app.Post(routerPrefix+"/teacher/updateAddress", controllers.UpdateTeacherAddress)
-	app.Post(routerPrefix+"/teacher/updatePhoto", controllers.UpdateTeacherPhoto)
-	app.Post(routerPrefix+"/teacher/updateName", controllers.UpdateTeacherName)
-	app.Post(routerPrefix+"/teacher/updateHomeroom", controllers.UpdateTeacherHomeroom)
-	app.Post(routerPrefix+"/teacher/updateEmail", controllers.UpdateTeacherEmail)
-	app.Post(routerPrefix+"/teacher/resetPassword", controllers.ResetTeacherPassword)
+	app.Post(routerPrefix+"/teacher/updatePassword", update.UpdateTeacherPassword)
+	app.Post(routerPrefix+"/teacher/updateAddress", update.UpdateTeacherAddress)
+	app.Post(routerPrefix+"/teacher/updatePhoto", update.UpdateTeacherPhoto)
+	app.Post(routerPrefix+"/teacher/updateName", update.UpdateTeacherName)
+	app.Post(routerPrefix+"/teacher/updateHomeroom", update.UpdateTeacherHomeroom)
+	app.Post(routerPrefix+"/teacher/updateEmail", update.UpdateTeacherEmail)
+	app.Post(routerPrefix+"/teacher/resetPassword", update.ResetTeacherPassword)
 
 	// General Routes
 	app.Post(routerPrefix+"/logout", controllers.Logout)
@@ -73,14 +74,14 @@ func Setup(app *fiber.App) {
 	app.Post(routerPrefix+"/admin/login", controllers.AdminLogin)
 
 	// Admin Update Handler
-	app.Post(routerPrefix+"/admin/updateName", controllers.UpdateAdminName)
-	app.Post(routerPrefix+"/admin/updateEmail", controllers.UpdateAdminEmail)
-	app.Post(routerPrefix+"/admin/updatePassword", controllers.UpdateAdminPassword)
+	app.Post(routerPrefix+"/admin/updateName", update.UpdateAdminName)
+	app.Post(routerPrefix+"/admin/updateEmail", update.UpdateAdminEmail)
+	app.Post(routerPrefix+"/admin/updatePassword", update.UpdateAdminPassword)
 
 	// General Command Handling
-	app.Post(routerPrefix+"/admin/updateLockerCombo", controllers.UpdateLockerCombo)
-	app.Post(routerPrefix+"/admin/enableStudent", controllers.RemoveStudentsDisabled)
-	app.Post(routerPrefix+"/admin/enableTeacher", controllers.RemoveTeachersDisabled)
+	app.Post(routerPrefix+"/admin/updateLockerCombo", update.UpdateLockerCombo)
+	app.Post(routerPrefix+"/admin/enableStudent", update.RemoveStudentsDisabled)
+	app.Post(routerPrefix+"/admin/enableTeacher", update.RemoveTeachersDisabled)
 
 	// Delete Handler
 	app.Post(routerPrefix+"/remove/student", controllers.RemoveStudent)

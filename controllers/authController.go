@@ -21,10 +21,21 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var teacherCollection *mongo.Collection = database.OpenCollection(database.Client, "teachers")
-var studentCollection *mongo.Collection = database.OpenCollection(database.Client, "students")
-var contactCollection *mongo.Collection = database.OpenCollection(database.Client, "contacts")
-var adminCollection *mongo.Collection = database.OpenCollection(database.Client, "admins")
+/*
+	The auth controller handles the following:
+		- default admin settings
+		- creating new users
+		- authenticating users
+		- retreiving users
+		- removeing users
+*/
+
+var TeacherCollection *mongo.Collection = database.OpenCollection(database.Client, "teachers")
+var StudentCollection *mongo.Collection = database.OpenCollection(database.Client, "students")
+var ContactCollection *mongo.Collection = database.OpenCollection(database.Client, "contacts")
+var AdminCollection *mongo.Collection = database.OpenCollection(database.Client, "admins")
+var ImageCollection *mongo.Collection = database.OpenCollection(database.Client, "images")
+var LockerCollection *mongo.Collection = database.OpenCollection(database.Client, "lockers")
 
 func confirm(s string) bool {
 	r := bufio.NewReader(os.Stdin)
@@ -86,7 +97,7 @@ func CreateDefaultAdmin() models.Admin {
 }
 
 func NewSystem() {
-	count, err := adminCollection.CountDocuments(context.Background(), bson.D{})
+	count, err := AdminCollection.CountDocuments(context.Background(), bson.D{})
 	if err != nil {
 		fmt.Println("Unable to detect new system")
 	}
@@ -98,7 +109,7 @@ func NewSystem() {
 			defaultAdmin := CreateDefaultAdmin()
 
 			if confirm("Are the above credentials correct?") {
-				_, insertErr := adminCollection.InsertOne(context.Background(), defaultAdmin)
+				_, insertErr := AdminCollection.InsertOne(context.Background(), defaultAdmin)
 				if insertErr != nil {
 					log.Printf("Failed to create an admin\n")
 				}
@@ -130,7 +141,7 @@ func AuthenticateUser(c *fiber.Ctx, userType int) (bool, string) {
 	claims := token.Claims.(*jwt.StandardClaims)
 
 	var userID models.Id
-	findErr := idCollection.FindOne(context.TODO(), bson.M{"cid": claims.Issuer}).Decode(&userID)
+	findErr := IdCollection.FindOne(context.TODO(), bson.M{"cid": claims.Issuer}).Decode(&userID)
 	if findErr != nil {
 		return false, ""
 	}
@@ -268,7 +279,7 @@ func Enroll(c *fiber.Ctx) error {
 	student.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	student.ID = primitive.NewObjectID()
 
-	_, insertErr := studentCollection.InsertOne(ctx, student)
+	_, insertErr := StudentCollection.InsertOne(ctx, student)
 	if insertErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -278,7 +289,7 @@ func Enroll(c *fiber.Ctx) error {
 		})
 	}
 
-	_, insertErr = imageCollection.InsertOne(ctx, photo)
+	_, insertErr = ImageCollection.InsertOne(ctx, photo)
 	if insertErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -406,7 +417,7 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	teacher.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	teacher.ID = primitive.NewObjectID()
 
-	_, insertErr := teacherCollection.InsertOne(ctx, teacher)
+	_, insertErr := TeacherCollection.InsertOne(ctx, teacher)
 	if insertErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -503,7 +514,7 @@ func CreateAdmin(c *fiber.Ctx) error {
 	admin.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	admin.ID = primitive.NewObjectID()
 
-	_, insertErr := adminCollection.InsertOne(ctx, admin)
+	_, insertErr := AdminCollection.InsertOne(ctx, admin)
 	if insertErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -543,7 +554,7 @@ func StudentLogin(c *fiber.Ctx) error {
 	}
 
 	var student models.Student
-	err := studentCollection.FindOne(ctx, bson.M{"schooldata.sid": data["sid"]}).Decode(&student)
+	err := StudentCollection.FindOne(ctx, bson.M{"schooldata.sid": data["sid"]}).Decode(&student)
 
 	if err != nil {
 		cancel()
@@ -574,7 +585,7 @@ func StudentLogin(c *fiber.Ctx) error {
 			},
 		}
 
-		_, updateErr := studentCollection.UpdateOne(
+		_, updateErr := StudentCollection.UpdateOne(
 			ctx,
 			bson.M{"schooldata.sid": data["sid"]},
 			update,
@@ -623,7 +634,7 @@ func StudentLogin(c *fiber.Ctx) error {
 			},
 		}
 
-		_, updateErr := studentCollection.UpdateOne(
+		_, updateErr := StudentCollection.UpdateOne(
 			ctx,
 			bson.M{"schooldata.sid": data["sid"]},
 			update,
@@ -650,7 +661,7 @@ func StudentLogin(c *fiber.Ctx) error {
 			},
 		}
 
-		_, updateErr := studentCollection.UpdateOne(
+		_, updateErr := StudentCollection.UpdateOne(
 			ctx,
 			bson.M{"schooldata.sid": data["sid"]},
 			update,
@@ -715,7 +726,7 @@ func TeacherLogin(c *fiber.Ctx) error {
 	}
 
 	var teacher models.Teacher
-	err := teacherCollection.FindOne(ctx, bson.M{"schooldata.tid": data["tid"]}).Decode(&teacher)
+	err := TeacherCollection.FindOne(ctx, bson.M{"schooldata.tid": data["tid"]}).Decode(&teacher)
 	defer cancel()
 
 	if err != nil {
@@ -785,7 +796,7 @@ func AdminLogin(c *fiber.Ctx) error {
 	}
 
 	var admin models.Admin
-	err := adminCollection.FindOne(ctx, bson.M{"aid": data["aid"]}).Decode(&admin)
+	err := AdminCollection.FindOne(ctx, bson.M{"aid": data["aid"]}).Decode(&admin)
 	defer cancel()
 
 	if err != nil {
@@ -878,7 +889,7 @@ func Student(c *fiber.Ctx) error {
 	responseData["photo"] = nil
 
 	var student models.Student
-	findErr := studentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": sid}).Decode(&student)
+	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": sid}).Decode(&student)
 	if findErr != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -897,14 +908,14 @@ func Student(c *fiber.Ctx) error {
 
 	var locker models.Locker
 	if student.SchoolData.Locker != "" {
-		lockerCollection.FindOne(context.TODO(), bson.M{"ID": student.SchoolData.Locker}).Decode(&locker)
+		LockerCollection.FindOne(context.TODO(), bson.M{"ID": student.SchoolData.Locker}).Decode(&locker)
 		responseData["locker"] = locker
 	}
 
 	var contacts []models.Contact
 	var contact models.Contact
 	for i := range student.PersonalData.Contacts {
-		findErr := contactCollection.FindOne(context.TODO(), bson.M{"_id": student.PersonalData.Contacts[i]}).Decode(&contact)
+		findErr := ContactCollection.FindOne(context.TODO(), bson.M{"_id": student.PersonalData.Contacts[i]}).Decode(&contact)
 		if findErr != nil {
 			responseData["error"] = "Error! There was an error finding some contacts"
 		}
@@ -915,7 +926,7 @@ func Student(c *fiber.Ctx) error {
 	}
 
 	var photo models.Photo
-	findErr = imageCollection.FindOne(context.TODO(), bson.M{"name": student.SchoolData.PhotoName}).Decode(&photo)
+	findErr = ImageCollection.FindOne(context.TODO(), bson.M{"name": student.SchoolData.PhotoName}).Decode(&photo)
 	if findErr != nil {
 		responseData["error"] = "Error! There was an error finding the student photo"
 	}
@@ -943,7 +954,7 @@ func Teacher(c *fiber.Ctx) error {
 	claims := token.Claims.(*jwt.StandardClaims)
 
 	var teacher models.Teacher
-	findErr := teacherCollection.FindOne(context.TODO(), bson.M{"schooldata.tid": claims.Issuer}).Decode(&teacher)
+	findErr := TeacherCollection.FindOne(context.TODO(), bson.M{"schooldata.tid": claims.Issuer}).Decode(&teacher)
 	if findErr != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -974,7 +985,7 @@ func Admin(c *fiber.Ctx) error {
 	claims := token.Claims.(*jwt.StandardClaims)
 
 	var admin models.Admin
-	findErr := adminCollection.FindOne(context.TODO(), bson.M{"aid": claims.Issuer}).Decode(&admin)
+	findErr := AdminCollection.FindOne(context.TODO(), bson.M{"aid": claims.Issuer}).Decode(&admin)
 	if findErr != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -1054,7 +1065,7 @@ func CreateContact(c *fiber.Ctx) error {
 	contact.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	contact.ID = primitive.NewObjectID()
 
-	_, insertErr := contactCollection.InsertOne(ctx, contact)
+	_, insertErr := ContactCollection.InsertOne(ctx, contact)
 	if insertErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -1069,7 +1080,7 @@ func CreateContact(c *fiber.Ctx) error {
 			"contacts": contact.ID,
 		},
 	}
-	_, updateErr := studentCollection.UpdateOne(
+	_, updateErr := StudentCollection.UpdateOne(
 		ctx,
 		bson.M{"sid": data["sid"]},
 		update,
@@ -1121,7 +1132,7 @@ func DeleteContact(c *fiber.Ctx) error {
 		})
 	}
 
-	_, err := contactCollection.DeleteOne(ctx, bson.M{"_id": data["_id"]})
+	_, err := ContactCollection.DeleteOne(ctx, bson.M{"_id": data["_id"]})
 	if err != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -1135,5 +1146,179 @@ func DeleteContact(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "Successfully deleted contact",
+	})
+}
+
+func RemoveStudent(c *fiber.Ctx) error {
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	// Ensure Authenticated admin sent request
+	if verified, _ := AuthenticateUser(c, 3); !verified {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "Unauthorized: only an admin can perform this action",
+		})
+	}
+
+	// Check student id is included
+	if data["sid"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	_, deleteErr := IdCollection.DeleteOne(ctx, bson.M{"cid": data["sid"]})
+	if deleteErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the identification number could not be deleted",
+			"error":   deleteErr,
+		})
+	}
+
+	_, deleteErr = StudentCollection.DeleteOne(ctx, bson.M{"schooldata.sid": data["sid"]})
+	if deleteErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the student could not be deleted",
+			"error":   deleteErr,
+		})
+	}
+	defer cancel()
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully deleted student",
+	})
+}
+
+func RemoveTeacher(c *fiber.Ctx) error {
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	// Ensure Authenticated admin sent request
+	if verified, _ := AuthenticateUser(c, 3); !verified {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "Unauthorized: only an admin can perform this action",
+		})
+	}
+
+	// Check student id is included
+	if data["tid"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	_, deleteErr := IdCollection.DeleteOne(ctx, bson.M{"cid": data["tid"]})
+	if deleteErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the identification number could not be deleted",
+			"error":   deleteErr,
+		})
+	}
+
+	_, deleteErr = TeacherCollection.DeleteOne(ctx, bson.M{"schooldata.tid": data["tid"]})
+	if deleteErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the teacher could not be deleted",
+			"error":   deleteErr,
+		})
+	}
+	defer cancel()
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully deleted teacher",
+	})
+}
+
+func RemoveAdmin(c *fiber.Ctx) error {
+	var data map[string]string
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	if err := c.BodyParser(&data); err != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to parse body",
+			"error":   err,
+		})
+	}
+
+	// Ensure Authenticated admin sent request
+	if verified, _ := AuthenticateUser(c, 3); !verified {
+		cancel()
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "Unauthorized: only an admin can perform this action",
+		})
+	}
+
+	// Check student id is included
+	if data["aid"] == "" {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "missing required fields",
+		})
+	}
+
+	_, deleteErr := IdCollection.DeleteOne(ctx, bson.M{"cid": data["aid"]})
+	if deleteErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the identification number could not be deleted",
+			"error":   deleteErr,
+		})
+	}
+
+	_, deleteErr = AdminCollection.DeleteOne(ctx, bson.M{"aid": data["aid"]})
+	if deleteErr != nil {
+		cancel()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "the admin could not be deleted",
+			"error":   deleteErr,
+		})
+	}
+	defer cancel()
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "successfully deleted admin",
 	})
 }

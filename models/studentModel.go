@@ -18,8 +18,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var lockerCollection *mongo.Collection = database.OpenCollection(database.Client, "lockers")
-var studentCollection *mongo.Collection = database.OpenCollection(database.Client, "students")
+var LockerCollection *mongo.Collection = database.OpenCollection(database.Client, "lockers")
+var StudentCollection *mongo.Collection = database.OpenCollection(database.Client, "students")
 
 type Student struct {
 	ID           primitive.ObjectID `bson:"_id"`
@@ -75,7 +75,7 @@ func (s *Student) HashPassword(password string) string {
 
 func (s *Student) EmailExists(email string) bool {
 	var student Student
-	findErr := studentCollection.FindOne(context.TODO(), bson.M{"accountdata.schoolemail": email}).Decode(&student)
+	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"accountdata.schoolemail": email}).Decode(&student)
 	if findErr != nil {
 		return false
 	}

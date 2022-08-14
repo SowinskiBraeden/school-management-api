@@ -24,7 +24,7 @@ var (
 	allCharSet     = lowerCharSet + upperCharSet + specialCharSet + numberSet
 )
 
-var teacherCollection *mongo.Collection = database.OpenCollection(database.Client, "teachers")
+var TeacherCollection *mongo.Collection = database.OpenCollection(database.Client, "teachers")
 
 type Teacher struct {
 	ID           primitive.ObjectID `bson:"_id"`
@@ -73,7 +73,7 @@ func (t *Teacher) HashPassword(password string) string {
 
 func (t *Teacher) EmailExists(email string) bool {
 	var teacher Teacher
-	findErr := teacherCollection.FindOne(context.TODO(), bson.M{"accountdata.schoolemail": email}).Decode(&teacher)
+	findErr := TeacherCollection.FindOne(context.TODO(), bson.M{"accountdata.schoolemail": email}).Decode(&teacher)
 	if findErr != nil {
 		return false
 	}

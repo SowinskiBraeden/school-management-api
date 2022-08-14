@@ -24,7 +24,6 @@ var config Config = Config{
 }
 
 type Request struct {
-	from    string
 	to      []string
 	subject string
 	body    string

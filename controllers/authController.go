@@ -72,7 +72,7 @@ func CreateDefaultAdmin() models.Admin {
 	var aid string
 	for {
 		aid = GenerateID(6)
-		if ValidateID(aid, 3) == true {
+		if ValidateID(aid, 3) {
 			break
 		}
 	}
@@ -112,9 +112,6 @@ func NewSystem() {
 }
 
 var SecretKey = os.Getenv("secret")
-
-var systemEmail string = os.Getenv("SYSTEM_EMAIL")
-var systemPassword string = os.Getenv("SYSTEM_PASSWORD")
 
 func AuthenticateUser(c *fiber.Ctx, userType int) (bool, string) {
 	if userType < 1 || userType > 3 {
@@ -240,7 +237,7 @@ func Enroll(c *fiber.Ctx) error {
 	var sid string
 	for {
 		sid = GenerateID(6)
-		if ValidateID(sid, 1) == true {
+		if ValidateID(sid, 1) {
 			break
 		}
 	}
@@ -261,7 +258,7 @@ func Enroll(c *fiber.Ctx) error {
 	var pen string
 	for {
 		pen = GenerateID(9)
-		if ValidatePEN(pen) == true {
+		if ValidatePEN(pen) {
 			break
 		}
 	}
@@ -387,8 +384,7 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	// For the unlikely event that an ID is already in use this will simply try again till it gets a id not in use
 	for {
 		tid = GenerateID(6)
-		isValid := ValidateID(tid, 2)
-		if isValid == true {
+		if ValidateID(tid, 2) {
 			break
 		}
 	}
@@ -485,7 +481,7 @@ func CreateAdmin(c *fiber.Ctx) error {
 	var aid string
 	for {
 		aid = GenerateID(6)
-		if ValidateID(aid, 3) == true {
+		if ValidateID(aid, 3) {
 			break
 		}
 	}
@@ -733,7 +729,7 @@ func TeacherLogin(c *fiber.Ctx) error {
 	defer cancel()
 
 	var verified bool = teacher.ComparePasswords(data["password"])
-	if verified == false {
+	if !verified {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"success": false,
 			"message": "incorrect password",
@@ -803,7 +799,7 @@ func AdminLogin(c *fiber.Ctx) error {
 	defer cancel()
 
 	var verified bool = admin.ComparePasswords(data["password"])
-	if verified == false {
+	if !verified {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"success": false,
 			"message": "incorrect password",

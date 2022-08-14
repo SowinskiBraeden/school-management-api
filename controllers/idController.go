@@ -29,10 +29,7 @@ func ValidateID(id string, userType int) bool { // true: valid id, false: id alr
 		newID.ParentType = userType
 		newID.ID = primitive.NewObjectID()
 		_, insertErr := idCollection.InsertOne(context.Background(), newID)
-		if insertErr != nil {
-			return false
-		}
-		return true
+		return insertErr == nil
 	}
 	return false
 }
@@ -42,10 +39,7 @@ func ValidatePEN(pen string) bool { // true: valid pen, false: pen already in us
 	var foundID models.Id
 	err := studentCollection.FindOne(ctx, bson.M{"schooldata.pen": pen}).Decode(&foundID)
 	cancel()
-	if err != nil {
-		return true
-	}
-	return false
+	return err != nil
 }
 
 func GenerateID(length int) string {

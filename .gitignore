@@ -1,6 +1,9 @@
 # Environment
 .env
 
+# Vendor
+/vendor/*
+
 # Pycache
 /test/__pycache__/*
 /test/util/__pycache__/*

@@ -3,7 +3,6 @@ package update
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"time"
@@ -422,7 +421,7 @@ func UpdateTeacherPhoto(c *fiber.Ctx) error {
 	}
 
 	// Read the entire file into a byte slice
-	bytes, err := ioutil.ReadFile(fmt.Sprintf("./database/images/%s", image))
+	bytes, err := os.ReadFile(fmt.Sprintf("./database/images/%s", image))
 	if err != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

@@ -158,7 +158,9 @@ There are several account that can be registered into the system. As you may gue
             "firstname": "John",
             "lastname": "Doe",
             "dob": "01-01-1999",
-            "email": "john_doe@example.com"
+            "email": "john_doe@example.com",
+            "password1": "mySuperSecurePassword",
+            "password2": "mySuperSecurePassword"
         }
         ```
     
@@ -191,7 +193,9 @@ There are several account that can be registered into the system. As you may gue
             "middlename": "Jay",
             "lastname": "Simson",
             "dob": "12-05-1956",
-            "email": "homerdog_simpson@example.com"
+            "email": "homer_simpson@example.com",
+            "password1": "homerLovesDuffBeer123",
+            "password2": "homerLovesDuffBeer123"
         }
         ```
     
@@ -227,7 +231,9 @@ There are several account that can be registered into the system. As you may gue
             "province": "...",
             "city": "Springfield",
             "address": "742 Evergreen Terrace",
-            "postal": "..."
+            "postal": "...",
+            "password1": "I_am_el_barto_5",
+            "password2": "I_am_el_barto_5"
         }
         ```
         
@@ -237,7 +243,7 @@ There are several account that can be registered into the system. As you may gue
         ```jsonc
         {
             "success": true,
-            "successfully inserted student"
+            "message": "successfully inserted student"
         }
         ```
         
@@ -278,7 +284,7 @@ There are several account that can be registered into the system. As you may gue
 	**Returns:**
 	* Status 200: `OK`
 	* JSON:
-		```
+		```jsonc
 		{
 			"success": true,
 			"message": "correct password"
@@ -709,7 +715,7 @@ There are several account that can be registered into the system. As you may gue
 	**Required:**
 	* Logged into an admin account
 	* JSON:
-	    ```
+	    ```jsonc
 	    {
 	        "tid": "123456",
 	        "homeroom": "A123"
@@ -884,7 +890,7 @@ There are several account that can be registered into the system. As you may gue
     * JSON:
         ```jsonc
         {
-            "firstname": "seymour_skinner@example.com"
+            "email": "seymour_skinner@example.com"
         }
         ```
         
@@ -926,7 +932,7 @@ There are several account that can be registered into the system. As you may gue
             "message": "successfully updated admin password"
         }
         ```
-    * Emails admin ab alert of password change
+    * Emails admin an alert of password change
 
 <br></br>
 
@@ -949,7 +955,7 @@ In the case of an emergency for a specified student, a contact is required to be
             "middlename": "Jacqueline", // (optional)
             "lastname": "Simpson",
             "homephone": "123-456-7890",
-            "workphone": "098-765-4321"
+            "workphone": "098-765-4321",
             "email": "therealmarge@example.com",
             "priority": 1, // 1 is highest priority, 10 is least priority
             "relation": "mother",
@@ -969,7 +975,7 @@ In the case of an emergency for a specified student, a contact is required to be
             "message": "successfully inserted contact to student"
         }
         ```
-    * Emails admin ab alert of password change
+    * Emails admin an alert of password change
 
 <br></br>
 
@@ -986,7 +992,7 @@ In the case of an emergency for a specified student, a contact is required to be
         {
             "_id": "<contact object id>",
             "firstname": "Marge",
-            "middlename": "" // (optional)
+            "middlename": "", // (optional)
             "lastname": "Simpson"
         }
         ```

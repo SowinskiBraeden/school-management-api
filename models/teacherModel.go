@@ -74,10 +74,7 @@ func (t *Teacher) HashPassword(password string) string {
 func (t *Teacher) EmailExists(email string) bool {
 	var teacher Teacher
 	findErr := TeacherCollection.FindOne(context.TODO(), bson.M{"accountdata.schoolemail": email}).Decode(&teacher)
-	if findErr != nil {
-		return false
-	}
-	return true
+	return findErr == nil
 }
 
 func (t *Teacher) GenerateSchoolEmail(offset int, lastEmail string) string {
@@ -97,10 +94,7 @@ func (t *Teacher) GenerateSchoolEmail(offset int, lastEmail string) string {
 
 func (t *Teacher) ComparePasswords(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(t.AccountData.Password), []byte(password))
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 func (t *Teacher) CheckPasswordStrength(password string) bool {
@@ -119,7 +113,7 @@ func (t *Teacher) CheckPasswordStrength(password string) bool {
 		}
 	}
 
-	if strings.ContainsAny(password, specialCharSet) && hasLower && hasUpper {
+	if strings.ContainsAny(password, specialCharSet) && hasLower && hasUpper && len(password) >= 8 {
 		return true
 	} else {
 		return false

@@ -76,10 +76,7 @@ func (s *Student) HashPassword(password string) string {
 func (s *Student) EmailExists(email string) bool {
 	var student Student
 	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"accountdata.schoolemail": email}).Decode(&student)
-	if findErr != nil {
-		return false
-	}
-	return true
+	return findErr == nil
 }
 
 func (s *Student) GenerateSchoolEmail(offset int, lastEmail string) string {
@@ -99,10 +96,7 @@ func (s *Student) GenerateSchoolEmail(offset int, lastEmail string) string {
 
 func (s *Student) ComparePasswords(password string) bool { //True: passwords match, False: no match
 	valid := bcrypt.CompareHashAndPassword([]byte(s.AccountData.Password), []byte(password))
-	if valid != nil {
-		return false
-	}
-	return true
+	return valid == nil
 }
 
 func (s *Student) CheckPasswordStrength(password string) bool {
@@ -121,7 +115,7 @@ func (s *Student) CheckPasswordStrength(password string) bool {
 		}
 	}
 
-	if strings.ContainsAny(password, specialCharSet) && hasLower && hasUpper {
+	if strings.ContainsAny(password, specialCharSet) && hasLower && hasUpper && len(password) >= 8 {
 		return true
 	} else {
 		return false

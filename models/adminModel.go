@@ -1,16 +1,23 @@
 package models
 
 import (
+	"context"
 	"math/rand"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
 
+	"github.com/SowinskiBraeden/school-management-api/database"
 	"golang.org/x/crypto/bcrypt"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
+
+var AdminCollection *mongo.Collection = database.OpenCollection(database.Client, "admins")
 
 type Admin struct {
 	ID           primitive.ObjectID `bson:"_id"`
@@ -25,10 +32,24 @@ type Admin struct {
 	Updated_at   time.Time          `json:"updated_at"`
 }
 
-func (a *Admin) GenerateSchoolEmail() string {
+func (a *Admin) EmailExists(email string) bool {
+	var admin Admin
+	findErr := AdminCollection.FindOne(context.TODO(), bson.M{"accountdata.schoolemail": email}).Decode(&admin)
+	return findErr == nil
+}
+
+func (a *Admin) GenerateSchoolEmail(offset int, lastEmail string) string {
 	addr := os.Getenv("SYSTEM_EMAIL_ADDRESS")
 	var email string = strings.ToLower(a.LastName) + "_" + strings.ToLower(string(a.FirstName[0])) + addr
-	// Add check to see if email already exists
+	if offset > 0 && offset < len([]rune(a.FirstName))-1 {
+		email = lastEmail[:strings.Index(lastEmail, "_")+offset+1] + strings.ToLower(string(a.FirstName[offset])) + addr
+	}
+	if offset == len([]rune(a.FirstName))-1 {
+		email = strings.ToLower(a.LastName) + "_" + strings.ToLower(a.FirstName) + addr
+	}
+	if offset > len([]rune(a.FirstName))-1 {
+		email = strings.ToLower(a.LastName) + "_" + strings.ToLower(a.FirstName) + strconv.Itoa(offset-len([]rune(a.FirstName))) + addr
+	}
 	return email
 }
 
@@ -37,15 +58,12 @@ func (s *Admin) HashPassword(password string) string {
 	return string(hash)
 }
 
-func (s *Admin) ComparePasswords(password string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(s.Password), []byte(password))
-	if err != nil {
-		return false
-	}
-	return true
+func (a *Admin) ComparePasswords(password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(a.Password), []byte(password))
+	return err == nil
 }
 
-func (s *Admin) CheckPasswordStrength(password string) bool {
+func (a *Admin) CheckPasswordStrength(password string) bool {
 
 	var hasUpper bool = false
 	for _, r := range password {
@@ -61,14 +79,14 @@ func (s *Admin) CheckPasswordStrength(password string) bool {
 		}
 	}
 
-	if strings.ContainsAny(password, specialCharSet) && hasLower && hasUpper {
+	if strings.ContainsAny(password, specialCharSet) && hasLower && hasUpper && len(password) >= 8 {
 		return true
 	} else {
 		return false
 	}
 }
 
-func (s *Admin) GeneratePassword(passwordLength, minSpecialChar, minNum, minUpperCase int) string {
+func (a *Admin) GeneratePassword(passwordLength, minSpecialChar, minNum, minUpperCase int) string {
 	var password strings.Builder
 
 	//Set special character

@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/mail"
 	"os"
 	"strings"
 	"time"
@@ -36,6 +37,14 @@ var ContactCollection *mongo.Collection = database.OpenCollection(database.Clien
 var AdminCollection *mongo.Collection = database.OpenCollection(database.Client, "admins")
 var ImageCollection *mongo.Collection = database.OpenCollection(database.Client, "images")
 var LockerCollection *mongo.Collection = database.OpenCollection(database.Client, "lockers")
+
+func validMailAddress(address string) (string, bool) {
+	addr, err := mail.ParseAddress(address)
+	if err != nil {
+		return "", false
+	}
+	return addr.Address, true
+}
 
 func confirm(s string) bool {
 	r := bufio.NewReader(os.Stdin)
@@ -74,7 +83,16 @@ func CreateDefaultAdmin() models.Admin {
 	admin.LastName = lastname
 	admin.Email = email
 
-	admin.SchoolEmail = admin.GenerateSchoolEmail()
+	var schoolEmail string = ""
+	offset := 0
+	for {
+		schoolEmail = admin.GenerateSchoolEmail(offset, schoolEmail)
+		if !admin.EmailExists(schoolEmail) {
+			break
+		}
+		offset++
+	}
+	admin.SchoolEmail = schoolEmail
 
 	pass := strings.TrimSuffix(string(password), "\n")
 	admin.Password = admin.HashPassword(pass)
@@ -176,7 +194,10 @@ func Enroll(c *fiber.Ctx) error {
 	}
 
 	// Check minimum enroll field requirements are met
-	if data["firstname"] == nil || data["lastname"] == nil || data["age"] == nil || data["gradelevel"] == nil || data["dob"] == nil || data["email"] == nil || data["province"] == nil || data["city"] == nil || data["address"] == nil || data["postal"] == nil {
+	if data["firstname"] == nil || data["lastname"] == nil || data["age"] == nil ||
+		data["gradelevel"] == nil || data["dob"] == nil || data["email"] == nil ||
+		data["province"] == nil || data["city"] == nil || data["address"] == nil ||
+		data["postal"] == nil || data["password1"] == nil || data["password2"] == nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -184,7 +205,32 @@ func Enroll(c *fiber.Ctx) error {
 		})
 	}
 
+	if _, validEmail := validMailAddress(data["email"].(string)); !validEmail {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "invalid email address",
+		})
+	}
+
+	if data["password1"] != data["password2"] {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "the passwords chosen must match",
+		})
+	}
+
 	var student models.Student
+
+	if !student.CheckPasswordStrength(data["password1"].(string)) {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "your password isnt strong enough",
+		})
+	}
+
 	student.PersonalData.FirstName = data["firstname"].(string)
 	student.PersonalData.MiddleName = data["middlename"].(string)
 	student.PersonalData.LastName = data["lastname"].(string)
@@ -227,23 +273,8 @@ func Enroll(c *fiber.Ctx) error {
 	student.AccountData.Alerted = false
 	student.AccountData.Attempts = 0
 
-	// Generate temporary password
-	var tempPass string = student.GeneratePassword(12, 1, 1, 1)
-	student.AccountData.Password = student.HashPassword(tempPass)
-	student.AccountData.TempPassword = true
-
-	// Send student personal email temp password
-	subject := "Password Changed"
-	receiver := student.PersonalData.Email
-	r := NewRequest([]string{receiver}, subject)
-
-	if sent := r.Send("./templates/passwordChanged.html", map[string]string{"username": student.PersonalData.FirstName, "password": tempPass}); !sent {
-		cancel()
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "Could not send password to students email",
-		})
-	}
+	student.AccountData.Password = data["password1"].(string)
+	student.AccountData.TempPassword = false
 
 	var sid string
 	for {
@@ -255,8 +286,9 @@ func Enroll(c *fiber.Ctx) error {
 	student.SchoolData.SID = sid
 
 	// Send student personal email student ID
-	subject = "Account Registered"
-	r = NewRequest([]string{receiver}, subject)
+	subject := "Account Registered"
+	receiver := student.PersonalData.Email
+	r := NewRequest([]string{receiver}, subject)
 
 	if sent := r.Send("./templates/accountRegisreded.html", map[string]string{"username": student.PersonalData.FirstName, "id": sid, "userType": "student"}); !sent {
 		cancel()
@@ -329,7 +361,8 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	}
 
 	// Check minimum register teacher field requirements are met
-	if data["firstname"] == nil || data["lastname"] == nil || data["dob"] == nil || data["email"] == nil {
+	if data["firstname"] == nil || data["lastname"] == nil || data["dob"] == nil || data["email"] == nil ||
+		data["password1"] == nil || data["password2"] == nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -337,7 +370,32 @@ func RegisterTeacher(c *fiber.Ctx) error {
 		})
 	}
 
+	if _, validEmail := validMailAddress(data["email"].(string)); !validEmail {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "invalid email address",
+		})
+	}
+
+	if data["password1"] != data["password2"] {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "the passwords chosen must match",
+		})
+	}
+
 	var teacher models.Teacher
+
+	if !teacher.CheckPasswordStrength(data["password1"].(string)) {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "your password isnt strong enough",
+		})
+	}
+
 	teacher.PersonalData.FirstName = data["firstname"].(string)
 	teacher.PersonalData.MiddleName = data["middlename"].(string)
 	teacher.PersonalData.LastName = data["lastname"].(string)
@@ -374,22 +432,8 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	teacher.AccountData.AccountDisabled = false
 	teacher.AccountData.Attempts = 0
 
-	var tempPass string = teacher.GeneratePassword(12, 1, 1, 1)
-	teacher.AccountData.Password = teacher.HashPassword(tempPass)
-	teacher.AccountData.TempPassword = true
-
-	// Send teacher personal email temp password
-	subject := "Password Changed"
-	receiver := teacher.PersonalData.Email
-	r := NewRequest([]string{receiver}, subject)
-
-	if sent := r.Send("./templates/passwordChanged.html", map[string]string{"username": teacher.PersonalData.FirstName, "password": tempPass}); !sent {
-		cancel()
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "Could not send password to teachers email",
-		})
-	}
+	teacher.AccountData.Password = data["password"].(string)
+	teacher.AccountData.TempPassword = false
 
 	var tid string
 	// For the unlikely event that an ID is already in use this will simply try again till it gets a id not in use
@@ -402,8 +446,9 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	teacher.SchoolData.TID = tid
 
 	// Send teacher personal email student ID
-	subject = "Account Registered"
-	r = NewRequest([]string{receiver}, subject)
+	subject := "Account Registered"
+	receiver := teacher.PersonalData.Email
+	r := NewRequest([]string{receiver}, subject)
 
 	if sent := r.Send("./templates/accountRegisreded.html", map[string]string{"username": teacher.PersonalData.FirstName, "id": tid, "userType": "teacher"}); !sent {
 		cancel()
@@ -457,7 +502,8 @@ func CreateAdmin(c *fiber.Ctx) error {
 	}
 
 	// Check minimum register teacher field requirements are met
-	if data["firstname"] == nil || data["lastname"] == nil || data["dob"] == nil || data["email"] == nil {
+	if data["firstname"] == nil || data["lastname"] == nil || data["dob"] == nil || data["email"] == nil ||
+		data["password1"] == nil || data["password2"] == nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -465,29 +511,49 @@ func CreateAdmin(c *fiber.Ctx) error {
 		})
 	}
 
+	if _, validEmail := validMailAddress(data["email"].(string)); !validEmail {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "invalid email address",
+		})
+	}
+
+	if data["password1"] != data["password2"] {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "the passwords chosen must match",
+		})
+	}
+
 	var admin models.Admin
+
+	if !admin.CheckPasswordStrength(data["password1"].(string)) {
+		cancel()
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "your password isnt strong enough",
+		})
+	}
+
 	admin.FirstName = data["firstname"].(string)
 	admin.LastName = data["lastname"].(string)
 	admin.Email = data["email"].(string)
 
-	admin.SchoolEmail = admin.GenerateSchoolEmail()
-
-	tempPass := admin.GeneratePassword(12, 1, 1, 1)
-	admin.Password = admin.HashPassword(tempPass)
-	admin.TempPassword = true
-
-	// Send admin personal email temp password
-	subject := "Password Changed"
-	receiver := admin.Email
-	r := NewRequest([]string{receiver}, subject)
-
-	if sent := r.Send("./templates/passwordChanged.html", map[string]string{"username": admin.FirstName, "password": tempPass}); !sent {
-		cancel()
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "Could not send password to admins email",
-		})
+	var schoolEmail string = ""
+	offset := 0
+	for {
+		schoolEmail = admin.GenerateSchoolEmail(offset, schoolEmail)
+		if !admin.EmailExists(schoolEmail) {
+			break
+		}
+		offset++
 	}
+	admin.SchoolEmail = schoolEmail
+
+	admin.Password = data["password1"].(string)
+	admin.TempPassword = false
 
 	var aid string
 	for {
@@ -499,8 +565,9 @@ func CreateAdmin(c *fiber.Ctx) error {
 	admin.AID = aid
 
 	// Send student personal email student ID
-	subject = "Account Registered"
-	r = NewRequest([]string{receiver}, subject)
+	subject := "Account Registered"
+	receiver := admin.Email
+	r := NewRequest([]string{receiver}, subject)
 
 	if sent := r.Send("./templates/accountRegisreded.html", map[string]string{"username": admin.FirstName, "id": aid, "userType": "admin"}); !sent {
 		cancel()

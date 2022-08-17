@@ -19,7 +19,8 @@ this on as a full project to work on for my Software Engineering class and is no
 work on this till completion, starting with this API, and then the front end, learning new tricks and languages
 along the way.
 
-I highly recommend looking at the testing for [schedule generation](/test/scheduleGenerator), [version 3](/test/scheduleGenerator/generator_v3.py)
+I highly recommend looking at the testing for [schedule generation](/test/scheduleGenerator), version 3.
+Though this has been moved to its own [repository](https://github.com/SowinskiBraeden/schedule-generator).
 
 ## Related Work
 
@@ -29,7 +30,7 @@ for the next frontier of this project. I am now concurrently working on the [Sch
 
 The School Management Website, is going to be written using the [Next.js](https://nextjs.org/) framework. Previously the plan  
 was to use Vue.js, and I started work on the project, which I have now decided to discontinue and archive it [here](https://github.com/SowinskiBraeden/school-management-archived). I now plan to start from scratch and use Next.js as I believe it is more  
-suited for this project and is more popular with its use of React.js over Vue.js.
+suited for this project and is more popular with its use of React.js over Vue.js. The new repository can be found [here](https://github.com/SowinskiBraeden/school-management).
 <br>
 
 ### Built With

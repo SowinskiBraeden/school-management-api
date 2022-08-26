@@ -8,8 +8,6 @@ The backend API for a school management system accessible by staff and students.
 * [Contributing](#contributing)
 * [License](#license)
 * [Contact](#contact)
-<br>
-<br>
 
 ### Built With
 
@@ -125,7 +123,6 @@ Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 <!-- CONTACT -->
 ## Contact
 
-Braeden Sowinski - [@BraedenSowinski](https://twitter.com/BraedenSowinski) - sowinskibraeden@gmail.com
-McDazzzled#5307 on Discord
+Braeden Sowinski - [@BraedenSowinski](https://twitter.com/BraedenSowinski) - sowinskibraeden@gmail.com - McDazzzled#5307 on Discord
 
 Project Link: [https://github.com/SowinskiBraeden/school-management-api](https://github.com/SowinskiBraeden/school-management-api)

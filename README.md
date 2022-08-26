@@ -11,6 +11,13 @@ The backend API for a school management system accessible by staff and students.
 <br>
 <br>
 
+### Built With
+
+* [Golang](https://go.dev/)
+* [GoFiber](https://gofiber.io/)
+* [GoMongo Driver](https://docs.mongodb.com/drivers/go/current/)
+* [golang-jwt](https://github.com/golang-jwt/jwt)
+
 ## About The Project
 
 Originally started as a personal project to improve my overall Go knowledge and skills, driven by the complaints
@@ -19,8 +26,23 @@ this on as a full project to work on for my Software Engineering class and is no
 work on this till completion, starting with this API, and then the front end, learning new tricks and languages
 along the way.
 
-I highly recommend looking at the testing for [schedule generation](/test/scheduleGenerator), version 3.
-Though this has been moved to its own [repository](https://github.com/SowinskiBraeden/schedule-generator).
+Developing the API has has me face many challenges. With me developing my techniques in Go, and increasing my 
+ability to work with Go frameworks. Understanding the workflow of packages and the Go ecosystem.
+
+I started by developing authentication; a solid footing to the project, without the authentication of users, 
+the rest of the project would fail to work. As the purpose of this API handles sensitive data on students.
+
+Once the authentication was complete, I took to working on majority of the user data handling. Such as 
+setting, updating and or deleting user attributes. Building a few more key authentication features only 
+allowing the proper authenticated user, an admin, perfom many of the actions.
+
+Once this was complete I started work on conceptualizing the next major step of the API. Course management,
+including course selection, schedule generation, etc. This can be viewed in this [request](https://github.com/SowinskiBraeden/school-management-api/issues/5).
+To start off on this new set of features, I decided to tackle the largest and most complex problem, 
+schedule generation. This algorithm generates a master timetable as well as updates the student schedule. 
+All the while keeping track of any errors for admins to handle personally. This can be found in `testing`,
+The [schedule generation](/test/scheduleGenerator) file is of the latest version, version 3. Though this has 
+been moved to its own [repository](https://github.com/SowinskiBraeden/schedule-generator).
 
 ## Related Work
 
@@ -32,12 +54,6 @@ The School Management Website, is going to be written using the [Next.js](https:
 was to use Vue.js, and I started work on the project, which I have now decided to discontinue and archive it [here](https://github.com/SowinskiBraeden/school-management-archived). I now plan to start from scratch and use Next.js as I believe it is more  
 suited for this project and is more popular with its use of React.js over Vue.js. The new repository can be found [here](https://github.com/SowinskiBraeden/school-management).
 <br>
-
-### Built With
-
-* [Golang](https://go.dev/)
-* [GoFiber](https://gofiber.io/)
-* [GoMongo Driver](https://docs.mongodb.com/drivers/go/current/)
 
 ## Getting Started
 
@@ -110,5 +126,6 @@ Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 ## Contact
 
 Braeden Sowinski - [@BraedenSowinski](https://twitter.com/BraedenSowinski) - sowinskibraeden@gmail.com
+McDazzzled#5307 on Discord
 
 Project Link: [https://github.com/SowinskiBraeden/school-management-api](https://github.com/SowinskiBraeden/school-management-api)

@@ -191,7 +191,7 @@ There are several account that can be registered into the system. As you may gue
         {
             "firstname": "Homer",
             "middlename": "Jay",
-            "lastname": "Simson",
+            "lastname": "Simpson",
             "dob": "12-05-1956",
             "email": "homer_simpson@example.com",
             "password1": "homerLovesDuffBeer123",
@@ -276,7 +276,7 @@ There are several account that can be registered into the system. As you may gue
 	* JSON:
 		```jsonc
 		{
-			"tid": "123456",
+			"aid": "123456",
 			"password": "myawesomepassword123"
 		}
 		```

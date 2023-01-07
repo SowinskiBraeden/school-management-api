@@ -231,18 +231,20 @@ func Enroll(c *fiber.Ctx) error {
 		})
 	}
 
-	student.PersonalData.FirstName = data["firstname"].(string)
-	student.PersonalData.MiddleName = data["middlename"].(string)
-	student.PersonalData.LastName = data["lastname"].(string)
-	student.PersonalData.Age = data["age"].(float64)
+	student.Personal.FirstName = data["firstname"].(string)
+	if middle, ok := data["middlename"]; ok {
+		student.Personal.MiddleName = middle.(string)
+	}
+	student.Personal.LastName = data["lastname"].(string)
+	student.Personal.Age = data["age"].(float64)
 	student.SchoolData.GradeLevel = data["gradelevel"].(float64)
-	student.PersonalData.DOB = data["dob"].(string)
-	student.PersonalData.Email = data["email"].(string)
-	student.PersonalData.Province = data["province"].(string)
-	student.PersonalData.City = data["city"].(string)
-	student.PersonalData.Address = data["address"].(string)
-	student.PersonalData.Postal = data["postal"].(string)
-	student.PersonalData.Contacts = []string{}
+	student.Personal.DOB = data["dob"].(string)
+	student.Personal.Email = data["email"].(string)
+	student.Personal.Province = data["province"].(string)
+	student.Personal.City = data["city"].(string)
+	student.Personal.Address = data["address"].(string)
+	student.Personal.Postal = data["postal"].(string)
+	student.Personal.Contacts = []string{}
 	student.SchoolData.YOG = ((12 - int(student.SchoolData.GradeLevel)) + time.Now().Year()) + 1
 
 	var photo models.Photo
@@ -287,10 +289,10 @@ func Enroll(c *fiber.Ctx) error {
 
 	// Send student personal email student ID
 	subject := "Account Registered"
-	receiver := student.PersonalData.Email
+	receiver := student.Personal.Email
 	r := NewRequest([]string{receiver}, subject)
 
-	if sent := r.Send("./templates/accountRegisreded.html", map[string]string{"username": student.PersonalData.FirstName, "id": sid, "userType": "student"}); !sent {
+	if sent := r.Send("./templates/accountRegisreded.html", map[string]string{"username": student.Personal.FirstName, "id": sid, "userType": "student"}); !sent {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
@@ -396,14 +398,24 @@ func RegisterTeacher(c *fiber.Ctx) error {
 		})
 	}
 
-	teacher.PersonalData.FirstName = data["firstname"].(string)
-	teacher.PersonalData.MiddleName = data["middlename"].(string)
-	teacher.PersonalData.LastName = data["lastname"].(string)
-	teacher.PersonalData.Email = data["email"].(string)
-	teacher.PersonalData.Province = data["province"].(string)
-	teacher.PersonalData.City = data["city"].(string)
-	teacher.PersonalData.Postal = data["postal"].(string)
-	teacher.PersonalData.DOB = data["dob"].(string)
+	teacher.Personal.FirstName = data["firstname"].(string)
+	if middle, ok := data["middlename"]; ok {
+		teacher.Personal.MiddleName = middle.(string)
+	}
+	teacher.Personal.LastName = data["lastname"].(string)
+	teacher.Personal.Email = data["email"].(string)
+	if province, ok := data["province"]; ok {
+		teacher.Personal.Province = province.(string)
+	}
+	if city, ok := data["city"]; ok {
+		teacher.Personal.City = city.(string)
+	}
+	if postal, ok := data["postal"]; ok {
+		teacher.Personal.Postal = postal.(string)
+	}
+	if dob, ok := data["dob"]; ok {
+		teacher.Personal.DOB = dob.(string)
+	}
 
 	var photo models.Photo
 	photo.Name = uuid.New().String()
@@ -447,10 +459,10 @@ func RegisterTeacher(c *fiber.Ctx) error {
 
 	// Send teacher personal email student ID
 	subject := "Account Registered"
-	receiver := teacher.PersonalData.Email
+	receiver := teacher.Personal.Email
 	r := NewRequest([]string{receiver}, subject)
 
-	if sent := r.Send("./templates/accountRegisreded.html", map[string]string{"username": teacher.PersonalData.FirstName, "id": tid, "userType": "teacher"}); !sent {
+	if sent := r.Send("./templates/accountRegisreded.html", map[string]string{"username": teacher.Personal.FirstName, "id": tid, "userType": "teacher"}); !sent {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
@@ -672,10 +684,10 @@ func StudentLogin(c *fiber.Ctx) error {
 		if !student.AccountData.Alerted {
 			// Send student email warning of disabled account
 			subject := "Account Disabled"
-			receiver := student.PersonalData.Email
+			receiver := student.Personal.Email
 			r := NewRequest([]string{receiver}, subject)
 
-			if sent := r.Send("./templates/accountDisabled.html", map[string]string{"username": student.PersonalData.FirstName}); !sent {
+			if sent := r.Send("./templates/accountDisabled.html", map[string]string{"username": student.Personal.FirstName}); !sent {
 				cancel()
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 					"success": false,
@@ -981,8 +993,8 @@ func Student(c *fiber.Ctx) error {
 
 	var contacts []models.Contact
 	var contact models.Contact
-	for i := range student.PersonalData.Contacts {
-		findErr := ContactCollection.FindOne(context.TODO(), bson.M{"_id": student.PersonalData.Contacts[i]}).Decode(&contact)
+	for i := range student.Personal.Contacts {
+		findErr := ContactCollection.FindOne(context.TODO(), bson.M{"_id": student.Personal.Contacts[i]}).Decode(&contact)
 		if findErr != nil {
 			responseData["error"] = "Error! There was an error finding some contacts"
 		}

@@ -63,18 +63,18 @@ func UpdateStudentName(c *fiber.Ctx) error {
 	if updateMiddle {
 		update = bson.M{
 			"$set": bson.M{
-				"personaldata.firstname":  data["firstname"],
-				"personaldata.middlename": data["middlename"],
-				"personaldata.lastname":   data["lastname"],
-				"updated_at":              update_time,
+				"Personal.firstname":  data["firstname"],
+				"Personal.middlename": data["middlename"],
+				"Personal.lastname":   data["lastname"],
+				"updated_at":          update_time,
 			},
 		}
 	} else {
 		update = bson.M{
 			"$set": bson.M{
-				"personaldata.firstname": data["firstname"],
-				"personaldata.lastname":  data["lastname"],
-				"updated_at":             update_time,
+				"Personal.firstname": data["firstname"],
+				"Personal.lastname":  data["lastname"],
+				"updated_at":         update_time,
 			},
 		}
 	}
@@ -162,15 +162,15 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 }
 
 /*
-	Far later on this function is going to be completely automated.
-	Instead of an admin sending a request to update the homeroom of
-	a student or teacher, the system will take the room number of
-	the teacher's or student's Block 2 class from their schedule.
+Far later on this function is going to be completely automated.
+Instead of an admin sending a request to update the homeroom of
+a student or teacher, the system will take the room number of
+the teacher's or student's Block 2 class from their schedule.
 
-	Though this function would remain for students only, for example
-	a student requests a course change, if its their block 2 the
-	admin would have to alter their homeroom to be the new class
-	number.
+Though this function would remain for students only, for example
+a student requests a course change, if its their block 2 the
+admin would have to alter their homeroom to be the new class
+number.
 */
 func UpdateStudentHomeroom(c *fiber.Ctx) error {
 	var data map[string]string
@@ -332,10 +332,10 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 
 	// Alert email the password has changed
 	subject := "Password Changed"
-	receiver := student.PersonalData.Email
+	receiver := student.Personal.Email
 	r := NewRequest([]string{receiver}, subject)
 
-	if sent := r.Send("./templates/selfPasswordChanged.html", map[string]string{"username": student.PersonalData.FirstName}); !sent {
+	if sent := r.Send("./templates/selfPasswordChanged.html", map[string]string{"username": student.Personal.FirstName}); !sent {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "failed to send email to student",
@@ -381,7 +381,7 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 		})
 	}
 
-	if student.PersonalData.Email != data["email"] {
+	if student.Personal.Email != data["email"] {
 		cancel()
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"success": false,
@@ -416,10 +416,10 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 
 	// Send student personal email temp password
 	subject := "Password Changed"
-	receiver := student.PersonalData.Email
+	receiver := student.Personal.Email
 	r := NewRequest([]string{receiver}, subject)
 
-	if sent := r.Send("./templates/passwordChanged.html", map[string]string{"username": student.PersonalData.FirstName, "password": tempPass}); !sent {
+	if sent := r.Send("./templates/passwordChanged.html", map[string]string{"username": student.Personal.FirstName, "password": tempPass}); !sent {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Could not send password to students email",
@@ -538,11 +538,11 @@ func UpdateStudentAddress(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"personaldata.address":  data["address"],
-			"personaldata.city":     data["city"],
-			"personaldata.province": data["province"],
-			"personaldata.postal":   data["postal"],
-			"updated_at":            update_time,
+			"Personal.address":  data["address"],
+			"Personal.city":     data["city"],
+			"Personal.province": data["province"],
+			"Personal.postal":   data["postal"],
+			"updated_at":        update_time,
 		},
 	}
 
@@ -687,7 +687,7 @@ func RemoveStudentContact(c *fiber.Ctx) error {
 			"updated_at": update_time,
 		},
 		"$pull": bson.M{
-			"personaldata.contacts": contact.ID,
+			"Personal.contacts": contact.ID,
 		},
 	}
 
@@ -761,7 +761,7 @@ func AddStudentContact(c *fiber.Ctx) error {
 			"updated_at": update_time,
 		},
 		"$push": bson.M{
-			"personaldata.contacts": contact.ID,
+			"Personal.contacts": contact.ID,
 		},
 	}
 
@@ -951,8 +951,8 @@ func UpdateStudentEmail(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"personaldata.email": data["email"],
-			"updated_at":         update_time,
+			"Personal.email": data["email"],
+			"updated_at":     update_time,
 		},
 	}
 

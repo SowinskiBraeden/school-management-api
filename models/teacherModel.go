@@ -27,8 +27,8 @@ var (
 var TeacherCollection *mongo.Collection = database.OpenCollection(database.Client, "teachers")
 
 type Teacher struct {
-	ID           primitive.ObjectID `bson:"_id"`
-	PersonalData struct {
+	ID       primitive.ObjectID `bson:"_id"`
+	Personal struct {
 		FirstName  string `json:"firstname" validate:"required"`
 		MiddleName string `json:"middlename"`
 		LastName   string `json:"lastname" validate:"required"`
@@ -38,7 +38,7 @@ type Teacher struct {
 		Province   string `json:"province"`
 		Postal     string `json:"postal"`
 		DOB        string `json:"dob" validate:"required"`
-	} `json:"personaldata"`
+	} `json:"Personal"`
 	SchoolData struct {
 		TID       string `json:"tid"` // Teacher ID
 		Homeroom  string `json:"homeroom"`
@@ -79,15 +79,15 @@ func (t *Teacher) EmailExists(email string) bool {
 
 func (t *Teacher) GenerateSchoolEmail(offset int, lastEmail string) string {
 	addr := os.Getenv("SYSTEM_EMAIL_ADDRESS")
-	var email string = strings.ToLower(t.PersonalData.LastName) + "_" + strings.ToLower(string(t.PersonalData.FirstName[0])) + addr
-	if offset > 0 && offset < len([]rune(t.PersonalData.FirstName))-1 {
-		email = lastEmail[:strings.Index(lastEmail, "_")+offset+1] + strings.ToLower(string(t.PersonalData.FirstName[offset])) + addr
+	var email string = strings.ToLower(t.Personal.LastName) + "_" + strings.ToLower(string(t.Personal.FirstName[0])) + addr
+	if offset > 0 && offset < len([]rune(t.Personal.FirstName))-1 {
+		email = lastEmail[:strings.Index(lastEmail, "_")+offset+1] + strings.ToLower(string(t.Personal.FirstName[offset])) + addr
 	}
-	if offset == len([]rune(t.PersonalData.FirstName))-1 {
-		email = strings.ToLower(t.PersonalData.LastName) + "_" + strings.ToLower(t.PersonalData.FirstName) + addr
+	if offset == len([]rune(t.Personal.FirstName))-1 {
+		email = strings.ToLower(t.Personal.LastName) + "_" + strings.ToLower(t.Personal.FirstName) + addr
 	}
-	if offset > len([]rune(t.PersonalData.FirstName))-1 {
-		email = strings.ToLower(t.PersonalData.LastName) + "_" + strings.ToLower(t.PersonalData.FirstName) + strconv.Itoa(offset-len([]rune(t.PersonalData.FirstName))) + addr
+	if offset > len([]rune(t.Personal.FirstName))-1 {
+		email = strings.ToLower(t.Personal.LastName) + "_" + strings.ToLower(t.Personal.FirstName) + strconv.Itoa(offset-len([]rune(t.Personal.FirstName))) + addr
 	}
 	return email
 }

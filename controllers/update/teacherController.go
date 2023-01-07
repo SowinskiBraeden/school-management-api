@@ -17,15 +17,15 @@ import (
 )
 
 /*
-	Far later on this function is going to be completely automated.
-	Instead of an admin sending a request to update the homeroom of
-	a student or teacher, the system will take the room number of
-	the teacher's or student's Block 2 class from their schedule.
+Far later on this function is going to be completely automated.
+Instead of an admin sending a request to update the homeroom of
+a student or teacher, the system will take the room number of
+the teacher's or student's Block 2 class from their schedule.
 
-	Though this function would remain for students only, for example
-	a student requests a course change, if its their block 2 the
-	admin would have to alter their homeroom to be the new class
-	number.
+Though this function would remain for students only, for example
+a student requests a course change, if its their block 2 the
+admin would have to alter their homeroom to be the new class
+number.
 */
 func UpdateTeacherHomeroom(c *fiber.Ctx) error {
 	var data map[string]string
@@ -186,10 +186,10 @@ func UpdateTeacherPassword(c *fiber.Ctx) error {
 	defer cancel()
 
 	subject := "Password Changed"
-	receiver := teacher.PersonalData.Email
+	receiver := teacher.Personal.Email
 	r := NewRequest([]string{receiver}, subject)
 
-	if sent := r.Send("./templates/selfPasswordChanged.html", map[string]string{"username": teacher.PersonalData.FirstName}); !sent {
+	if sent := r.Send("./templates/selfPasswordChanged.html", map[string]string{"username": teacher.Personal.FirstName}); !sent {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Could not send password to teachers email",
@@ -234,7 +234,7 @@ func ResetTeacherPassword(c *fiber.Ctx) error {
 		})
 	}
 
-	if teacher.PersonalData.Email != data["email"] {
+	if teacher.Personal.Email != data["email"] {
 		cancel()
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"success": false,
@@ -269,10 +269,10 @@ func ResetTeacherPassword(c *fiber.Ctx) error {
 
 	// Send teacher personal email temp password
 	subject := "Password Changed"
-	receiver := teacher.PersonalData.Email
+	receiver := teacher.Personal.Email
 	r := NewRequest([]string{receiver}, subject)
 
-	if sent := r.Send("./templates/passwordChanged.html", map[string]string{"username": teacher.PersonalData.FirstName, "password": tempPass}); !sent {
+	if sent := r.Send("./templates/passwordChanged.html", map[string]string{"username": teacher.Personal.FirstName, "password": tempPass}); !sent {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Could not send password to teachers email",
@@ -320,11 +320,11 @@ func UpdateTeacherAddress(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"personaldata.address":  data["address"],
-			"personaldata.city":     data["city"],
-			"personaldata.province": data["province"],
-			"personaldata.postal":   data["postal"],
-			"updated_at":            update_time,
+			"Personal.address":  data["address"],
+			"Personal.city":     data["city"],
+			"Personal.province": data["province"],
+			"Personal.postal":   data["postal"],
+			"updated_at":        update_time,
 		},
 	}
 
@@ -514,8 +514,8 @@ func UpdateTeacherEmail(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"personaldata.email": data["email"],
-			"updated_at":         update_time,
+			"Personal.email": data["email"],
+			"updated_at":     update_time,
 		},
 	}
 
@@ -592,10 +592,10 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"personaldata.firstname":  data["firstname"],
-			"personaldata.middlename": middlename,
-			"personaldata.lastname":   data["lastname"],
-			"updated_at":              update_time,
+			"Personal.firstname":  data["firstname"],
+			"Personal.middlename": middlename,
+			"Personal.lastname":   data["lastname"],
+			"updated_at":          update_time,
 		},
 	}
 

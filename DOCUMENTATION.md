@@ -190,9 +190,12 @@ There are several account that can be registered into the system. As you may gue
         ```jsonc
         {
             "firstname": "Homer",
-            "middlename": "Jay",
+            "middlename": "Jay",   // (optional)
             "lastname": "Simpson",
-            "dob": "12-05-1956",
+            "province": "...",     // (optional)
+            "city": "Springfield", // (optional)
+            "postal": "...",       // (optional)
+            "dob": "12-05-1956",   // (optional)
             "email": "homer_simpson@example.com",
             "password1": "homerLovesDuffBeer123",
             "password2": "homerLovesDuffBeer123"
@@ -223,11 +226,12 @@ There are several account that can be registered into the system. As you may gue
         ```jsonc
         {
             "firstname": "Bart",
-            "middlename": "JoJo",
+            "middlename": "JoJo", // (optional)
             "lastname": "Simpson",
             "age": 10,
             "gradelevel": 4,
             "dob": "17-12-1979",
+            "email": "bartsimpson@example.com",
             "province": "...",
             "city": "Springfield",
             "address": "742 Evergreen Terrace",
@@ -962,7 +966,7 @@ In the case of an emergency for a specified student, a contact is required to be
             "province": "...",                  // (optional)
             "city": "Springfield",              // (optional)
             "address": "742 Evergreen Terrace", // (optional)
-            "postal": "                         // (optional)
+            "postal": "..."                 // (optional)
         }
         ```
         

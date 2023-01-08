@@ -39,11 +39,11 @@ type Teacher struct {
 		Postal     string `json:"postal"`
 		DOB        string `json:"dob" validate:"required"`
 	} `json:"Personal"`
-	SchoolData struct {
+	School struct {
 		TID       string `json:"tid"` // Teacher ID
 		Homeroom  string `json:"homeroom"`
 		PhotoName string `json:"photoname"` // name of photo in db
-	} `json:"schooldata"`
+	} `json:"School"`
 	Account struct {
 		VerifiedEmail   bool     `json:"verifiedemail"`
 		SchoolEmail     string   `json:"schoolemail"`

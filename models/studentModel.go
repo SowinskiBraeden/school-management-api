@@ -36,7 +36,7 @@ type Student struct {
 		DOB        string   `json:"dob" validate:"required"`
 		Contacts   []string `json:"contacts"` // List of contact ID's rather than contact object
 	} `json:"Personal"`
-	SchoolData struct {
+	School struct {
 		GradeLevel float64 `json:"gradelevel" validate:"required"`
 		SID        string  `json:"sid"` // Student ID
 		PEN        string  `json:"ped"` // Personal Education Number
@@ -44,7 +44,7 @@ type Student struct {
 		Locker     string  `json:"-"`         // Locker ID
 		YOG        int     `json:"yog"`       // Year of Graduation
 		PhotoName  string  `json:"photoname"` // name of photo in db
-	} `json:"schooldata"`
+	} `json:"School"`
 	Account struct {
 		VerifiedEmail   bool     `json:"verifiedemail"`
 		SchoolEmail     string   `json:"schoolemail"`

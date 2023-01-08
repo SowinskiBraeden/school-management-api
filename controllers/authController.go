@@ -237,7 +237,7 @@ func Enroll(c *fiber.Ctx) error {
 	}
 	student.Personal.LastName = data["lastname"].(string)
 	student.Personal.Age = data["age"].(float64)
-	student.SchoolData.GradeLevel = data["gradelevel"].(float64)
+	student.School.GradeLevel = data["gradelevel"].(float64)
 	student.Personal.DOB = data["dob"].(string)
 	student.Personal.Email = data["email"].(string)
 	student.Personal.Province = data["province"].(string)
@@ -245,7 +245,7 @@ func Enroll(c *fiber.Ctx) error {
 	student.Personal.Address = data["address"].(string)
 	student.Personal.Postal = data["postal"].(string)
 	student.Personal.Contacts = []string{}
-	student.SchoolData.YOG = ((12 - int(student.SchoolData.GradeLevel)) + time.Now().Year()) + 1
+	student.School.YOG = ((12 - int(student.School.GradeLevel)) + time.Now().Year()) + 1
 
 	var photo models.Photo
 	photo.Name = uuid.New().String()
@@ -256,7 +256,7 @@ func Enroll(c *fiber.Ctx) error {
 	defaultImage, _ := os.ReadFile("./database/defaultImage.txt")
 	photo.Base64 = string(defaultImage)
 
-	student.SchoolData.PhotoName = photo.Name
+	student.School.PhotoName = photo.Name
 
 	var schoolEmail string = ""
 	offset := 0
@@ -285,7 +285,7 @@ func Enroll(c *fiber.Ctx) error {
 			break
 		}
 	}
-	student.SchoolData.SID = sid
+	student.School.SID = sid
 
 	// Send student personal email student ID
 	subject := "Account Registered"
@@ -307,7 +307,7 @@ func Enroll(c *fiber.Ctx) error {
 			break
 		}
 	}
-	student.SchoolData.PEN = pen
+	student.School.PEN = pen
 
 	student.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	student.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
@@ -426,7 +426,7 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	defaultImage, _ := os.ReadFile("./database/defaultImage.txt")
 	photo.Base64 = string(defaultImage)
 
-	teacher.SchoolData.PhotoName = photo.Name
+	teacher.School.PhotoName = photo.Name
 
 	var schoolEmail string = ""
 	offset := 0
@@ -455,7 +455,7 @@ func RegisterTeacher(c *fiber.Ctx) error {
 			break
 		}
 	}
-	teacher.SchoolData.TID = tid
+	teacher.School.TID = tid
 
 	// Send teacher personal email student ID
 	subject := "Account Registered"
@@ -633,7 +633,7 @@ func StudentLogin(c *fiber.Ctx) error {
 	}
 
 	var student models.Student
-	err := StudentCollection.FindOne(ctx, bson.M{"schooldata.sid": data["sid"]}).Decode(&student)
+	err := StudentCollection.FindOne(ctx, bson.M{"School.sid": data["sid"]}).Decode(&student)
 
 	if err != nil {
 		cancel()
@@ -666,7 +666,7 @@ func StudentLogin(c *fiber.Ctx) error {
 
 		_, updateErr := StudentCollection.UpdateOne(
 			ctx,
-			bson.M{"schooldata.sid": data["sid"]},
+			bson.M{"School.sid": data["sid"]},
 			update,
 		)
 		if updateErr != nil {
@@ -715,7 +715,7 @@ func StudentLogin(c *fiber.Ctx) error {
 
 		_, updateErr := StudentCollection.UpdateOne(
 			ctx,
-			bson.M{"schooldata.sid": data["sid"]},
+			bson.M{"School.sid": data["sid"]},
 			update,
 		)
 		cancel()
@@ -742,7 +742,7 @@ func StudentLogin(c *fiber.Ctx) error {
 
 		_, updateErr := StudentCollection.UpdateOne(
 			ctx,
-			bson.M{"schooldata.sid": data["sid"]},
+			bson.M{"School.sid": data["sid"]},
 			update,
 		)
 		if updateErr != nil {
@@ -757,7 +757,7 @@ func StudentLogin(c *fiber.Ctx) error {
 	defer cancel()
 
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer:    student.SchoolData.SID,
+		Issuer:    student.School.SID,
 		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), // 1 Day
 	})
 	token, err := claims.SignedString([]byte(SecretKey))
@@ -805,7 +805,7 @@ func TeacherLogin(c *fiber.Ctx) error {
 	}
 
 	var teacher models.Teacher
-	err := TeacherCollection.FindOne(ctx, bson.M{"schooldata.tid": data["tid"]}).Decode(&teacher)
+	err := TeacherCollection.FindOne(ctx, bson.M{"School.tid": data["tid"]}).Decode(&teacher)
 	defer cancel()
 
 	if err != nil {
@@ -827,7 +827,7 @@ func TeacherLogin(c *fiber.Ctx) error {
 	}
 
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer:    teacher.SchoolData.TID,
+		Issuer:    teacher.School.TID,
 		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), // 1 Day
 	})
 	token, err := claims.SignedString([]byte(SecretKey))
@@ -968,7 +968,7 @@ func Student(c *fiber.Ctx) error {
 	responseData["photo"] = nil
 
 	var student models.Student
-	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"schooldata.sid": sid}).Decode(&student)
+	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"School.sid": sid}).Decode(&student)
 	if findErr != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -986,8 +986,8 @@ func Student(c *fiber.Ctx) error {
 	responseData["student"] = student
 
 	var locker models.Locker
-	if student.SchoolData.Locker != "" {
-		LockerCollection.FindOne(context.TODO(), bson.M{"ID": student.SchoolData.Locker}).Decode(&locker)
+	if student.School.Locker != "" {
+		LockerCollection.FindOne(context.TODO(), bson.M{"ID": student.School.Locker}).Decode(&locker)
 		responseData["locker"] = locker
 	}
 
@@ -1005,7 +1005,7 @@ func Student(c *fiber.Ctx) error {
 	}
 
 	var photo models.Photo
-	findErr = ImageCollection.FindOne(context.TODO(), bson.M{"name": student.SchoolData.PhotoName}).Decode(&photo)
+	findErr = ImageCollection.FindOne(context.TODO(), bson.M{"name": student.School.PhotoName}).Decode(&photo)
 	if findErr != nil {
 		responseData["error"] = "Error! There was an error finding the student photo"
 	}
@@ -1033,7 +1033,7 @@ func Teacher(c *fiber.Ctx) error {
 	claims := token.Claims.(*jwt.StandardClaims)
 
 	var teacher models.Teacher
-	findErr := TeacherCollection.FindOne(context.TODO(), bson.M{"schooldata.tid": claims.Issuer}).Decode(&teacher)
+	findErr := TeacherCollection.FindOne(context.TODO(), bson.M{"School.tid": claims.Issuer}).Decode(&teacher)
 	if findErr != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -1269,7 +1269,7 @@ func RemoveStudent(c *fiber.Ctx) error {
 		})
 	}
 
-	_, deleteErr = StudentCollection.DeleteOne(ctx, bson.M{"schooldata.sid": data["sid"]})
+	_, deleteErr = StudentCollection.DeleteOne(ctx, bson.M{"School.sid": data["sid"]})
 	if deleteErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -1327,7 +1327,7 @@ func RemoveTeacher(c *fiber.Ctx) error {
 		})
 	}
 
-	_, deleteErr = TeacherCollection.DeleteOne(ctx, bson.M{"schooldata.tid": data["tid"]})
+	_, deleteErr = TeacherCollection.DeleteOne(ctx, bson.M{"School.tid": data["tid"]})
 	if deleteErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

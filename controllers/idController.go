@@ -37,7 +37,7 @@ func ValidateID(id string, userType int) bool { // true: valid id, false: id alr
 func ValidatePEN(pen string) bool { // true: valid pen, false: pen already in use
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	var foundID models.Id
-	err := StudentCollection.FindOne(ctx, bson.M{"schooldata.pen": pen}).Decode(&foundID)
+	err := StudentCollection.FindOne(ctx, bson.M{"School.pen": pen}).Decode(&foundID)
 	cancel()
 	return err != nil
 }

@@ -292,7 +292,7 @@ func Enroll(c *fiber.Ctx) error {
 	receiver := student.Personal.Email
 	r := NewRequest([]string{receiver}, subject)
 
-	if sent := r.Send("./templates/accountRegisreded.html", map[string]string{"username": student.Personal.FirstName, "id": sid, "userType": "student"}); !sent {
+	if sent := r.Send("./templates/accountRegistered.html", map[string]string{"username": student.Personal.FirstName, "id": sid, "userType": "student"}); !sent {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
@@ -462,7 +462,7 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	receiver := teacher.Personal.Email
 	r := NewRequest([]string{receiver}, subject)
 
-	if sent := r.Send("./templates/accountRegisreded.html", map[string]string{"username": teacher.Personal.FirstName, "id": tid, "userType": "teacher"}); !sent {
+	if sent := r.Send("./templates/accountRegistered.html", map[string]string{"username": teacher.Personal.FirstName, "id": tid, "userType": "teacher"}); !sent {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
@@ -581,7 +581,7 @@ func CreateAdmin(c *fiber.Ctx) error {
 	receiver := admin.Email
 	r := NewRequest([]string{receiver}, subject)
 
-	if sent := r.Send("./templates/accountRegisreded.html", map[string]string{"username": admin.FirstName, "id": aid, "userType": "admin"}); !sent {
+	if sent := r.Send("./templates/accountRegistered.html", map[string]string{"username": admin.FirstName, "id": aid, "userType": "admin"}); !sent {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,

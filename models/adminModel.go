@@ -34,7 +34,7 @@ type Admin struct {
 
 func (a *Admin) EmailExists(email string) bool {
 	var admin Admin
-	findErr := AdminCollection.FindOne(context.TODO(), bson.M{"accountdata.schoolemail": email}).Decode(&admin)
+	findErr := AdminCollection.FindOne(context.TODO(), bson.M{"Account.schoolemail": email}).Decode(&admin)
 	return findErr == nil
 }
 

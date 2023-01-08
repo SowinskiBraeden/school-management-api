@@ -45,7 +45,7 @@ type Student struct {
 		YOG        int     `json:"yog"`       // Year of Graduation
 		PhotoName  string  `json:"photoname"` // name of photo in db
 	} `json:"schooldata"`
-	AccountData struct {
+	Account struct {
 		VerifiedEmail   bool     `json:"verifiedemail"`
 		SchoolEmail     string   `json:"schoolemail"`
 		Password        string   `json:"-" validate:"min=10,max=32"`
@@ -54,13 +54,13 @@ type Student struct {
 		TempPassword    bool     `json:"temppassword"`
 		Attempts        int      `json:"attempts"` // login attempts max 5
 		HashHistory     []string `json:"-"`        // List of old hashed passwords (not including auto generated passwords)
-	} `json:"accountdata"`
+	} `json:"Account"`
 	Created_at time.Time `json:"created_at"`
 	Updated_at time.Time `json:"updated_at"`
 }
 
 func (s *Student) UsedPassword(password string) bool {
-	for _, oldHash := range s.AccountData.HashHistory {
+	for _, oldHash := range s.Account.HashHistory {
 		if oldHash == s.HashPassword(password) {
 			return true
 		}
@@ -75,7 +75,7 @@ func (s *Student) HashPassword(password string) string {
 
 func (s *Student) EmailExists(email string) bool {
 	var student Student
-	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"accountdata.schoolemail": email}).Decode(&student)
+	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"Account.schoolemail": email}).Decode(&student)
 	return findErr == nil
 }
 
@@ -95,7 +95,7 @@ func (s *Student) GenerateSchoolEmail(offset int, lastEmail string) string {
 }
 
 func (s *Student) ComparePasswords(password string) bool { //True: passwords match, False: no match
-	valid := bcrypt.CompareHashAndPassword([]byte(s.AccountData.Password), []byte(password))
+	valid := bcrypt.CompareHashAndPassword([]byte(s.Account.Password), []byte(password))
 	return valid == nil
 }
 

@@ -306,12 +306,12 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"accountdata.password":     student.HashPassword(data["newpassword1"]),
-			"accountdata.temppassword": false, // If it were a temp password, its not now
-			"updated_at":               update_time,
+			"Account.password":     student.HashPassword(data["newpassword1"]),
+			"Account.temppassword": false, // If it were a temp password, its not now
+			"updated_at":           update_time,
 		},
 		"$push": bson.M{
-			"accountdata.hashhistory": student.HashPassword(data["newpassword1"]),
+			"Account.hashhistory": student.HashPassword(data["newpassword1"]),
 		},
 	}
 
@@ -393,9 +393,9 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"accountdata.password":     student.HashPassword(tempPass),
-			"accountdata.temppassword": true,
-			"updated_at":               update_time,
+			"Account.password":     student.HashPassword(tempPass),
+			"Account.temppassword": true,
+			"updated_at":           update_time,
 		},
 	}
 

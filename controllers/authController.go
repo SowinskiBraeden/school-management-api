@@ -267,16 +267,16 @@ func Enroll(c *fiber.Ctx) error {
 		}
 		offset++
 	}
-	student.AccountData.SchoolEmail = schoolEmail
-	student.AccountData.HashHistory = []string{}
+	student.Account.SchoolEmail = schoolEmail
+	student.Account.HashHistory = []string{}
 
 	// Disable login block
-	student.AccountData.AccountDisabled = false
-	student.AccountData.Alerted = false
-	student.AccountData.Attempts = 0
+	student.Account.AccountDisabled = false
+	student.Account.Alerted = false
+	student.Account.Attempts = 0
 
-	student.AccountData.Password = student.HashPassword(data["password1"].(string))
-	student.AccountData.TempPassword = false
+	student.Account.Password = student.HashPassword(data["password1"].(string))
+	student.Account.TempPassword = false
 
 	var sid string
 	for {
@@ -437,15 +437,15 @@ func RegisterTeacher(c *fiber.Ctx) error {
 		}
 		offset++
 	}
-	teacher.AccountData.SchoolEmail = schoolEmail
-	teacher.AccountData.HashHistory = []string{}
+	teacher.Account.SchoolEmail = schoolEmail
+	teacher.Account.HashHistory = []string{}
 
 	// Disable login block
-	teacher.AccountData.AccountDisabled = false
-	teacher.AccountData.Attempts = 0
+	teacher.Account.AccountDisabled = false
+	teacher.Account.Attempts = 0
 
-	teacher.AccountData.Password = teacher.HashPassword(data["password1"].(string))
-	teacher.AccountData.TempPassword = false
+	teacher.Account.Password = teacher.HashPassword(data["password1"].(string))
+	teacher.Account.TempPassword = false
 
 	var tid string
 	// For the unlikely event that an ID is already in use this will simply try again till it gets a id not in use
@@ -646,21 +646,21 @@ func StudentLogin(c *fiber.Ctx) error {
 
 	var verified bool = student.ComparePasswords(data["password"])
 	var localAccountDisabled bool = false
-	var localAttempts int = student.AccountData.Attempts
+	var localAttempts int = student.Account.Attempts
 
 	if !verified {
 		localAttempts += 1
 	}
 
-	if student.AccountData.Attempts >= 5 || localAttempts >= 5 {
+	if student.Account.Attempts >= 5 || localAttempts >= 5 {
 		localAccountDisabled = true // Catches newly disbaled account before student obj is updated
 		update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		update := bson.M{
 			"$set": bson.M{
-				"accountdata.accountdisabled": true,
-				"accountdata.alerted":         true,
-				"accountdata.attempts":        0,
-				"updated_at":                  update_time,
+				"Account.accountdisabled": true,
+				"Account.alerted":         true,
+				"Account.attempts":        0,
+				"updated_at":              update_time,
 			},
 		}
 
@@ -679,9 +679,9 @@ func StudentLogin(c *fiber.Ctx) error {
 		}
 	}
 
-	if localAccountDisabled || student.AccountData.AccountDisabled {
+	if localAccountDisabled || student.Account.AccountDisabled {
 
-		if !student.AccountData.Alerted {
+		if !student.Account.Alerted {
 			// Send student email warning of disabled account
 			subject := "Account Disabled"
 			receiver := student.Personal.Email
@@ -708,8 +708,8 @@ func StudentLogin(c *fiber.Ctx) error {
 		update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		update := bson.M{
 			"$set": bson.M{
-				"accountdata.attempts": (student.AccountData.Attempts + 1),
-				"updated_at":           update_time,
+				"Account.attempts": (student.Account.Attempts + 1),
+				"updated_at":       update_time,
 			},
 		}
 
@@ -735,8 +735,8 @@ func StudentLogin(c *fiber.Ctx) error {
 		update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		update := bson.M{
 			"$set": bson.M{
-				"accountdata.attempts": 0,
-				"updated_at":           update_time,
+				"Account.attempts": 0,
+				"updated_at":       update_time,
 			},
 		}
 
@@ -976,7 +976,7 @@ func Student(c *fiber.Ctx) error {
 		})
 	}
 
-	if student.AccountData.AccountDisabled {
+	if student.Account.AccountDisabled {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "Student Accound Disabled, Contact and Admin",

@@ -275,7 +275,7 @@ func Enroll(c *fiber.Ctx) error {
 	student.AccountData.Alerted = false
 	student.AccountData.Attempts = 0
 
-	student.AccountData.Password = data["password1"].(string)
+	student.AccountData.Password = student.HashPassword(data["password1"].(string))
 	student.AccountData.TempPassword = false
 
 	var sid string
@@ -444,7 +444,7 @@ func RegisterTeacher(c *fiber.Ctx) error {
 	teacher.AccountData.AccountDisabled = false
 	teacher.AccountData.Attempts = 0
 
-	teacher.AccountData.Password = data["password"].(string)
+	teacher.AccountData.Password = teacher.HashPassword(data["password1"].(string))
 	teacher.AccountData.TempPassword = false
 
 	var tid string
@@ -564,7 +564,7 @@ func CreateAdmin(c *fiber.Ctx) error {
 	}
 	admin.SchoolEmail = schoolEmail
 
-	admin.Password = data["password1"].(string)
+	admin.Password = admin.HashPassword(data["password1"].(string))
 	admin.TempPassword = false
 
 	var aid string

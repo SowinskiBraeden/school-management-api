@@ -35,7 +35,7 @@ type Student struct {
 		Postal     string   `json:"postal"`
 		DOB        string   `json:"dob" validate:"required"`
 		Contacts   []string `json:"contacts"` // List of contact ID's rather than contact object
-	} `json:"Personal"`
+	} `json:"personal"`
 	School struct {
 		GradeLevel float64 `json:"gradelevel" validate:"required"`
 		SID        string  `json:"sid"` // Student ID
@@ -75,7 +75,7 @@ func (s *Student) HashPassword(password string) string {
 
 func (s *Student) EmailExists(email string) bool {
 	var student Student
-	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"Account.schoolemail": email}).Decode(&student)
+	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"account.schoolemail": email}).Decode(&student)
 	return findErr == nil
 }
 

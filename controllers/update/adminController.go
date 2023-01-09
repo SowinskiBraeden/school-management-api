@@ -378,7 +378,7 @@ func RemoveStudentsDisabled(c *fiber.Ctx) error {
 
 	result, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"School.sid": data["sid"]},
+		bson.M{"school.sid": data["sid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -440,7 +440,7 @@ func RemoveTeachersDisabled(c *fiber.Ctx) error {
 
 	result, updateErr := TeacherCollection.UpdateOne(
 		ctx,
-		bson.M{"School.tid": data["tid"]},
+		bson.M{"school.tid": data["tid"]},
 		update,
 	)
 	if updateErr != nil {

@@ -68,7 +68,7 @@ func UpdateTeacherHomeroom(c *fiber.Ctx) error {
 
 	_, updateErr := TeacherCollection.UpdateOne(
 		ctx,
-		bson.M{"School.tid": data["tid"]},
+		bson.M{"school.tid": data["tid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -116,7 +116,7 @@ func UpdateTeacherPassword(c *fiber.Ctx) error {
 	claims := token.Claims.(*jwt.StandardClaims)
 
 	var teacher models.Teacher
-	findErr := TeacherCollection.FindOne(ctx, bson.M{"School.tid": claims.Issuer}).Decode(&teacher)
+	findErr := TeacherCollection.FindOne(ctx, bson.M{"school.tid": claims.Issuer}).Decode(&teacher)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -172,7 +172,7 @@ func UpdateTeacherPassword(c *fiber.Ctx) error {
 
 	_, updateErr := TeacherCollection.UpdateOne(
 		ctx,
-		bson.M{"School.tid": claims.Issuer},
+		bson.M{"school.tid": claims.Issuer},
 		update,
 	)
 	if updateErr != nil {
@@ -225,7 +225,7 @@ func ResetTeacherPassword(c *fiber.Ctx) error {
 	}
 
 	var teacher models.Teacher
-	findErr := TeacherCollection.FindOne(context.TODO(), bson.M{"School.tid": data["tid"]}).Decode(&teacher)
+	findErr := TeacherCollection.FindOne(context.TODO(), bson.M{"school.tid": data["tid"]}).Decode(&teacher)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -254,7 +254,7 @@ func ResetTeacherPassword(c *fiber.Ctx) error {
 
 	result, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"School.tid": data["tid"]},
+		bson.M{"school.tid": data["tid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -320,17 +320,17 @@ func UpdateTeacherAddress(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"Personal.address":  data["address"],
-			"Personal.city":     data["city"],
-			"Personal.province": data["province"],
-			"Personal.postal":   data["postal"],
+			"personal.address":  data["address"],
+			"personal.city":     data["city"],
+			"personal.province": data["province"],
+			"personal.postal":   data["postal"],
 			"updated_at":        update_time,
 		},
 	}
 
 	_, updateErr := TeacherCollection.UpdateOne(
 		ctx,
-		bson.M{"School.tid": data["tid"]},
+		bson.M{"school.tid": data["tid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -372,7 +372,7 @@ func UpdateTeacherPhoto(c *fiber.Ctx) error {
 
 	// Get teacher
 	var teacher models.Teacher
-	findErr := TeacherCollection.FindOne(context.TODO(), bson.M{"School.tid": tid}).Decode(&teacher)
+	findErr := TeacherCollection.FindOne(context.TODO(), bson.M{"school.tid": tid}).Decode(&teacher)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -514,14 +514,14 @@ func UpdateTeacherEmail(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"Personal.email": data["email"],
+			"personal.email": data["email"],
 			"updated_at":     update_time,
 		},
 	}
 
 	_, updateErr := TeacherCollection.UpdateOne(
 		ctx,
-		bson.M{"School.tid": tid},
+		bson.M{"school.tid": tid},
 		update,
 	)
 	if updateErr != nil {
@@ -573,7 +573,7 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 
 	// Get teacher
 	var teacher models.Teacher
-	findErr := TeacherCollection.FindOne(ctx, bson.M{"School.tid": data["tid"]}).Decode(&teacher)
+	findErr := TeacherCollection.FindOne(ctx, bson.M{"school.tid": data["tid"]}).Decode(&teacher)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -592,16 +592,16 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"Personal.firstname":  data["firstname"],
-			"Personal.middlename": middlename,
-			"Personal.lastname":   data["lastname"],
+			"personal.firstname":  data["firstname"],
+			"personal.middlename": middlename,
+			"personal.lastname":   data["lastname"],
 			"updated_at":          update_time,
 		},
 	}
 
 	_, updateErr := TeacherCollection.UpdateOne(
 		ctx,
-		bson.M{"School.tid": data["tid"]},
+		bson.M{"school.tid": data["tid"]},
 		update,
 	)
 	if updateErr != nil {

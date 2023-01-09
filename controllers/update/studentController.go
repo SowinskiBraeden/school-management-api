@@ -63,17 +63,17 @@ func UpdateStudentName(c *fiber.Ctx) error {
 	if updateMiddle {
 		update = bson.M{
 			"$set": bson.M{
-				"Personal.firstname":  data["firstname"],
-				"Personal.middlename": data["middlename"],
-				"Personal.lastname":   data["lastname"],
+				"personal.firstname":  data["firstname"],
+				"personal.middlename": data["middlename"],
+				"personal.lastname":   data["lastname"],
 				"updated_at":          update_time,
 			},
 		}
 	} else {
 		update = bson.M{
 			"$set": bson.M{
-				"Personal.firstname": data["firstname"],
-				"Personal.lastname":  data["lastname"],
+				"personal.firstname": data["firstname"],
+				"personal.lastname":  data["lastname"],
 				"updated_at":         update_time,
 			},
 		}
@@ -81,7 +81,7 @@ func UpdateStudentName(c *fiber.Ctx) error {
 
 	result, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"School.sid": data["sid"]},
+		bson.M{"school.sid": data["sid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -142,7 +142,7 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 
 	_, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"School.sid": data["sid"].(string)},
+		bson.M{"school.sid": data["sid"].(string)},
 		update,
 	)
 	if updateErr != nil {
@@ -213,7 +213,7 @@ func UpdateStudentHomeroom(c *fiber.Ctx) error {
 
 	_, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"School.sid": data["sid"]},
+		bson.M{"school.sid": data["sid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -261,7 +261,7 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 	claims := token.Claims.(*jwt.StandardClaims)
 
 	var student models.Student
-	findErr := StudentCollection.FindOne(ctx, bson.M{"School.sid": claims.Issuer}).Decode(&student)
+	findErr := StudentCollection.FindOne(ctx, bson.M{"school.sid": claims.Issuer}).Decode(&student)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -317,7 +317,7 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 
 	_, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"School.sid": claims.Issuer},
+		bson.M{"school.sid": claims.Issuer},
 		update,
 	)
 	if updateErr != nil {
@@ -372,7 +372,7 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 	}
 
 	var student models.Student
-	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"School.sid": data["sid"]}).Decode(&student)
+	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"school.sid": data["sid"]}).Decode(&student)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -401,7 +401,7 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 
 	result, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"School.sid": data["sid"]},
+		bson.M{"school.sid": data["sid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -485,7 +485,7 @@ func UpdateStudentLocker(c *fiber.Ctx) error {
 
 	_, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"School.sid": data["sid"]},
+		bson.M{"school.sid": data["sid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -538,10 +538,10 @@ func UpdateStudentAddress(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"Personal.address":  data["address"],
-			"Personal.city":     data["city"],
-			"Personal.province": data["province"],
-			"Personal.postal":   data["postal"],
+			"personal.address":  data["address"],
+			"personal.city":     data["city"],
+			"personal.province": data["province"],
+			"personal.postal":   data["postal"],
 			"updated_at":        update_time,
 		},
 	}
@@ -600,7 +600,7 @@ func UpdateStudentYOG(c *fiber.Ctx) error {
 	}
 
 	var student models.Student
-	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"School.sid": data["sid"].(string)}).Decode(&student)
+	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"school.sid": data["sid"].(string)}).Decode(&student)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -619,7 +619,7 @@ func UpdateStudentYOG(c *fiber.Ctx) error {
 
 	result, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"School.sid": data["sid"].(string)},
+		bson.M{"school.sid": data["sid"].(string)},
 		update,
 	)
 	if updateErr != nil {
@@ -687,13 +687,13 @@ func RemoveStudentContact(c *fiber.Ctx) error {
 			"updated_at": update_time,
 		},
 		"$pull": bson.M{
-			"Personal.contacts": contact.ID,
+			"personal.contacts": contact.ID,
 		},
 	}
 
 	result, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"School.sid": data["sid"]},
+		bson.M{"school.sid": data["sid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -761,13 +761,13 @@ func AddStudentContact(c *fiber.Ctx) error {
 			"updated_at": update_time,
 		},
 		"$push": bson.M{
-			"Personal.contacts": contact.ID,
+			"personal.contacts": contact.ID,
 		},
 	}
 
 	result, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"School.sid": data["sid"]},
+		bson.M{"school.sid": data["sid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -810,7 +810,7 @@ func UpdateStudentPhoto(c *fiber.Ctx) error {
 
 	// Get student
 	var student models.Student
-	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"School.sid": sid}).Decode(&student)
+	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"school.sid": sid}).Decode(&student)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -951,14 +951,14 @@ func UpdateStudentEmail(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"Personal.email": data["email"],
+			"personal.email": data["email"],
 			"updated_at":     update_time,
 		},
 	}
 
 	result, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"School.sid": sid},
+		bson.M{"school.sid": sid},
 		update,
 	)
 	if updateErr != nil {

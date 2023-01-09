@@ -38,7 +38,7 @@ type Teacher struct {
 		Province   string `json:"province"`
 		Postal     string `json:"postal"`
 		DOB        string `json:"dob" validate:"required"`
-	} `json:"Personal"`
+	} `json:"personal"`
 	School struct {
 		TID       string `json:"tid"` // Teacher ID
 		Homeroom  string `json:"homeroom"`
@@ -73,7 +73,7 @@ func (t *Teacher) HashPassword(password string) string {
 
 func (t *Teacher) EmailExists(email string) bool {
 	var teacher Teacher
-	findErr := TeacherCollection.FindOne(context.TODO(), bson.M{"Account.schoolemail": email}).Decode(&teacher)
+	findErr := TeacherCollection.FindOne(context.TODO(), bson.M{"account.schoolemail": email}).Decode(&teacher)
 	return findErr == nil
 }
 

@@ -633,7 +633,7 @@ func StudentLogin(c *fiber.Ctx) error {
 	}
 
 	var student models.Student
-	err := StudentCollection.FindOne(ctx, bson.M{"School.sid": data["sid"]}).Decode(&student)
+	err := StudentCollection.FindOne(ctx, bson.M{"school.sid": data["sid"]}).Decode(&student)
 
 	if err != nil {
 		cancel()
@@ -666,7 +666,7 @@ func StudentLogin(c *fiber.Ctx) error {
 
 		_, updateErr := StudentCollection.UpdateOne(
 			ctx,
-			bson.M{"School.sid": data["sid"]},
+			bson.M{"school.sid": data["sid"]},
 			update,
 		)
 		if updateErr != nil {
@@ -715,7 +715,7 @@ func StudentLogin(c *fiber.Ctx) error {
 
 		_, updateErr := StudentCollection.UpdateOne(
 			ctx,
-			bson.M{"School.sid": data["sid"]},
+			bson.M{"school.sid": data["sid"]},
 			update,
 		)
 		cancel()
@@ -742,7 +742,7 @@ func StudentLogin(c *fiber.Ctx) error {
 
 		_, updateErr := StudentCollection.UpdateOne(
 			ctx,
-			bson.M{"School.sid": data["sid"]},
+			bson.M{"school.sid": data["sid"]},
 			update,
 		)
 		if updateErr != nil {
@@ -805,7 +805,7 @@ func TeacherLogin(c *fiber.Ctx) error {
 	}
 
 	var teacher models.Teacher
-	err := TeacherCollection.FindOne(ctx, bson.M{"School.tid": data["tid"]}).Decode(&teacher)
+	err := TeacherCollection.FindOne(ctx, bson.M{"school.tid": data["tid"]}).Decode(&teacher)
 	defer cancel()
 
 	if err != nil {
@@ -968,7 +968,7 @@ func Student(c *fiber.Ctx) error {
 	responseData["photo"] = nil
 
 	var student models.Student
-	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"School.sid": sid}).Decode(&student)
+	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"school.sid": sid}).Decode(&student)
 	if findErr != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -1033,7 +1033,7 @@ func Teacher(c *fiber.Ctx) error {
 	claims := token.Claims.(*jwt.StandardClaims)
 
 	var teacher models.Teacher
-	findErr := TeacherCollection.FindOne(context.TODO(), bson.M{"School.tid": claims.Issuer}).Decode(&teacher)
+	findErr := TeacherCollection.FindOne(context.TODO(), bson.M{"school.tid": claims.Issuer}).Decode(&teacher)
 	if findErr != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -1269,7 +1269,7 @@ func RemoveStudent(c *fiber.Ctx) error {
 		})
 	}
 
-	_, deleteErr = StudentCollection.DeleteOne(ctx, bson.M{"School.sid": data["sid"]})
+	_, deleteErr = StudentCollection.DeleteOne(ctx, bson.M{"school.sid": data["sid"]})
 	if deleteErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -1327,7 +1327,7 @@ func RemoveTeacher(c *fiber.Ctx) error {
 		})
 	}
 
-	_, deleteErr = TeacherCollection.DeleteOne(ctx, bson.M{"School.tid": data["tid"]})
+	_, deleteErr = TeacherCollection.DeleteOne(ctx, bson.M{"school.tid": data["tid"]})
 	if deleteErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

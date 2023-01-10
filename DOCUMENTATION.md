@@ -280,7 +280,7 @@ There are several account that can be registered into the system. As you may gue
 	* JSON:
 		```jsonc
 		{
-			"aid": "123456",
+			"uid": "123456",
 			"password": "myawesomepassword123"
 		}
 		```
@@ -307,7 +307,7 @@ There are several account that can be registered into the system. As you may gue
 	* JSON:
 		```jsonc
 		{
-			"tid": "123456",
+			"uid": "123456",
 			"password": "myawesomepassword123"
 		}
 		```
@@ -334,7 +334,7 @@ There are several account that can be registered into the system. As you may gue
 	* JSON:
 		```jsonc
 		{
-			"sid": "123456",
+			"uid": "123456",
 			"password": "myawesomepassword123"
 		}
 		```
@@ -432,7 +432,7 @@ There are several account that can be registered into the system. As you may gue
     * JSON:
         ```jsonc
         {
-            "sid": "123456",
+            "uid": "123456",
             "firstname": "Lisa",
             "middlename": "Marie", // (OPTIONAL)
             "lastname": "Simpson"
@@ -462,7 +462,7 @@ There are several account that can be registered into the system. As you may gue
 	* JSON":
 	    ```jsonc
 	    {
-	        "sid": "123456",
+	        "uid": "123456",
 	        "gradelevel": 11
 	    }
 	    ```
@@ -490,7 +490,7 @@ There are several account that can be registered into the system. As you may gue
     * JSON:
         ```jsonc
         {
-            "sid": "123456",
+            "uid": "123456",
             "homeroom": "A123"
         }
         ```
@@ -518,7 +518,7 @@ There are several account that can be registered into the system. As you may gue
 	* JSON:
 	    ```jsonc
 	    {
-	        "sid": "123456",
+	        "uid": "123456",
 	        "lockernumber": "B123"
 	    }
 	    ```
@@ -546,7 +546,7 @@ There are several account that can be registered into the system. As you may gue
 	* JSON:
 	    ```jsonc
 	    {
-	        "sid": "123456",
+	        "uid": "123456",
 	        "yog": 2020
 	    }
 	    ```
@@ -606,7 +606,7 @@ There are several account that can be registered into the system. As you may gue
 	* JSON:
 		```jsonc
 		{
-			"sid": "123456", // (Only required if signed in as admin)
+			"uid": "123456", // (Only required if signed in as admin)
 			"email": "BartSimpsonsCoolEmail@example.com"
 		}
 		```
@@ -634,7 +634,7 @@ There are several account that can be registered into the system. As you may gue
 	* JSON:
 	    ```jsonc
 	   {
-	       "sid": "123456",
+	       "uid": "123456",
 	       "address": "742 Evergreen Terrace",
 	       "city": "Springfield",
 	       "province": "...",
@@ -691,7 +691,7 @@ There are several account that can be registered into the system. As you may gue
     * JSON:
         ```jsonc
         {
-            "tid": "123456",
+            "uid": "123456",
             "firstname": "Marjorie",
             "middlename": "Jacqueline", // (Optional)
             "lastname": "Simpson"
@@ -721,7 +721,7 @@ There are several account that can be registered into the system. As you may gue
 	* JSON:
 	    ```jsonc
 	    {
-	        "tid": "123456",
+	        "uid": "123456",
 	        "homeroom": "A123"
 	    }
 	    ```
@@ -781,7 +781,7 @@ There are several account that can be registered into the system. As you may gue
     * JSON:
         ```jsonc
         {
-            "tid": "123456", // (Only required if igned in as admin)
+            "uid": "123456", // (Only required if igned in as admin)
             "email": "MargeSimpson@example.com"
         }
         ```
@@ -809,7 +809,7 @@ There are several account that can be registered into the system. As you may gue
 	* JSON:
 	    ```jsonc
 	    {
-	        "tid": "123456",
+	        "uid": "123456",
 	        "address": "742 Evergreen Terrace",
 	        "city": "Springfield",
 	        "province": "...",
@@ -954,7 +954,7 @@ In the case of an emergency for a specified student, a contact is required to be
     * JSON:
         ```jsonc
         {
-            "sid": "123456",
+            "uid": "123456",
             "firstname": "Marge",
             "middlename": "Jacqueline", // (optional)
             "lastname": "Simpson",
@@ -1197,7 +1197,7 @@ Students and staff are bound to leave the school at some time, so there is a way
     * JSON:
         ```jsonc
         {
-            "aid": "123456"
+            "uid": "123456"
         }
         ```
         
@@ -1224,7 +1224,7 @@ Students and staff are bound to leave the school at some time, so there is a way
     * JSON:
         ```jsonc
         {
-            "tid": "123456"
+            "uid": "123456"
         }
         ```
         
@@ -1251,7 +1251,7 @@ Students and staff are bound to leave the school at some time, so there is a way
     * JSON:
         ```jsonc
         {
-            "sid": "123456"
+            "uid": "123456"
         }
         ```
         
@@ -1313,7 +1313,7 @@ Administrators play a very important role in managing a school, they do much wor
     * JSON:
         ```jsonc
         {
-            "sid": "123456"
+            "uid": "123456"
         }
         ```
         
@@ -1341,7 +1341,7 @@ Administrators play a very important role in managing a school, they do much wor
     * JSON:
         ```jsonc
         {
-            "tid": "123456"
+            "uid": "123456"
         }
         ```
         

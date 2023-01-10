@@ -624,7 +624,7 @@ func StudentLogin(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["sid"] == "" || data["password"] == "" {
+	if data["uid"] == "" || data["password"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -633,7 +633,7 @@ func StudentLogin(c *fiber.Ctx) error {
 	}
 
 	var student models.Student
-	err := StudentCollection.FindOne(ctx, bson.M{"school.sid": data["sid"]}).Decode(&student)
+	err := StudentCollection.FindOne(ctx, bson.M{"school.sid": data["uid"]}).Decode(&student)
 
 	if err != nil {
 		cancel()
@@ -666,7 +666,7 @@ func StudentLogin(c *fiber.Ctx) error {
 
 		_, updateErr := StudentCollection.UpdateOne(
 			ctx,
-			bson.M{"school.sid": data["sid"]},
+			bson.M{"school.sid": data["uid"]},
 			update,
 		)
 		if updateErr != nil {
@@ -715,7 +715,7 @@ func StudentLogin(c *fiber.Ctx) error {
 
 		_, updateErr := StudentCollection.UpdateOne(
 			ctx,
-			bson.M{"school.sid": data["sid"]},
+			bson.M{"school.sid": data["uid"]},
 			update,
 		)
 		cancel()
@@ -742,7 +742,7 @@ func StudentLogin(c *fiber.Ctx) error {
 
 		_, updateErr := StudentCollection.UpdateOne(
 			ctx,
-			bson.M{"school.sid": data["sid"]},
+			bson.M{"school.sid": data["uid"]},
 			update,
 		)
 		if updateErr != nil {
@@ -796,7 +796,7 @@ func TeacherLogin(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["tid"] == "" || data["password"] == "" {
+	if data["uid"] == "" || data["password"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -805,7 +805,7 @@ func TeacherLogin(c *fiber.Ctx) error {
 	}
 
 	var teacher models.Teacher
-	err := TeacherCollection.FindOne(ctx, bson.M{"school.tid": data["tid"]}).Decode(&teacher)
+	err := TeacherCollection.FindOne(ctx, bson.M{"school.tid": data["uid"]}).Decode(&teacher)
 	defer cancel()
 
 	if err != nil {
@@ -866,7 +866,7 @@ func AdminLogin(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["aid"] == "" || data["password"] == "" {
+	if data["uid"] == "" || data["password"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -875,7 +875,7 @@ func AdminLogin(c *fiber.Ctx) error {
 	}
 
 	var admin models.Admin
-	err := AdminCollection.FindOne(ctx, bson.M{"aid": data["aid"]}).Decode(&admin)
+	err := AdminCollection.FindOne(ctx, bson.M{"aid": data["uid"]}).Decode(&admin)
 	defer cancel()
 
 	if err != nil {
@@ -936,13 +936,13 @@ func Student(c *fiber.Ctx) error {
 		}
 
 		// Check required fields are included
-		if data["sid"] == "" {
+		if data["uid"] == "" {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"success": false,
 				"message": "missing required fields",
 			})
 		}
-		sid = data["sid"]
+		sid = data["uid"]
 	} else {
 		cookie := c.Cookies("jwt")
 
@@ -1118,7 +1118,7 @@ func CreateContact(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["sid"] == nil || data["firstname"] == nil || data["lastname"] == nil || data["homephone"] == nil || data["email"] == nil || data["priority"] == nil || data["relation"] == nil {
+	if data["uid"] == nil || data["firstname"] == nil || data["lastname"] == nil || data["homephone"] == nil || data["email"] == nil || data["priority"] == nil || data["relation"] == nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -1161,7 +1161,7 @@ func CreateContact(c *fiber.Ctx) error {
 	}
 	_, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"sid": data["sid"]},
+		bson.M{"sid": data["uid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -1251,7 +1251,7 @@ func RemoveStudent(c *fiber.Ctx) error {
 	}
 
 	// Check student id is included
-	if data["sid"] == "" {
+	if data["uid"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -1259,7 +1259,7 @@ func RemoveStudent(c *fiber.Ctx) error {
 		})
 	}
 
-	_, deleteErr := IdCollection.DeleteOne(ctx, bson.M{"cid": data["sid"]})
+	_, deleteErr := IdCollection.DeleteOne(ctx, bson.M{"cid": data["uid"]})
 	if deleteErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -1269,7 +1269,7 @@ func RemoveStudent(c *fiber.Ctx) error {
 		})
 	}
 
-	_, deleteErr = StudentCollection.DeleteOne(ctx, bson.M{"school.sid": data["sid"]})
+	_, deleteErr = StudentCollection.DeleteOne(ctx, bson.M{"school.sid": data["uid"]})
 	if deleteErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -1309,7 +1309,7 @@ func RemoveTeacher(c *fiber.Ctx) error {
 	}
 
 	// Check student id is included
-	if data["tid"] == "" {
+	if data["uid"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -1317,7 +1317,7 @@ func RemoveTeacher(c *fiber.Ctx) error {
 		})
 	}
 
-	_, deleteErr := IdCollection.DeleteOne(ctx, bson.M{"cid": data["tid"]})
+	_, deleteErr := IdCollection.DeleteOne(ctx, bson.M{"cid": data["uid"]})
 	if deleteErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -1327,7 +1327,7 @@ func RemoveTeacher(c *fiber.Ctx) error {
 		})
 	}
 
-	_, deleteErr = TeacherCollection.DeleteOne(ctx, bson.M{"school.tid": data["tid"]})
+	_, deleteErr = TeacherCollection.DeleteOne(ctx, bson.M{"school.tid": data["uid"]})
 	if deleteErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -1367,7 +1367,7 @@ func RemoveAdmin(c *fiber.Ctx) error {
 	}
 
 	// Check student id is included
-	if data["aid"] == "" {
+	if data["uid"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -1375,7 +1375,7 @@ func RemoveAdmin(c *fiber.Ctx) error {
 		})
 	}
 
-	_, deleteErr := IdCollection.DeleteOne(ctx, bson.M{"cid": data["aid"]})
+	_, deleteErr := IdCollection.DeleteOne(ctx, bson.M{"cid": data["uid"]})
 	if deleteErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -1385,7 +1385,7 @@ func RemoveAdmin(c *fiber.Ctx) error {
 		})
 	}
 
-	_, deleteErr = AdminCollection.DeleteOne(ctx, bson.M{"aid": data["aid"]})
+	_, deleteErr = AdminCollection.DeleteOne(ctx, bson.M{"aid": data["uid"]})
 	if deleteErr != nil {
 		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

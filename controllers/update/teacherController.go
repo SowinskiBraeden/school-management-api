@@ -50,7 +50,7 @@ func UpdateTeacherHomeroom(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["tid"] == "" || data["homeroom"] == "" {
+	if data["uid"] == "" || data["homeroom"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -68,7 +68,7 @@ func UpdateTeacherHomeroom(c *fiber.Ctx) error {
 
 	_, updateErr := TeacherCollection.UpdateOne(
 		ctx,
-		bson.M{"school.tid": data["tid"]},
+		bson.M{"school.tid": data["uid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -216,7 +216,7 @@ func ResetTeacherPassword(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included (email must be personal email)
-	if data["tid"] == "" || data["email"] == "" {
+	if data["uid"] == "" || data["email"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -225,7 +225,7 @@ func ResetTeacherPassword(c *fiber.Ctx) error {
 	}
 
 	var teacher models.Teacher
-	findErr := TeacherCollection.FindOne(context.TODO(), bson.M{"school.tid": data["tid"]}).Decode(&teacher)
+	findErr := TeacherCollection.FindOne(context.TODO(), bson.M{"school.tid": data["uid"]}).Decode(&teacher)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -254,7 +254,7 @@ func ResetTeacherPassword(c *fiber.Ctx) error {
 
 	result, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"school.tid": data["tid"]},
+		bson.M{"school.tid": data["uid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -309,7 +309,7 @@ func UpdateTeacherAddress(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["tid"] == "" || data["address"] == "" || data["city"] == "" || data["province"] == "" || data["postal"] == "" {
+	if data["uid"] == "" || data["address"] == "" || data["city"] == "" || data["province"] == "" || data["postal"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -330,7 +330,7 @@ func UpdateTeacherAddress(c *fiber.Ctx) error {
 
 	_, updateErr := TeacherCollection.UpdateOne(
 		ctx,
-		bson.M{"school.tid": data["tid"]},
+		bson.M{"school.tid": data["uid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -492,14 +492,14 @@ func UpdateTeacherEmail(c *fiber.Ctx) error {
 		})
 	}
 
-	if verifiedAdmin && data["tid"] == "" {
+	if verifiedAdmin && data["uid"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "missing required fields",
 		})
 	} else if verifiedAdmin {
-		tid = data["tid"]
+		tid = data["uid"]
 	}
 
 	// Check required fields are included
@@ -563,7 +563,7 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 	}
 
 	// Check id and names are included
-	if data["tid"] == "" || data["firstname"] == "" || data["lastname"] == "" {
+	if data["uid"] == "" || data["firstname"] == "" || data["lastname"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -573,7 +573,7 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 
 	// Get teacher
 	var teacher models.Teacher
-	findErr := TeacherCollection.FindOne(ctx, bson.M{"school.tid": data["tid"]}).Decode(&teacher)
+	findErr := TeacherCollection.FindOne(ctx, bson.M{"school.tid": data["uid"]}).Decode(&teacher)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -601,7 +601,7 @@ func UpdateTeacherName(c *fiber.Ctx) error {
 
 	_, updateErr := TeacherCollection.UpdateOne(
 		ctx,
-		bson.M{"school.tid": data["tid"]},
+		bson.M{"school.tid": data["uid"]},
 		update,
 	)
 	if updateErr != nil {

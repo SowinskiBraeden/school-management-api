@@ -358,7 +358,7 @@ func RemoveStudentsDisabled(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["sid"] == "" {
+	if data["uid"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -378,7 +378,7 @@ func RemoveStudentsDisabled(c *fiber.Ctx) error {
 
 	result, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"school.sid": data["sid"]},
+		bson.M{"school.sid": data["uid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -421,7 +421,7 @@ func RemoveTeachersDisabled(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["tid"] == "" {
+	if data["uid"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -440,7 +440,7 @@ func RemoveTeachersDisabled(c *fiber.Ctx) error {
 
 	result, updateErr := TeacherCollection.UpdateOne(
 		ctx,
-		bson.M{"school.tid": data["tid"]},
+		bson.M{"school.tid": data["uid"]},
 		update,
 	)
 	if updateErr != nil {

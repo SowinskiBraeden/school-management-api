@@ -45,7 +45,7 @@ func UpdateStudentName(c *fiber.Ctx) error {
 
 	// Check id and names are included
 	// Middle name is optional
-	if data["sid"] == "" || data["firstname"] == "" || data["lastname"] == "" {
+	if data["uid"] == "" || data["firstname"] == "" || data["lastname"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -81,7 +81,7 @@ func UpdateStudentName(c *fiber.Ctx) error {
 
 	result, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"school.sid": data["sid"]},
+		bson.M{"school.sid": data["uid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -124,7 +124,7 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["sid"] == nil || data["gradelevel"] == nil {
+	if data["uid"] == nil || data["gradelevel"] == nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -142,7 +142,7 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 
 	_, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"school.sid": data["sid"].(string)},
+		bson.M{"school.sid": data["uid"].(string)},
 		update,
 	)
 	if updateErr != nil {
@@ -195,7 +195,7 @@ func UpdateStudentHomeroom(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["sid"] == "" || data["homeroom"] == "" {
+	if data["uid"] == "" || data["homeroom"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -213,7 +213,7 @@ func UpdateStudentHomeroom(c *fiber.Ctx) error {
 
 	_, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"school.sid": data["sid"]},
+		bson.M{"school.sid": data["uid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -363,7 +363,7 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included (email must be personal email)
-	if data["sid"] == "" || data["email"] == "" {
+	if data["uid"] == "" || data["email"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -372,7 +372,7 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 	}
 
 	var student models.Student
-	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"school.sid": data["sid"]}).Decode(&student)
+	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"school.sid": data["uid"]}).Decode(&student)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -401,7 +401,7 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 
 	result, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"school.sid": data["sid"]},
+		bson.M{"school.sid": data["uid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -456,7 +456,7 @@ func UpdateStudentLocker(c *fiber.Ctx) error {
 	}
 
 	// Check id and locker are included
-	if data["sid"] == "" || data["lockernumber"] == "" {
+	if data["uid"] == "" || data["lockernumber"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -485,7 +485,7 @@ func UpdateStudentLocker(c *fiber.Ctx) error {
 
 	_, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"school.sid": data["sid"]},
+		bson.M{"school.sid": data["uid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -527,7 +527,7 @@ func UpdateStudentAddress(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["sid"] == "" || data["address"] == "" || data["city"] == "" || data["province"] == "" || data["postal"] == "" {
+	if data["uid"] == "" || data["address"] == "" || data["city"] == "" || data["province"] == "" || data["postal"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -548,7 +548,7 @@ func UpdateStudentAddress(c *fiber.Ctx) error {
 
 	_, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"sid": data["sid"]},
+		bson.M{"sid": data["uid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -591,7 +591,7 @@ func UpdateStudentYOG(c *fiber.Ctx) error {
 	}
 
 	// Check required fields are included
-	if data["sid"] == "" || data["yog"] == nil {
+	if data["uid"] == "" || data["yog"] == nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -600,7 +600,7 @@ func UpdateStudentYOG(c *fiber.Ctx) error {
 	}
 
 	var student models.Student
-	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"school.sid": data["sid"].(string)}).Decode(&student)
+	findErr := StudentCollection.FindOne(context.TODO(), bson.M{"school.sid": data["uid"].(string)}).Decode(&student)
 	if findErr != nil {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -619,7 +619,7 @@ func UpdateStudentYOG(c *fiber.Ctx) error {
 
 	result, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"school.sid": data["sid"].(string)},
+		bson.M{"school.sid": data["uid"].(string)},
 		update,
 	)
 	if updateErr != nil {
@@ -662,7 +662,7 @@ func RemoveStudentContact(c *fiber.Ctx) error {
 	}
 
 	// Check id and contact id are included
-	if data["sid"] == "" || data["contactid"] == "" {
+	if data["uid"] == "" || data["contactid"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -693,7 +693,7 @@ func RemoveStudentContact(c *fiber.Ctx) error {
 
 	result, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"school.sid": data["sid"]},
+		bson.M{"school.sid": data["uid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -736,7 +736,7 @@ func AddStudentContact(c *fiber.Ctx) error {
 	}
 
 	// Check id and contact id are included
-	if data["sid"] == "" || data["contactid"] == "" {
+	if data["uid"] == "" || data["contactid"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -767,7 +767,7 @@ func AddStudentContact(c *fiber.Ctx) error {
 
 	result, updateErr := StudentCollection.UpdateOne(
 		ctx,
-		bson.M{"school.sid": data["sid"]},
+		bson.M{"school.sid": data["uid"]},
 		update,
 	)
 	if updateErr != nil {
@@ -929,14 +929,14 @@ func UpdateStudentEmail(c *fiber.Ctx) error {
 		})
 	}
 
-	if verifiedAdmin && data["sid"] == "" {
+	if verifiedAdmin && data["uid"] == "" {
 		cancel()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "missing required fields",
 		})
 	} else if verifiedAdmin {
-		sid = data["sid"]
+		sid = data["uid"]
 	}
 
 	// Check required fields are included

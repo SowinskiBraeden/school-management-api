@@ -135,7 +135,7 @@ func UpdateStudentGradeLevel(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"School.gradelevel": data["gradelevel"].(float64),
+			"school.gradelevel": data["gradelevel"].(float64),
 			"updated_at":        update_time,
 		},
 	}
@@ -206,7 +206,7 @@ func UpdateStudentHomeroom(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"School.homeroom": data["homeroom"],
+			"school.homeroom": data["homeroom"],
 			"updated_at":      update_time,
 		},
 	}
@@ -306,12 +306,12 @@ func UpdateStudentPassword(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"Account.password":     student.HashPassword(data["newpassword1"]),
-			"Account.temppassword": false, // If it were a temp password, its not now
+			"account.password":     student.HashPassword(data["newpassword1"]),
+			"account.temppassword": false, // If it were a temp password, its not now
 			"updated_at":           update_time,
 		},
 		"$push": bson.M{
-			"Account.hashhistory": student.HashPassword(data["newpassword1"]),
+			"account.hashhistory": student.HashPassword(data["newpassword1"]),
 		},
 	}
 
@@ -393,8 +393,8 @@ func ResetStudentPassword(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"Account.password":     student.HashPassword(tempPass),
-			"Account.temppassword": true,
+			"account.password":     student.HashPassword(tempPass),
+			"account.temppassword": true,
 			"updated_at":           update_time,
 		},
 	}
@@ -478,7 +478,7 @@ func UpdateStudentLocker(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"School.locker": locker.ID,
+			"school.locker": locker.ID,
 			"updated_at":    update_time,
 		},
 	}
@@ -612,7 +612,7 @@ func UpdateStudentYOG(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"School.yog": data["yog"].(int),
+			"school.yog": data["yog"].(int),
 			"updated_at": update_time,
 		},
 	}

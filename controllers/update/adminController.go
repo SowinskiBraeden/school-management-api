@@ -369,9 +369,9 @@ func RemoveStudentsDisabled(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"Account.accountdisabled": false,
-			"Account.alerted":         false,
-			"Account.attempts":        0,
+			"account.accountdisabled": false,
+			"account.alerted":         false,
+			"account.attempts":        0,
 			"updated_at":              update_time,
 		},
 	}
@@ -432,8 +432,8 @@ func RemoveTeachersDisabled(c *fiber.Ctx) error {
 	update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update := bson.M{
 		"$set": bson.M{
-			"Account.accountdisabled": false,
-			"Account.attempts":        0,
+			"account.accountdisabled": false,
+			"account.attempts":        0,
 			"updated_at":              update_time,
 		},
 	}

@@ -646,20 +646,19 @@ func StudentLogin(c *fiber.Ctx) error {
 
 	var verified bool = student.ComparePasswords(data["password"])
 	var localAccountDisabled bool = false
-	var localAttempts int = student.Account.Attempts
 
 	if !verified {
-		localAttempts += 1
+		student.Account.Attempts += 1
 	}
 
-	if student.Account.Attempts >= 5 || localAttempts >= 5 {
+	if student.Account.Attempts >= 5 {
 		localAccountDisabled = true // Catches newly disbaled account before student obj is updated
 		update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		update := bson.M{
 			"$set": bson.M{
-				"Account.accountdisabled": true,
-				"Account.alerted":         true,
-				"Account.attempts":        0,
+				"account.accountdisabled": true,
+				"account.alerted":         true,
+				"account.attempts":        0,
 				"updated_at":              update_time,
 			},
 		}
@@ -708,7 +707,7 @@ func StudentLogin(c *fiber.Ctx) error {
 		update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		update := bson.M{
 			"$set": bson.M{
-				"Account.attempts": (student.Account.Attempts + 1),
+				"account.attempts": (student.Account.Attempts + 1),
 				"updated_at":       update_time,
 			},
 		}
@@ -735,7 +734,7 @@ func StudentLogin(c *fiber.Ctx) error {
 		update_time, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		update := bson.M{
 			"$set": bson.M{
-				"Account.attempts": 0,
+				"account.attempts": 0,
 				"updated_at":       update_time,
 			},
 		}

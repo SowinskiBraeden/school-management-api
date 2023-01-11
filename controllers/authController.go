@@ -1031,6 +1031,8 @@ func Teacher(c *fiber.Ctx) error {
 
 	claims := token.Claims.(*jwt.StandardClaims)
 
+	responseData := make(map[string]interface{})
+
 	var teacher models.Teacher
 	findErr := TeacherCollection.FindOne(context.TODO(), bson.M{"school.tid": claims.Issuer}).Decode(&teacher)
 	if findErr != nil {
@@ -1040,10 +1042,19 @@ func Teacher(c *fiber.Ctx) error {
 		})
 	}
 
+	responseData["teacher"] = teacher
+
+	var photo models.Photo
+	findErr = ImageCollection.FindOne(context.TODO(), bson.M{"name": teacher.School.PhotoName}).Decode(&photo)
+	if findErr != nil {
+		responseData["error"] = "Error! There was an error finding the student photo"
+	}
+	responseData["photo"] = photo
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success": true,
-		"message": "successfully logged into teacher",
-		"result":  teacher,
+		"success":  true,
+		"message":  "successfully logged into teacher",
+		"response": responseData,
 	})
 }
 

@@ -5,7 +5,6 @@ The backend API for a school management system accessible by staff and students.
 ***Explore the docs »***
 * [Getting Started](#getting-started)
 * [Usage/Documenation](#usage)
-* [Contributing](#contributing)
 * [License](#license)
 * [Contact](#contact)
 
@@ -40,18 +39,15 @@ To start off on this new set of features, I decided to tackle the largest and mo
 schedule generation. This algorithm generates a master timetable as well as updates the student schedule. 
 All the while keeping track of any errors for admins to handle personally. This can be found in `testing`,
 The [schedule generation](/test/scheduleGenerator) file is of the latest version, version 3. Though this has 
-been moved to its own [repository](https://github.com/SowinskiBraeden/schedule-generator).
+been moved to its own [repository](https://github.com/SowinskiBraeden/ScheduleGeneratorApp).
 
 ## Related Work
 
 After the majority completion of vital api functionalities such as the ability to update information, create new
 information, generate information, delete information, authentication etc. I have created a new repository 
-for the next frontier of this project. I am now concurrently working on the [School Management Website](https://github.com/SowinskiBraeden/school-management).
+for the next frontier of this project. I am now concurrently working on the [School Management Website](https://github.com/SowinskiBraeden/school-management-vue).
 
-The School Management Website, is going to be written using the [Next.js](https://nextjs.org/) framework. Previously the plan  
-was to use Vue.js, and I started work on the project, which I have now decided to discontinue and archive it [here](https://github.com/SowinskiBraeden/school-management-archived). I now plan to start from scratch and use Next.js as I believe it is more  
-suited for this project and is more popular with its use of React.js over Vue.js. The new repository can be found [here](https://github.com/SowinskiBraeden/school-management).
-<br>
+The School Management Website, is going to be written using the [Vue.js](https://vuejs.org/) framework.
 
 ## Getting Started
 
@@ -105,13 +101,6 @@ The systems is easy to start and your local machine. Eliminating any long unforg
 The usage for this API is in the name, school management, it's not an easy task in the areas I live near. Overcrowded schools are far too common and the need for a better school management system is there. The current systems issued by the government work but are poor and outdated.
 
 To see a full list of features and how to use the system, read the [documentation](DOCUMENTATION.md)
-
-
-<!-- CONTRIBUTING -->
-## Contributing
-
-Please refer to [CONTRIBUTING](CONTRIBUTING.md) for contributing to the project.
-
 
 
 <!-- LICENSE -->

@@ -47,7 +47,7 @@ After the majority completion of vital api functionalities such as the ability t
 information, generate information, delete information, authentication etc. I have created a new repository 
 for the next frontier of this project. I am now concurrently working on the [School Management Website](https://github.com/SowinskiBraeden/school-management-vue).
 
-The School Management Website, is going to be written using the [Vue.js](https://vuejs.org/) framework as there were issues trying to use Next.js in an older test.
+The School Management Website, is going to be written using the [Vue.js](https://vuejs.org/) framework as there were issues trying to use Next.js in an [older test](https://github.com/SowinskiBraeden/school-management).
 
 ## Getting Started
 
